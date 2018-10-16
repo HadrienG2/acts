@@ -82,8 +82,8 @@ namespace Test {
     BOOST_CHECK(dumpOuput.is_equal(
         "Acts::DiscTrapezoidalBounds:  (innerRadius, outerRadius, hMinX, "
         "hMaxX, hlengthY, hPhiSector, averagePhi, rCenter, stereo) = "
-        "(2.0000000, 6.0000000, 1.0000000, 5.0000000, 0.7922870, 0.9851108, "
-        "0.0000000, 2.5243378, 0.0000000)"));
+        "(2.00000, 6.00000, 1.00000, 5.00000, 0.79229, 0.98511, "
+        "0.00000, 2.52434, 0.00000)"));
     //
     /// Test inside
     BOOST_CHECK(

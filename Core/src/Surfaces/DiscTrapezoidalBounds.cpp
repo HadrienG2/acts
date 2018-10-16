@@ -106,7 +106,7 @@ std::ostream&
 Acts::DiscTrapezoidalBounds::toStream(std::ostream& sl) const
 {
   sl << std::setiosflags(std::ios::fixed);
-  sl << std::setprecision(7);
+  sl << std::setprecision(5);
   sl << "Acts::DiscTrapezoidalBounds:  (innerRadius, outerRadius, hMinX, "
         "hMaxX, hlengthY, hPhiSector, averagePhi, rCenter, stereo) = ";
   sl << "(" << rMin() << ", " << rMax() << ", " << minHalflengthX() << ", "
