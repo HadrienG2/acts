@@ -52,7 +52,7 @@ namespace Test {
     // outf << "x;y;z;B_x;B_y;B_z" << std::endl;
 
     double tol   = 1e-6;
-    double tol_B = 1e-6 * Acts::units::_T;
+    double tol_B = 1e-4 * cfg.bMagCenter;
     size_t steps = 20;
     for (size_t i = 0; i < steps; i++) {
       double r = 1.5 * cfg.radius / steps * i;
