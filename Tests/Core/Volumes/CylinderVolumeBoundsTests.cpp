@@ -75,10 +75,10 @@ namespace Test {
     // check if difference is halfZ - sign and direction independent
     CHECK_CLOSE_REL((pos - boundarySurfaces.at(0)->center(tgContext)).norm(),
                     cylBounds.halflengthZ(),
-                    1e-12);
+                    1e-6);
     CHECK_CLOSE_REL((pos - boundarySurfaces.at(1)->center(tgContext)).norm(),
                     cylBounds.halflengthZ(),
-                    1e-12);
+                    1e-6);
     // transform to local
     double posDiscPosZ
         = (transformPtr->inverse() * boundarySurfaces.at(1)->center(tgContext))
@@ -92,8 +92,8 @@ namespace Test {
     BOOST_CHECK_GT(centerPosZ, negDiscPosZ);
     // check positions of disc boundarysurfaces
     // checks for zero value. double precision value is not exact.
-    CHECK_CLOSE_ABS(negDiscPosZ + cylBounds.halflengthZ(), centerPosZ, 1e-12);
-    CHECK_CLOSE_ABS(posDiscPosZ - cylBounds.halflengthZ(), centerPosZ, 1e-12);
+    CHECK_CLOSE_ABS(negDiscPosZ + cylBounds.halflengthZ(), centerPosZ, 2e-6);
+    CHECK_CLOSE_ABS(posDiscPosZ - cylBounds.halflengthZ(), centerPosZ, 2e-6);
     // orientation of disc surfaces
     // positive disc durface should point in positive direction in the frame of
     // the volume
@@ -101,17 +101,17 @@ namespace Test {
         transformPtr->rotation().col(2).dot(
             boundarySurfaces.at(1)->normal(tgContext, Acts::Vector2D(0., 0.))),
         1.,
-        1e-12);
+        1e-5);
     // negative disc durface should point in negative direction in the frame of
     // the volume
     CHECK_CLOSE_REL(
         transformPtr->rotation().col(2).dot(
             boundarySurfaces.at(0)->normal(tgContext, Acts::Vector2D(0., 0.))),
         -1.,
-        1e-12);
+        1e-5);
     // test in r
-    CHECK_CLOSE_REL(boundarySurfaces.at(3)->center(tgContext), pos, 1e-12);
-    CHECK_CLOSE_REL(boundarySurfaces.at(2)->center(tgContext), pos, 1e-12);
+    CHECK_CLOSE_REL(boundarySurfaces.at(3)->center(tgContext), pos, 1e-6);
+    CHECK_CLOSE_REL(boundarySurfaces.at(2)->center(tgContext), pos, 1e-6);
   }
 
   BOOST_AUTO_TEST_SUITE_END()
