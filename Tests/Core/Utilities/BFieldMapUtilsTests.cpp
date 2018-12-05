@@ -231,21 +231,21 @@ namespace Test {
     auto value4_xyz = mapper_xyz.getField(pos4);
 
     // check z- and phi-symmetry
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value1_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value1_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value2_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value2_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value3_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value3_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value4_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value4_rz.z(), 1e-10);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value1_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value1_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value2_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value2_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value3_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value3_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value4_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value4_rz.z(), 1e-6);
 
     // checkx-,y-,z-symmetry - need to check close (because of interpolation
     // there can be small differences)
-    CHECK_CLOSE_REL(value0_xyz, value1_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value2_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value3_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value4_xyz, 1e-10);
+    CHECK_CLOSE_REL(value0_xyz, value1_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value2_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value3_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value4_xyz, 1e-6);
   }
 
   /// Unit test for testing the decomposeToSurfaces() function
@@ -312,10 +312,10 @@ namespace Test {
     BOOST_CHECK(mapper_rz.getNBins() == nBins_rz);
     // check minimum (should be first value because bin values are always
     // assigned to the left boundary)
-    CHECK_CLOSE_ABS(mapper_rz.getMin(), minima_rz, 1e-10);
+    BOOST_CHECK(mapper_rz.getMin() == minima_rz);
     // check maximum (should be last value + 1 step because bin values are
     // always assigned to the left boundary)
-    CHECK_CLOSE_ABS(mapper_rz.getMax(), maxima_rz, 1e-10);
+    BOOST_CHECK(mapper_rz.getMax() == maxima_rz);
 
     // bfield in xyz
     std::vector<Acts::Vector3D> bField_xyz;
@@ -346,10 +346,10 @@ namespace Test {
     BOOST_CHECK(mapper_xyz.getNBins() == nBins_xyz);
     // check minimum (should be first value because bin values are always
     // assigned to the left boundary)
-    CHECK_CLOSE_REL(mapper_xyz.getMin(), minima_xyz, 1e-10);
+    CHECK_CLOSE_REL(mapper_xyz.getMin(), minima_xyz, 1e-6);
     // check maximum (should be last value + 1 step because bin values are
     // always assigned to the left boundary)
-    CHECK_CLOSE_REL(mapper_xyz.getMax(), maxima_xyz, 1e-10);
+    CHECK_CLOSE_REL(mapper_xyz.getMax(), maxima_xyz, 1e-6);
 
     Acts::Vector3D pos0(x, y, z);
     Acts::Vector3D pos1(x, y, -z);
@@ -364,14 +364,14 @@ namespace Test {
     auto value4_rz = mapper_rz.getField(pos4);
 
     // check z- and phi-symmetry
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value1_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value1_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value2_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value2_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value3_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value3_rz.z(), 1e-10);
-    CHECK_CLOSE_REL(perp(value0_rz), perp(value4_rz), 1e-10);
-    CHECK_CLOSE_REL(value0_rz.z(), value4_rz.z(), 1e-10);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value1_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value1_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value2_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value2_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value3_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value3_rz.z(), 1e-6);
+    CHECK_CLOSE_REL(perp(value0_rz), perp(value4_rz), 1e-6);
+    CHECK_CLOSE_REL(value0_rz.z(), value4_rz.z(), 1e-6);
 
     auto value0_xyz = mapper_xyz.getField(pos0);
     auto value1_xyz = mapper_xyz.getField(pos1);
@@ -381,10 +381,10 @@ namespace Test {
 
     // checkx-,y-,z-symmetry - need to check close (because of interpolation
     // there can be small differences)
-    CHECK_CLOSE_REL(value0_xyz, value1_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value2_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value3_xyz, 1e-10);
-    CHECK_CLOSE_REL(value0_xyz, value4_xyz, 1e-10);
+    CHECK_CLOSE_REL(value0_xyz, value1_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value2_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value3_xyz, 1e-6);
+    CHECK_CLOSE_REL(value0_xyz, value4_xyz, 1e-6);
   }
 }
 }
