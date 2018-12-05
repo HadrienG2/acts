@@ -130,7 +130,7 @@ namespace IntegrationTest {
     auto eposition = constant_field_propagation(
         epropagator, pT, phi, theta, dcharge, index, Bz);
     // check consistency
-    CHECK_CLOSE_REL(eposition, aposition, 1e-5);
+    CHECK_CLOSE_REL(eposition, aposition, 2e-4);
   }
 
 // The actual test - needs to be included to avoid
