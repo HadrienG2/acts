@@ -119,8 +119,8 @@ namespace IntegrationTest {
 
     // test propagation invariants
     // clang-format off
-    CHECK_CLOSE_ABS(pT, VH::perp(tp->momentum()), 1 * units::_keV);
-    CHECK_CLOSE_ABS(pz, tp->momentum()(2), 1 * units::_keV);
+    CHECK_CLOSE_ABS(pT, VH::perp(tp->momentum()), 100. * units::_keV);
+    CHECK_CLOSE_ABS(pz, tp->momentum()(2), 100. * units::_keV);
     CHECK_CLOSE_ABS(theta, VH::theta(tp->momentum()), 1e-4);
     // clang-format on
 
