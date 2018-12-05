@@ -31,7 +31,7 @@ using TDD_real_t = double;
 namespace Acts {
 
 ///  Tolerance for being on Surface
-static const double s_onSurfaceTolerance = 10e-5 * units::_mm;
+static const double s_onSurfaceTolerance = 1. * units::_um;
 
 /// Tolerance for not being within curvilinear projection
 /// this allows using the same curvilinear frame to eta = 6,
