@@ -90,7 +90,7 @@ namespace IntegrationTest {
                              double                 charge,
                              int /*index*/,
                              double Bz,
-                             double disttol = 0.1 * units::_um,
+                             double disttol = 50. * units::_um,
                              bool   debug   = false)
   {
 
