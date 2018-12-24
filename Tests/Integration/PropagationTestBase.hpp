@@ -222,7 +222,7 @@ BOOST_DATA_TEST_CASE(
                                                       true,
                                                       covtpr);
 
-  CHECK_CLOSE_ABS(e_at_plane.first, a_at_plane.first, 1 * units::_um);
+  CHECK_CLOSE_ABS(e_at_plane.first, a_at_plane.first, 5 * units::_um);
 }
 
 /// test consistency of propagators to a disc
@@ -296,7 +296,7 @@ BOOST_DATA_TEST_CASE(
                                                      true,
                                                      covtpr);
 
-  CHECK_CLOSE_ABS(e_at_disc.first, a_at_disc.first, 1 * units::_um);
+  CHECK_CLOSE_ABS(e_at_disc.first, a_at_disc.first, 5. * units::_um);
 }
 
 /// test consistency of propagators to a line
@@ -379,7 +379,7 @@ BOOST_DATA_TEST_CASE(
                                                       covtpr,
                                                       debug);
 
-  CHECK_CLOSE_ABS(e_at_line.first, a_at_line.first, 1 * units::_um);
+  CHECK_CLOSE_ABS(e_at_line.first, a_at_line.first, 5. * units::_um);
 }
 
 /// test correct covariance transport for curvilinear parameters
