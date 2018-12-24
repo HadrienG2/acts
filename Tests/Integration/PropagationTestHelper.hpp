@@ -411,7 +411,7 @@ namespace IntegrationTest {
                          double                 charge,
                          double                 plimit,
                          int /*index*/,
-                         double reltol = 1e-3,
+                         double reltol = 1e-2,
                          bool   debug  = false)
   {
     covariance_validation_fixture<Propagator_type> fixture(propagator);
@@ -471,7 +471,7 @@ namespace IntegrationTest {
                    int /*index*/,
                    bool   startPlanar = true,
                    bool   destPlanar  = true,
-                   double reltol      = 1e-3,
+                   double reltol      = 1e-2,
                    bool   debug       = false)
   {
     covariance_validation_fixture<Propagator_type> fixture(propagator);
