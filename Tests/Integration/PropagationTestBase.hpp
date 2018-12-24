@@ -61,7 +61,7 @@ BOOST_DATA_TEST_CASE(
                   plimit,
                   index,
                   1e-3,
-                  10. * Acts::units::_keV,
+                  100. * Acts::units::_keV,
                   debug);
   // foward backward check eigen stepper
   foward_backward(epropagator,
@@ -72,7 +72,7 @@ BOOST_DATA_TEST_CASE(
                   plimit,
                   index,
                   1e-3,
-                  10. * Acts::units::_keV,
+                  100. * Acts::units::_keV,
                   debug);
 }
 
