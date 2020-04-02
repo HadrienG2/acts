@@ -31,7 +31,7 @@ using namespace Acts::UnitLiterals;
 namespace Acts {
 namespace Test {
 
-// Some randomness & number crunching
+// Benchmark parameters
 unsigned int ntests = 10;
 unsigned int nrepts = 1000;
 const BoundaryCheck boundaryCheck([] {
