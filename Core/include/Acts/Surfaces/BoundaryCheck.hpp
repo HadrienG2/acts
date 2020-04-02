@@ -347,36 +347,36 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   auto processPolygonVertex = [&](const Vector2D& currVertex) {
     // Let's denote O the origin, V1 the previous vertex and V2 the current one
     // n is a vector going across the edge V1V2 that we're studying.
-    auto n = currVertex - prevVertex;
+    const Vector2D  n = currVertex - prevVertex;
 
     // If you see through the caching of weighted vertices, this is just
     // f = (n.transpose() * m_weight * n).value()
-    auto weightedCurrVertex = m_weight * currVertex;
-    auto weighted_n = weightedCurrVertex - weightedPrevVertex;
-    auto f = n.dot(weighted_n);
+    const Vector2D weightedCurrVertex = m_weight * currVertex;
+    const Vector2D weighted_n = weightedCurrVertex - weightedPrevVertex;
+    const double f = n.dot(weighted_n);
 
     // Project "point" (which we'll denote P) on the infinite line that the
     // polygon edge is a segment of. We define u_l such that the projection Q
     // on this line follows OQ = OV1 + u_l * V1V2 = (1 - u_l) * OV1 + u_l * OV2
-    auto u_l = std::isnormal(f)
-                   ? (point - prevVertex).dot(weighted_n) / f
-                   : 0.5;  // The vertices are so close it doesn't matter
+    const double u_l = std::isnormal(f)
+                           ? (point - prevVertex).dot(weighted_n) / f
+                           : 0.5;  // V1 and V2 are so close it doesn't matter
 
     // To get the closest point on this polygon edge, R, enforce that the
     // projection must lie on the segment between V1 and V2
-    auto u_s = std::clamp(u_l, 0.0, 1.0);
-    auto edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
+    const double u_s = std::clamp(u_l, 0.0, 1.0);
+    const Vector2D edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
 
     // The distance is then defined by the vector PR = OR - OP.
-    auto distVector = edgeClosest - point;
+    const Vector2D distVector = edgeClosest - point;
 
     // We compute the squared norm version of distVector using the following
     // optimized specialization of squaredNorm(), which avoids superfluous
     // m_weight application by reusing the weighted vectors we already have.
-    auto weightedEdgeClosest =
+    const Vector2D weightedEdgeClosest =
       (1.0 - u_s) * weightedPrevVertex + u_s * weightedCurrVertex;
-    auto weightedDistVector = weightedEdgeClosest - weightedPoint;
-    auto edgeDistance = distVector.dot(weightedDistVector);
+    const Vector2D weightedDistVector = weightedEdgeClosest - weightedPoint;
+    const double edgeDistance = distVector.dot(weightedDistVector);
 
     // If this is smaller than the previously known smallest distance, the
     // closest point on this edge becomes our new estimate of the closest point
