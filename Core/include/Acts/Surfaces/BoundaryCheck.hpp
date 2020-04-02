@@ -317,42 +317,89 @@ inline double Acts::BoundaryCheck::squaredNorm(const Vector2D& x) const {
 template <typename Vector2DContainer>
 inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     const Acts::Vector2D& point, const Vector2DContainer& vertices) const {
-  // calculate the closest position on the segment between `ll0` and `ll1` to
-  // the point as measured by the metric induced by the weight matrix
-  auto closestOnSegment = [&](auto&& ll0, auto&& ll1) {
-    // normal vector and position of the closest point along the normal
-    auto n = ll1 - ll0;
-    auto weighted_n = m_weight * n;
+  // Prepare to iterate over the input polygon's edges, read the first vertex
+  auto vertexIter = std::begin(vertices);
+  const Vector2D firstVertex = *(vertexIter++);
+
+  // Our goal here is to find out what is the closest position on the input
+  // polygon's edges,  as measured by the metric induced by the weight matrix.
+  // To do this, we need to track what is the closest point that we observed so
+  // far, and how close this point was.
+  Vector2D closestPoint;
+  double closestDistance = std::numeric_limits<double>::max();
+
+  // Applying the weight matrix to a vector is costly, therefore we carefully
+  // choose which vectors we apply it to, and cache the results, in order to
+  // perform this multiplication as few times as possible.
+  const Vector2D weightedPoint = m_weight * point;
+  Vector2D prevVertex = firstVertex;
+  Vector2D weightedPrevVertex = m_weight * prevVertex;
+
+  // Now, we're going to iterate over the remaining polygon vertices, and for
+  // each of them we will study the closest point on the polygon edge defined by
+  // the segment between the previously observed vertex and the current one.
+  //
+  // To process all polygon edges, we'll also need to consider the edge between
+  // the last point of the polygon and the first one, which makes the iteration
+  // pattern nontrivial. Hence we need to deduplicate the per-vertex logic in
+  // this stateful lambda function.
+  //
+  auto processPolygonVertex = [&](const Vector2D& currVertex) {
+    // Let's denote O the origin, V1 the previous vertex and V2 the current one
+    // n is a vector going across the edge V1V2 that we're studying.
+    auto n = currVertex - prevVertex;
+
+    // If you see through the caching of weighted vertices, this is just
+    // f = (n.transpose() * m_weight * n).value()
+    auto weightedCurrVertex = m_weight * currVertex;
+    auto weighted_n = weightedCurrVertex - weightedPrevVertex;
     auto f = n.dot(weighted_n);
-    auto u = std::isnormal(f)
-                 ? (point - ll0).dot(weighted_n) / f
-                 : 0.5;  // ll0 and ll1 are so close it doesn't matter
-    // u must be in [0, 1] to still be on the polygon segment
-    return ll0 + std::clamp(u, 0.0, 1.0) * n;
+
+    // Project "point" (which we'll denote P) on the infinite line that the
+    // polygon edge is a segment of. We define u_l such that the projection Q
+    // on this line follows OQ = OV1 + u_l * V1V2 = (1 - u_l) * OV1 + u_l * OV2
+    auto u_l = std::isnormal(f)
+                   ? (point - prevVertex).dot(weighted_n) / f
+                   : 0.5;  // The vertices are so close it doesn't matter
+
+    // To get the closest point on this polygon edge, R, enforce that the
+    // projection must lie on the segment between V1 and V2
+    auto u_s = std::clamp(u_l, 0.0, 1.0);
+    auto edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
+
+    // The distance is then defined by the vector PR = OR - OP.
+    auto distVector = edgeClosest - point;
+
+    // We compute the squared norm version of distVector using the following
+    // optimized specialization of squaredNorm(), which avoids superfluous
+    // m_weight application by reusing the weighted vectors we already have.
+    auto weightedEdgeClosest =
+      (1.0 - u_s) * weightedPrevVertex + u_s * weightedCurrVertex;
+    auto weightedDistVector = weightedEdgeClosest - weightedPoint;
+    auto edgeDistance = distVector.dot(weightedDistVector);
+
+    // If this is smaller than the previously known smallest distance, the
+    // closest point on this edge becomes our new estimate of the closest point
+    // on all polygon edges.
+    if (edgeDistance < closestDistance) {
+      closestDistance = edgeDistance;
+      closestPoint = edgeClosest;
+    }
+
+    // And finally, we prepare for the next edge of the polygon, which will
+    // start at the current vertex.
+    prevVertex = currVertex;
+    weightedPrevVertex = weightedCurrVertex;
   };
 
-  auto iv = std::begin(vertices);
-  Vector2D l0 = *iv;
-  Vector2D l1 = *(++iv);
-  Vector2D closest = closestOnSegment(l0, l1);
-  auto closestDist = squaredNorm(closest - point);
-  // Calculate the closest point on other connecting lines and compare distances
-  for (++iv; iv != std::end(vertices); ++iv) {
-    l0 = l1;
-    l1 = *iv;
-    Vector2D current = closestOnSegment(l0, l1);
-    auto currentDist = squaredNorm(current - point);
-    if (currentDist < closestDist) {
-      closest = current;
-      closestDist = currentDist;
-    }
+  // Do the iteration over all polygon edges
+  for(; vertexIter < std::end(vertices); ++vertexIter) {
+    processPolygonVertex(*vertexIter);
   }
-  // final edge from last vertex back to the first vertex
-  Vector2D last = closestOnSegment(l1, *std::begin(vertices));
-  if (squaredNorm(last - point) < closestDist) {
-    closest = last;
-  }
-  return closest;
+  processPolygonVertex(firstVertex);
+
+  // TODO: Should be able to propagate closestDistance as well as closestPoint
+  return closestPoint;
 }
 
 inline Acts::Vector2D
