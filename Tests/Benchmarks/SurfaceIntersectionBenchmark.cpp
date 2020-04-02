@@ -13,6 +13,7 @@
 #include <cmath>
 
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Surfaces/BoundaryCheck.hpp"
 #include "Acts/Surfaces/CylinderBounds.hpp"
 #include "Acts/Surfaces/CylinderSurface.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
@@ -32,8 +33,12 @@ namespace Test {
 
 // Some randomness & number crunching
 unsigned int ntests = 10;
-unsigned int nrepts = 2000;
-const bool boundaryCheck = false;
+unsigned int nrepts = 1000;
+const BoundaryCheck boundaryCheck([] {
+  ActsSymMatrixD<2> cov;
+  cov << 0.2, 0.02, 0.15, 0.02;
+  return BoundaryCheck(cov, 2.0);
+}());
 const bool testPlane = true;
 const bool testDisc = true;
 const bool testCylinder = true;
