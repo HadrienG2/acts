@@ -314,6 +314,28 @@ inline double Acts::BoundaryCheck::squaredNorm(const Vector2D& x) const {
   return (x.transpose() * m_weight * x).value();
 }
 
+namespace Acts {
+  namespace detail {
+    // Unlike the standard library's min functions, this function should compile
+    // down to a single minsd-like instruction on x86, without any branching.
+    inline double fast_min(double x, double y) {
+      return (x < y) ? x : y;
+    }
+
+    // Unlike the standard library's max functions, this function should compile
+    // down to a single maxsd-like instruction on x86, without any branching.
+    inline double fast_max(double x, double y) {
+      return (x > y) ? x : y;
+    }
+
+    // Unlike std::clamp, this function should compile down to a pair of x86
+    // instructions: a minsd-like instruction and a maxsd-like one.
+    inline double fast_clamp(double x, double min, double max) {
+      return fast_max(fast_min(x, max), min);
+    }
+  }
+}
+
 template <typename Vector2DContainer>
 inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     const Acts::Vector2D& point, const Vector2DContainer& vertices) const {
@@ -364,7 +386,8 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
 
     // To get the closest point on this polygon edge, R, enforce that the
     // projection must lie on the segment between V1 and V2
-    const double u_s = std::clamp(u_l, 0.0, 1.0);
+    /* const double u_s = std::clamp(u_l, 0.0, 1.0); */
+    const double u_s = Acts::detail::fast_clamp(u_l, 0.0, 1.0);
     const Vector2D edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
 
     // The distance is then defined by the vector PR = OR - OP.
