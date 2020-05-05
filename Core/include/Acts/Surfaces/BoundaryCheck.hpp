@@ -350,16 +350,16 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     const Vector2D  n = currVertex - prevVertex;
 
     // If you see through the caching of weighted vertices, this is just
-    // f = (n.transpose() * m_weight * n).value()
+    // f = (n.transpose() * m_weight * n).value() aka squaredNorm(n)
     const Vector2D weightedCurrVertex = m_weight * currVertex;
-    const Vector2D weighted_n = weightedCurrVertex - weightedPrevVertex;
-    const double f = n.dot(weighted_n);
+    const Vector2D weightedN = weightedCurrVertex - weightedPrevVertex;
+    const double f = n.dot(weightedN);
 
     // Project "point" (which we'll denote P) on the infinite line that the
     // polygon edge is a segment of. We define u_l such that the projection Q
     // on this line follows OQ = OV1 + u_l * V1V2 = (1 - u_l) * OV1 + u_l * OV2
     const double u_l = std::isnormal(f)
-                           ? (point - prevVertex).dot(weighted_n) / f
+                           ? (point - prevVertex).dot(weightedN) / f
                            : 0.5;  // V1 and V2 are so close it doesn't matter
 
     // To get the closest point on this polygon edge, R, enforce that the
