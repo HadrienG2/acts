@@ -317,10 +317,6 @@ inline double Acts::BoundaryCheck::squaredNorm(const Vector2D& x) const {
 template <typename Vector2DContainer>
 inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     const Acts::Vector2D& point, const Vector2DContainer& vertices) const {
-  // Prepare to iterate over the input polygon's edges, read the first vertex
-  auto vertexIter = std::begin(vertices);
-  const Vector2D firstVertex = *(vertexIter++);
-
   // Our goal here is to find out what is the closest position on the input
   // polygon's edges,  as measured by the metric induced by the weight matrix.
   // To do this, we need to track what is the closest point that we observed so
@@ -331,9 +327,20 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   // Applying the weight matrix to a vector is costly, therefore we carefully
   // choose which vectors we apply it to, and cache the results, in order to
   // perform this multiplication as few times as possible.
+  // - Pre-weight the current point
   const Vector2D weightedPoint = m_weight * point;
-  Vector2D prevVertex = firstVertex;
-  Vector2D weightedPrevVertex = m_weight * prevVertex;
+  // - Pre-weight the input vertices
+  const size_t numVertices = std::size(vertices);
+  Vector2D weightedVertices[numVertices];  // FIXME: VLAs are nonstandard & evil
+  for (size_t i = 0; i < numVertices; ++i) {
+    // FIXME: Indexed access to "vertices isn't guaranteed to work
+    //        (present in various other places as well)
+    weightedVertices[i] = m_weight * vertices[i];
+  }
+
+  // To study polygon edges, we keep track of the last vertex that we observed
+  Vector2D prevVertex = vertices[0];
+  Vector2D weightedPrevVertex = weightedVertices[0];
 
   // Now, we're going to iterate over the remaining polygon vertices, and for
   // each of them we will study the closest point on the polygon edge defined by
@@ -344,14 +351,15 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   // pattern nontrivial. Hence we need to deduplicate the per-vertex logic in
   // this stateful lambda function.
   //
-  auto processPolygonVertex = [&](const Vector2D& currVertex) {
+  auto processPolygonVertex = [&](size_t vertexIdx) {
     // Let's denote O the origin, V1 the previous vertex and V2 the current one
     // n is a vector going across the edge V1V2 that we're studying.
-    const Vector2D  n = currVertex - prevVertex;
+    const Vector2D currVertex = vertices[vertexIdx];
+    const Vector2D n = currVertex - prevVertex;
 
     // If you see through the caching of weighted vertices, this is just
     // f = (n.transpose() * m_weight * n).value() aka squaredNorm(n)
-    const Vector2D weightedCurrVertex = m_weight * currVertex;
+    const Vector2D weightedCurrVertex = weightedVertices[vertexIdx];
     const Vector2D weightedN = weightedCurrVertex - weightedPrevVertex;
     const double f = n.dot(weightedN);
 
@@ -393,10 +401,10 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   };
 
   // Do the iteration over all polygon edges
-  for(; vertexIter < std::end(vertices); ++vertexIter) {
-    processPolygonVertex(*vertexIter);
+  for(size_t i = 1; i < numVertices; ++i) {
+    processPolygonVertex(i);
   }
-  processPolygonVertex(firstVertex);
+  processPolygonVertex(0);
 
   // TODO: Should be able to propagate closestDistance as well as closestPoint
   return closestPoint;
