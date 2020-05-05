@@ -339,8 +339,29 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   }
 
   // To study polygon edges, we keep track of the last vertex that we observed
-  Vector2D prevVertex = vertices[0];
-  Vector2D weightedPrevVertex = weightedVertices[0];
+  Vector2D prevVertex = vertices[numVertices-1];
+  Vector2D weightedPrevVertex = weightedVertices[numVertices-1];
+
+  // Experiment: Pre-compute raw u_l as well
+  double u_l_raws[numEdges];
+  for (size_t i = 0; i < numVertices; ++i) {
+    const Vector2D currVertex = vertices[i];
+    const Vector2D weightedCurrVertex = weightedVertices[i];
+    const Vector2D n = currVertex - prevVertex;
+    const Vector2D weightedN = weightedCurrVertex - weightedPrevVertex;
+    const double f = n.dot(weightedN);
+    u_l_raws[i] = (point - prevVertex).dot(weightedN) / f;
+    prevVertex = currVertex;
+    weightedPrevVertex = weightedCurrVertex;
+  }
+
+  // Experiment: Pre-compute u_s as well
+  double u_ss[numEdges];
+  for (size_t i = 0; i < numVertices; ++i) {
+    const double u_l_raw = u_l_raws[i];
+    const double u_l = std::isnormal(u_l_raw) ? u_l_raw : 0.5;
+    u_ss[i] = std::clamp(u_l, 0.0, 1.0);
+  }
 
   // Now, we're going to iterate over the remaining polygon vertices, and for
   // each of them we will study the closest point on the polygon edge defined by
@@ -355,24 +376,14 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     // Let's denote O the origin, V1 the previous vertex and V2 the current one
     // n is a vector going across the edge V1V2 that we're studying.
     const Vector2D currVertex = vertices[vertexIdx];
-    const Vector2D n = currVertex - prevVertex;
 
     // If you see through the caching of weighted vertices, this is just
     // f = (n.transpose() * m_weight * n).value() aka squaredNorm(n)
     const Vector2D weightedCurrVertex = weightedVertices[vertexIdx];
-    const Vector2D weightedN = weightedCurrVertex - weightedPrevVertex;
-    const double f = n.dot(weightedN);
-
-    // Project "point" (which we'll denote P) on the infinite line that the
-    // polygon edge is a segment of. We define u_l such that the projection Q
-    // on this line follows OQ = OV1 + u_l * V1V2 = (1 - u_l) * OV1 + u_l * OV2
-    const double u_l = std::isnormal(f)
-                           ? (point - prevVertex).dot(weightedN) / f
-                           : 0.5;  // V1 and V2 are so close it doesn't matter
 
     // To get the closest point on this polygon edge, R, enforce that the
     // projection must lie on the segment between V1 and V2
-    const double u_s = std::clamp(u_l, 0.0, 1.0);
+    const double u_s = u_ss[vertexIdx];
     const Vector2D edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
 
     // The distance is then defined by the vector PR = OR - OP.
@@ -401,10 +412,9 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   };
 
   // Do the iteration over all polygon edges
-  for(size_t i = 1; i < numVertices; ++i) {
+  for(size_t i = 0; i < numVertices; ++i) {
     processPolygonVertex(i);
   }
-  processPolygonVertex(0);
 
   // TODO: Should be able to propagate closestDistance as well as closestPoint
   return closestPoint;
