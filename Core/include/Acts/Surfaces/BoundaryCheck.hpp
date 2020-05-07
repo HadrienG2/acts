@@ -10,6 +10,7 @@
 #include <cfloat>
 #include <cmath>
 #include <iterator>
+#include <utility>
 #include <vector>
 
 #include "Acts/Surfaces/detail/VerticesHelper.hpp"
@@ -335,14 +336,26 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   // each of them we will study the closest point on the polygon edge defined by
   // the segment between the previously observed vertex and the current one.
   for (const Vector2D& currVertex: vertices) {
+    // Given a linear combination recipe {{c1, v1}, {c2, v2}, ...}, this lambda
+    // produces both v = c1 * v1 + c2 * v2 + ... and m_weight * v in a manner
+    // which minimizes the amount of expensive m_weight * v multiplications.
+    auto weightedLinearCombination =
+      [this](auto c1, Vector2D v1, auto c2, Vector2D v2)
+        -> std::pair<Vector2D, Vector2D>
+      {
+        const Vector2D result = c1 * v1 + c2 * v2;
+        const Vector2D weightedResult =
+          c1 * (m_weight * v1).eval() + c2 * (m_weight * v2).eval();
+        return {result, weightedResult};
+      };
+
     // Let's denote O the origin, V1 the previous vertex and V2 the current one
     // n is a vector going across the edge V1V2 that we're studying.
-    const Vector2D  n = currVertex - prevVertex;
+    const auto [n, weightedN] =
+      weightedLinearCombination(1, currVertex, -1, prevVertex);
 
     // If you see through the caching of weighted vertices, this is just
     // f = (n.transpose() * m_weight * n).value() aka squaredNorm(n)
-    const Vector2D weightedN =
-      (m_weight * currVertex).eval() - (m_weight * prevVertex).eval();
     const double f = n.dot(weightedN);
 
     // Project "point" (which we'll denote P) on the infinite line that the
@@ -355,18 +368,17 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     // To get the closest point on this polygon edge, R, enforce that the
     // projection must lie on the segment between V1 and V2
     const double u_s = std::clamp(u_l, 0.0, 1.0);
-    const Vector2D edgeClosest = (1.0 - u_s) * prevVertex + u_s * currVertex;
+    const auto [edgeClosest, weightedEdgeClosest] =
+      weightedLinearCombination(1.0-u_s, prevVertex, u_s, currVertex);
 
     // The distance is then defined by the vector PR = OR - OP.
     const Vector2D distVector = edgeClosest - point;
+    const Vector2D weightedDistVector =
+      weightedEdgeClosest - (m_weight * point).eval();
 
     // We compute the squared norm version of distVector using the following
     // optimized specialization of squaredNorm(), which avoids superfluous
     // m_weight application by reusing the weighted vectors we already have.
-    const Vector2D weightedEdgeClosest =
-      (1.0 - u_s) * (m_weight * prevVertex).eval() + u_s * (m_weight * currVertex).eval();
-    const Vector2D weightedDistVector =
-      weightedEdgeClosest - (m_weight * point).eval();
     const double edgeDistance = distVector.dot(weightedDistVector);
 
     // If this is smaller than the previously known smallest distance, the
