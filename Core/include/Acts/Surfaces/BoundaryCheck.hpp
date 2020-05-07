@@ -331,11 +331,6 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   // study the peculiar [last vertex, first vertex] polygon closing edge.
   Vector2D prevVertex = *(std::crbegin(vertices));
 
-  // Applying the weight matrix to a vector is costly, therefore we carefully
-  // choose which vectors we apply it to, and cache the results, in order to
-  // perform this multiplication as few times as possible.
-  Vector2D weightedPrevVertex = m_weight * prevVertex;
-
   // Now, we're going to iterate over the remaining polygon vertices, and for
   // each of them we will study the closest point on the polygon edge defined by
   // the segment between the previously observed vertex and the current one.
@@ -346,7 +341,8 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
 
     // If you see through the caching of weighted vertices, this is just
     // f = (n.transpose() * m_weight * n).value() aka squaredNorm(n)
-    const Vector2D weightedN = (m_weight * currVertex).eval() - weightedPrevVertex;
+    const Vector2D weightedN =
+      (m_weight * currVertex).eval() - (m_weight * prevVertex).eval();
     const double f = n.dot(weightedN);
 
     // Project "point" (which we'll denote P) on the infinite line that the
@@ -368,7 +364,7 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     // optimized specialization of squaredNorm(), which avoids superfluous
     // m_weight application by reusing the weighted vectors we already have.
     const Vector2D weightedEdgeClosest =
-      (1.0 - u_s) * weightedPrevVertex + u_s * (m_weight * currVertex).eval();
+      (1.0 - u_s) * (m_weight * prevVertex).eval() + u_s * (m_weight * currVertex).eval();
     const Vector2D weightedDistVector =
       weightedEdgeClosest - (m_weight * point).eval();
     const double edgeDistance = distVector.dot(weightedDistVector);
@@ -384,7 +380,6 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     // And finally, we prepare for the next edge of the polygon, which will
     // start at the current vertex.
     prevVertex = currVertex;
-    weightedPrevVertex = m_weight * currVertex;
   }
 
   // TODO: Should be able to propagate closestDistance as well as closestPoint
