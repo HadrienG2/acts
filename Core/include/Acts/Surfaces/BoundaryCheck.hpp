@@ -334,7 +334,6 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
   // Applying the weight matrix to a vector is costly, therefore we carefully
   // choose which vectors we apply it to, and cache the results, in order to
   // perform this multiplication as few times as possible.
-  const Vector2D weightedPoint = m_weight * point;
   Vector2D weightedPrevVertex = m_weight * prevVertex;
 
   // Now, we're going to iterate over the remaining polygon vertices, and for
@@ -370,7 +369,8 @@ inline Acts::Vector2D Acts::BoundaryCheck::computeClosestPointOnPolygon(
     // m_weight application by reusing the weighted vectors we already have.
     const Vector2D weightedEdgeClosest =
       (1.0 - u_s) * weightedPrevVertex + u_s * (m_weight * currVertex).eval();
-    const Vector2D weightedDistVector = weightedEdgeClosest - weightedPoint;
+    const Vector2D weightedDistVector =
+      weightedEdgeClosest - (m_weight * point).eval();
     const double edgeDistance = distVector.dot(weightedDistVector);
 
     // If this is smaller than the previously known smallest distance, the
