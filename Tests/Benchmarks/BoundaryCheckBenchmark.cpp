@@ -64,11 +64,14 @@ int main(int /*argc*/, char** /*argv[]*/) {
 
   // Benchmark output display
   auto print_bench_header = [](const std::string& check_name) {
-    std::cout << check_name << ":" << std::endl;
+    /*std::cout << check_name << ":" << std::endl;*/
   };
   auto print_bench_result = [](const std::string& bench_name,
                                const Acts::Test::MicroBenchmarkResult& res) {
-    std::cout << "- " << bench_name << ": " << res << std::endl;
+    /*std::cout << "- " << bench_name << ": " << res << std::endl;*/
+    for (const auto& timing: res.run_timings) {
+      std::cout << timing.count() << std::endl;
+    }
   };
 
   // Benchmark runner
@@ -103,28 +106,28 @@ int main(int /*argc*/, char** /*argv[]*/) {
         num_inside_points = NTESTS;
         num_outside_points = NTESTS_SLOW;
     };
-    run_bench([&] { return check.isInside(center, poly); }, num_inside_points,
+    /*run_bench([&] { return check.isInside(center, poly); }, num_inside_points,
               "Center");
     run_bench([&] { return check.isInside(edge_inside, poly); },
               num_inside_points, "Inside edge");
     run_bench([&] { return check.isInside(edge_outside, poly); },
-              num_outside_points, "Outside edge");
+              num_outside_points, "Outside edge");*/
     run_bench([&] { return check.isInside(far_away, poly); },
               num_outside_points, "Far away");
 
-    // Pre-rolled random points
+    /*// Pre-rolled random points
     std::vector<Vector2D> points(num_outside_points);
     std::generate(points.begin(), points.end(), random_point);
     run_bench_with_inputs(
         [&](const auto& point) { return check.isInside(point, poly); }, points,
-        "Random");
+        "Random");*/
   };
 
   // Benchmark scenarios
-  run_all_benches(BoundaryCheck(false), "No check", Mode::NoCheck);
+  /*run_all_benches(BoundaryCheck(false), "No check", Mode::NoCheck);
   run_all_benches(BoundaryCheck(true), "No tolerance", Mode::FastOutside);
   run_all_benches(BoundaryCheck(true, true, 0.6, 0.45), "Abs. tolerance",
-                  Mode::SlowOutside);
+                  Mode::SlowOutside);*/
   run_all_benches(BoundaryCheck(cov, 3.0), "Cov. tolerance", Mode::SlowOutside);
 
   return 0;
