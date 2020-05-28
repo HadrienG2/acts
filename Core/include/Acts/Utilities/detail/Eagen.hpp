@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 // for GNU: ignore this specific warning, otherwise just include Eigen/Dense
 #if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
 #pragma GCC diagnostic push
@@ -25,23 +27,45 @@ namespace detail {
 /// Eagerly evaluated variant of Eigen, without expression templates
 namespace Eagen {
 
-template <typename _Scalar, int _Rows, int _Cols,
-          int _Options = Eigen::AutoAlign |
-                         ( (_Rows==1 && _Cols!=1) ? Eigen::RowMajor
-                           : (_Cols==1 && _Rows!=1) ? Eigen::ColMajor
-                           : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
-          int _MaxRows = _Rows,
-          int _MaxCols = _Cols>
+template <typename Scalar, int Rows, int Cols,
+          int Options = Eigen::AutoAlign |
+                        ( (Rows==1 && Cols!=1) ? Eigen::RowMajor
+                          : (Cols==1 && Rows!=1) ? Eigen::ColMajor
+                          : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
+          int MaxRows = Rows,
+          int MaxCols = Cols>
 class Matrix {
 public:
-    // TODO: Replicate interface of Eigen::Matrix
+    // === Eigen::Matrix interface ===
+
+    // Basic lifecycle
+    Matrix() = default;
+    Matrix(const Matrix&) = default;
+    Matrix& operator=(const Matrix&) = default;
+#if EIGEN_HAS_RVALUE_REFERENCES
+    Matrix(Matrix&&) = default;
+    Matrix& operator=(Matrix&&) = default;
+#endif
+
+    // Build and assign from anything Eigen supports building or assigning from
+    template <typename... ArgTypes>
+    Matrix(ArgTypes&&... args) : m_inner(std::forward(args)...) {}
+    template <typename Other>
+    Matrix& operator=(Other&& other) {
+        m_inner = std::forward(other);
+        return *this;
+    }
+
+    // Emulate Eigen::Matrix's base class typedef
+    using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+
     // TODO: Replicate interface of Eigen::PlainObjectBase
     // TODO: Replicate interface of Eigen::DenseBase
     // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
     // TODO: Replicate interface of Eigen::EigenBase
 
 private:
-    Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxRows> m_inner;
+    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxRows> m_inner;
 };
 
 }  // namespace Eagen
