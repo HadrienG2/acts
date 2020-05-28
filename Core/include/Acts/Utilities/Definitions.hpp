@@ -18,6 +18,8 @@
 #include <Eigen/Dense>
 #endif
 
+#include "detail/Eagen.hpp"
+
 namespace Acts {
 
 /// Tolerance for bein numerical equal for geometry building
