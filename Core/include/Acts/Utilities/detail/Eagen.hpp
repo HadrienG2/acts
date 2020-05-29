@@ -40,6 +40,152 @@ template <typename Scalar, int Rows, int Cols,
           int MaxRows = Rows,
           int MaxCols = Cols>
 class Matrix;
+template <typename Derived> class PlainObjectBase;
+
+// We don't need to replicate Eigen's full class hierarchy for now, but let's
+// keep the useful metadata from Eigen's method signatures around
+template <typename Derived> using DenseBase = PlainObjectBase<Derived>;
+template <typename Derived> using DenseCoeffsBaseDW = PlainObjectBase<Derived>;
+template <typename Derived> using DenseCoeffsBaseW = PlainObjectBase<Derived>;
+template <typename Derived> using DenseCoeffsBaseRO = PlainObjectBase<Derived>;
+template <typename Derived> using EigenBase = PlainObjectBase<Derived>;
+
+// Spiritual equivalent of Eigen::PlainObjectBase and lower layers
+//
+// (We need to replicate that layer of the Eigen class hierarchy to support both
+// Matrix and Array wrappers without code duplication.)
+//
+template <typename Derived>
+class PlainObjectBase {
+private:
+    // Eigen type wrapped by the CRTP daughter class
+    using Inner = typename Derived::Inner;
+
+    // Template parameters of derived class
+    using Scalar = typename Derived::Scalar;
+    static constexpr int Rows = Derived::Rows;
+    static constexpr int Cols = Derived::Cols;
+    static constexpr int Options = Derived::Options;
+    static constexpr int MaxRows = Derived::MaxRows;
+    static constexpr int MaxCols = Derived::MaxCols;
+
+public:
+    // === Eigen::PlainObjectBase interface ===
+
+    // Coefficient access
+    template <typename... Index>
+    const Scalar& coeff(Index... indices) const {
+        return derivedInner().coeff(indices...);
+    }
+    template <typename... Index>
+    const Scalar& coeffRef(Index... indices) const {
+        return derivedInner().coeffRef(indices...);
+    }
+    template <typename... Index>
+    Scalar& coeffRef(Index... indices) {
+        return derivedInner().coeffRef(indices...);
+    }
+
+    // Resizing
+    template <typename... ArgTypes>
+    void conservativeResize(ArgTypes... args) {
+        derivedInner().conservativeResize(args...);
+    }
+    template <typename OtherDerived>
+    void conservativeResizeLike(const DenseBase<OtherDerived>& other) {
+        derivedInner().conservativeResizeLike(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void conservativeResizeLike(const Eigen::DenseBase<OtherDerived>& other) {
+        derivedInner().conservativeResizeLike(other);
+    }
+    template <typename... ArgTypes>
+    void resize(ArgTypes... args) {
+        derivedInner().resize(args...);
+    }
+    template <typename OtherDerived>
+    void resizeLike(const EigenBase<OtherDerived>& other) {
+        derivedInner().resizeLike(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void resizeLike(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner().resizeLike(other);
+    }
+
+    // Data access
+    Scalar* data() { return derivedInner().data(); }
+    const Scalar* data() const { return derivedInner().data(); }
+
+    // Lazy assignment (?)
+    template <typename OtherDerived>
+    Derived& lazyAssign(const DenseBase<OtherDerived>& other) {
+        derivedInner().lazyAssign(other.derivedInner());
+        return *this;
+    }
+    template <typename OtherDerived>
+    Derived& lazyAssign(const Eigen::DenseBase<OtherDerived>& other) {
+        derivedInner().lazyAssign(other);
+        return *this;
+    }
+
+    // Set inner values from various scalar sources
+    template <typename... ArgTypes>
+    Derived& setConstant(ArgTypes&&... args) {
+        derivedInner().setConstant(std::forward(args)...);
+        return *this;
+    }
+    template <typename... Index>
+    Derived& setZero(Index... indices) {
+        derivedInner().setZero(indices...);
+        return *this;
+    }
+    template <typename... Index>
+    Derived& setOnes(Index... indices) {
+        derivedInner().setOnes(indices...);
+        return *this;
+    }
+    template <typename... Index>
+    Derived& setRandom(Index... indices) {
+        derivedInner().setRandom(indices...);
+        return *this;
+    }
+
+    // Map foreign data
+    // TODO: Consider avoiding copies by providing a first-class Map type
+    template <typename... ArgTypes>
+    static Derived Map(ArgTypes&&... args) {
+        return Derived(Inner::Map(std::forward(args)...));
+    }
+    template <typename... ArgTypes>
+    static Derived MapAligned(ArgTypes&&... args) {
+        return Derived(Inner::MapAligned(std::forward(args)...));
+    }
+
+    // TODO: Replicate interface of Eigen::DenseBase
+    // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
+    // TODO: Replicate interface of Eigen::EigenBase
+
+protected:
+    // Access the inner object held by the CRTP daughter class
+    Inner& derivedInner() {
+        return derived().getInner();
+    }
+    const Inner& derivedInner() const {
+        return derived().getInner();
+    }
+    Inner&& moveDerivedInner() {
+        return derived().moveInner();
+    }
+
+private:
+    // Access the CRTP daughter class
+    Derived& derived() {
+        return *static_cast<Derived*>(this);
+    }
+    const Derived& derived() const {
+        return *static_cast<const Derived*>(this);
+    }
+};
 
 // Equivalent of Eigen's vector typedefs
 template <typename Type, int Size>
@@ -48,81 +194,51 @@ template <typename Type, int Size>
 using RowVector = Matrix<Type, 1, Size>;
 
 // Eigen::Matrix, but with eagerly evaluated operations
-template <typename Scalar,
-          int Rows,
-          int Cols,
-          int Options,
-          int MaxRows,
-          int MaxCols>
-class Matrix {
-private:
-    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxRows>;
-
+template <typename _Scalar,
+          int _Rows,
+          int _Cols,
+          int _Options,
+          int _MaxRows,
+          int _MaxCols>
+class Matrix : public PlainObjectBase<Matrix<_Scalar,
+                                             _Rows,
+                                             _Cols,
+                                             _Options,
+                                             _MaxRows,
+                                             _MaxCols>> {
 public:
     // TODO: If this works, reduce reliance on variadic templates by using the
     //       true method signatures instead.
+
+    // Re-expose template parameters
+    using Scalar = _Scalar;
+    static constexpr int Rows = _Rows;
+    static constexpr int Cols = _Cols;
+    static constexpr int Options = _Options;
+    static constexpr int MaxRows = _MaxRows;
+    static constexpr int MaxCols = _MaxCols;
 
     // === Eigen::Matrix interface ===
 
     // Basic lifecycle
     Matrix() = default;
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix(const Matrix<OtherScalar,
-                        OtherRows,
-                        OtherCols,
-                        OtherOptions,
-                        OtherMaxRows,
-                        OtherMaxCols>& other)
-        : m_inner(other.m_inner)
+    template <typename OtherDerived>
+    Matrix(const EigenBase<OtherDerived>& other)
+        : m_inner(other.derivedInner())
     {}
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix& operator=(const Matrix<OtherScalar,
-                                   OtherRows,
-                                   OtherCols,
-                                   OtherOptions,
-                                   OtherMaxRows,
-                                   OtherMaxCols>& other) {
-        m_inner = other.m_inner;
+    template <typename OtherDerived>
+    Matrix& operator=(const EigenBase<OtherDerived>& other) {
+        m_inner = other.derivedInner();
         return *this;
     }
 #if EIGEN_HAS_RVALUE_REFERENCES
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix(Matrix<OtherScalar,
-                  OtherRows,
-                  OtherCols,
-                  OtherOptions,
-                  OtherMaxRows,
-                  OtherMaxCols>&& other)
-        : m_inner(std::move(other.m_inner))
+    template <typename OtherDerived>
+    Matrix(EigenBase<OtherDerived>&& other)
+        : m_inner(other.moveDerivedInner())
     {}
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix& operator=(Matrix<OtherScalar,
-                             OtherRows,
-                             OtherCols,
-                             OtherOptions,
-                             OtherMaxRows,
-                             OtherMaxCols>&& other) {
-        m_inner = std::move(other.m_inner);
+    template <typename OtherDerived>
+    Matrix& operator=(EigenBase<OtherDerived>&& other) {
+        m_inner = other.moveDerivedInner();
         return *this;
     }
 #endif
@@ -136,137 +252,22 @@ public:
         return *this;
     }
 
+    // Underlying Eigen matrix type (used for CRTP)
+    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxRows>;
+
     // Access the inner Eigen matrix (used for CRTP)
-    Inner& getEigen() {
+    Inner& getInner() {
         return m_inner;
     }
-    const Inner& getEigen() const {
+    const Inner& getInner() const {
         return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
     }
 
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
-
-    // === Eigen::PlainObjectBase interface ===
-
-    // Coefficient access
-    template <typename... Index>
-    const Scalar& coeff(Index... indices) const {
-        return m_inner.coeff(indices...);
-    }
-    template <typename... Index>
-    const Scalar& coeffRef(Index... indices) const {
-        return m_inner.coeffRef(indices...);
-    }
-    template <typename... Index>
-    Scalar& coeffRef(Index... indices) {
-        return m_inner.coeffRef(indices...);
-    }
-
-    // Resizing
-    template <typename... ArgTypes>
-    void conservativeResize(ArgTypes... args) {
-        m_inner.conservativeResize(args...);
-    }
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    void conservativeResizeLike(const Matrix<OtherScalar,
-                                             OtherRows,
-                                             OtherCols,
-                                             OtherOptions,
-                                             OtherMaxRows,
-                                             OtherMaxCols>& other) {
-        m_inner.conservativeResizeLike(other.m_inner);
-    }
-    template <typename OtherDerived>
-    void conservativeResizeLike(const Eigen::DenseBase<OtherDerived>& other) {
-        m_inner.conservativeResizeLike(other);
-    }
-    template <typename... ArgTypes>
-    void resize(ArgTypes... args) {
-        m_inner.resize(args...);
-    }
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    void resizeLike(const Matrix<OtherScalar,
-                                 OtherRows,
-                                 OtherCols,
-                                 OtherOptions,
-                                 OtherMaxRows,
-                                 OtherMaxCols>& other) {
-        m_inner.resizeLike(other.m_inner);
-    }
-    template <typename OtherDerived>
-    void resizeLike(const Eigen::DenseBase<OtherDerived>& other) {
-        m_inner.resizeLike(other);
-    }
-
-    // Data access
-    Scalar* data() { return m_inner.data(); }
-    const Scalar* data() const { return m_inner.data(); }
-
-    // Lazy assignment
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix& lazyAssign(const Matrix<OtherScalar,
-                                    OtherRows,
-                                    OtherCols,
-                                    OtherOptions,
-                                    OtherMaxRows,
-                                    OtherMaxCols>& other) {
-        m_inner.lazyAssign(other.m_inner);
-        return *this;
-    }
-    template <typename OtherDerived>
-    Matrix& lazyAssign(const Eigen::DenseBase<OtherDerived>& other) {
-        m_inner.lazyAssign(other);
-        return *this;
-    }
-
-    // Set inner values from various scalar sources
-    template <typename... ArgTypes>
-    Matrix& setConstant(ArgTypes&&... args) {
-        m_inner.setConstant(std::forward(args)...);
-        return *this;
-    }
-    template <typename... Index>
-    Matrix& setZero(Index... indices) {
-        m_inner.setZero(indices...);
-        return *this;
-    }
-    template <typename... Index>
-    Matrix& setOnes(Index... indices) {
-        m_inner.setOnes(indices...);
-        return *this;
-    }
-    template <typename... Index>
-    Matrix& setRandom(Index... indices) {
-        m_inner.setRandom(indices...);
-        return *this;
-    }
-
-    // Map foreign data
-    // TODO: Consider avoiding copies by providing a first-class Map type
-    template <typename... ArgTypes>
-    static Matrix Map(ArgTypes&&... args) {
-        return Matrix(Inner::Map(std::forward(args)...));
-    }
-    template <typename... ArgTypes>
-    static Matrix MapAligned(ArgTypes&&... args) {
-        return Matrix(Inner::MapAligned(std::forward(args)...));
-    }
 
     // === Eigen::MatrixBase interface ===
 
@@ -286,37 +287,17 @@ public:
     void applyOnTheLeft(ArgTypes&&... args) {
         m_inner.applyOnTheLeft(std::forward(args)...);
     }
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    void applyOnTheLeft(const Matrix<OtherScalar,
-                                     OtherRows,
-                                     OtherCols,
-                                     OtherOptions,
-                                     OtherMaxRows,
-                                     OtherMaxCols>& other) {
-        m_inner.applyOnTheLeft(other.m_inner);
+    template <typename OtherDerived>
+    void applyOnTheLeft(const EigenBase<OtherDerived>& other) {
+        m_inner.applyOnTheLeft(other.derivedInner());
     }
     template <typename... ArgTypes>
     void applyOnTheRight(ArgTypes&&... args) {
         m_inner.applyOnTheRight(std::forward(args)...);
     }
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    void applyOnTheRight(const Matrix<OtherScalar,
-                                      OtherRows,
-                                      OtherCols,
-                                      OtherOptions,
-                                      OtherMaxRows,
-                                      OtherMaxCols>& other) {
-        m_inner.applyOnTheRight(other.m_inner);
+    template <typename OtherDerived>
+    void applyOnTheRight(const EigenBase<OtherDerived>& other) {
+        m_inner.applyOnTheRight(other.derivedInner());
     }
 
     // FIXME: Support array(), which is used by Acts (requires Array type)
@@ -371,7 +352,7 @@ public:
         return m_inner.stableNormalized();
     }
 
-    // TODO: Support orthogonal matrix related features
+    // TODO: Support orthogonal matrix and decomposition features
     //       This is not currently used by Acts, so lower-priority.
     // TODO: Support computeInverse(AndDet)?WithCheck
     //       This is not currently used by Acts, so lower-priority.
@@ -427,7 +408,7 @@ public:
 
     // Diagonal and associated properties
     // FIXME: Support non-const diagonal access, which is used by Acts for
-    //        comma initialization based assignment.
+    //        comma initialization based diagonal assignment.
     template <typename... Index>
     Vector<Scalar, Rows> diagonal(Index... indices) const {
         return Vector<Scalar, Rows>(m_inner.diagonal(indices...));
@@ -479,29 +460,19 @@ public:
     }
 
     // Special matrix queries
-    bool isDiagonal(
-        const RealScalar& prec = Eigen::NumTraits<Scalar>::dummy_precision()
-    ) const {
+    bool isDiagonal(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isDiagonal(prec);
     }
-    bool isIdentity(
-        const RealScalar& prec = Eigen::NumTraits<Scalar>::dummy_precision()
-    ) const {
+    bool isIdentity(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isIdentity(prec);
     }
-    bool isLowerTriangular(
-        const RealScalar& prec = Eigen::NumTraits<Scalar>::dummy_precision()
-    ) const {
+    bool isLowerTriangular(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isLowerTriangular(prec);
     }
-    bool isUnitary(
-        const RealScalar& prec = Eigen::NumTraits<Scalar>::dummy_precision()
-    ) const {
+    bool isUnitary(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isUnitary(prec);
     }
-    bool isUpperTriangular(
-        const RealScalar& prec = Eigen::NumTraits<Scalar>::dummy_precision()
-    ) const {
+    bool isUpperTriangular(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isUpperTriangular(prec);
     }
 
@@ -562,28 +533,17 @@ public:
         );
     }
     template <typename OtherDerived>
-    Matrix& operator*=(const Eigen::MatrixBase<OtherDerived>& other) {
+    Matrix& operator*=(const Eigen::EigenBase<OtherDerived>& other) {
         m_inner *= other;
         return *this;
     }
-    template <typename OtherScalar,
-              int OtherRows,
-              int OtherCols,
-              int OtherOptions,
-              int OtherMaxRows,
-              int OtherMaxCols>
-    Matrix& operator*=(const Matrix<OtherScalar,
-                                    OtherRows,
-                                    OtherCols,
-                                    OtherOptions,
-                                    OtherMaxRows,
-                                    OtherMaxCols>& other) {
-        // Aliasing can happen in in-place multiplication
+    template <typename OtherDerived>
+    Matrix& operator*=(const EigenBase<OtherDerived>& other) {
         m_inner *= other.m_inner;
         return *this;
     }
     template <typename OtherDerived>
-    Matrix& operator+=(const Eigen::EigenBase<OtherDerived>& other) {
+    Matrix& operator+=(const Eigen::MatrixBase<OtherDerived>& other) {
         m_inner += other;
         return *this;
     }
@@ -603,7 +563,7 @@ public:
         return *this;
     }
     template <typename OtherDerived>
-    Matrix& operator-=(const Eigen::EigenBase<OtherDerived>& other) {
+    Matrix& operator-=(const Eigen::MatrixBase<OtherDerived>& other) {
         m_inner -= other;
         return *this;
     }
@@ -665,14 +625,6 @@ public:
     static Matrix UnitZ() {
         return Matrix(Inner::UnitZ());
     }
-
-    // TODO: Extract PlainObjectBase to another class, we'll need that for
-    //       Array support (and it'll be a good test drive for what follows)
-    // TODO: Extract commonalities of DenseBase and below to another class,
-    //       we'll need that for Array support
-    // TODO: Replicate interface of Eigen::DenseBase
-    // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
-    // TODO: Replicate interface of Eigen::EigenBase
 
 private:
     Inner m_inner;
