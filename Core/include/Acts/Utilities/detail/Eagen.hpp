@@ -136,6 +136,14 @@ public:
         return *this;
     }
 
+    // Access the inner Eigen matrix
+    Inner& getEigen() {
+        return m_inner;
+    }
+    const Inner& getEigen() const {
+        return m_inner;
+    }
+
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
