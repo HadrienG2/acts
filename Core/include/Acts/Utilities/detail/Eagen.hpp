@@ -250,7 +250,7 @@ public:
     }
 
     // Map foreign data
-    // FIXME: Avoid copy by providing a first-class Map type
+    // TODO: Consider avoiding copies by providing a first-class Map type
     template <typename... ArgTypes>
     static Matrix Map(ArgTypes&&... args) {
         return Matrix(Inner::Map(std::forward(args)...));
