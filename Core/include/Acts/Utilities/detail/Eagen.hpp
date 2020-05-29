@@ -666,6 +666,8 @@ public:
         return Matrix(Inner::UnitZ());
     }
 
+    // TODO: Extract PlainObjectBase to another class, we'll need that for
+    //       Array support (and it'll be a good test drive for what follows)
     // TODO: Extract commonalities of DenseBase and below to another class,
     //       we'll need that for Array support
     // TODO: Replicate interface of Eigen::DenseBase
