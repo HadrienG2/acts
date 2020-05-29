@@ -136,7 +136,7 @@ public:
         return *this;
     }
 
-    // Access the inner Eigen matrix
+    // Access the inner Eigen matrix (used for CRTP)
     Inner& getEigen() {
         return m_inner;
     }
