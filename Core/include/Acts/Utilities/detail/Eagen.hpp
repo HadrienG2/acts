@@ -48,11 +48,65 @@ public:
 
     // Basic lifecycle
     Matrix() = default;
-    Matrix(const Matrix&) = default;
-    Matrix& operator=(const Matrix&) = default;
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    Matrix(const Matrix<OtherScalar,
+                        OtherRows,
+                        OtherCols,
+                        OtherOptions,
+                        OtherMaxRows,
+                        OtherMaxCols>& other)
+        : m_inner(other.m_inner)
+    {}
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    Matrix& operator=(const Matrix<OtherScalar,
+                                   OtherRows,
+                                   OtherCols,
+                                   OtherOptions,
+                                   OtherMaxRows,
+                                   OtherMaxCols>& other) {
+        m_inner = other.m_inner;
+        return *this;
+    }
 #if EIGEN_HAS_RVALUE_REFERENCES
-    Matrix(Matrix&&) = default;
-    Matrix& operator=(Matrix&&) = default;
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    Matrix(Matrix<OtherScalar,
+                  OtherRows,
+                  OtherCols,
+                  OtherOptions,
+                  OtherMaxRows,
+                  OtherMaxCols>&& other)
+        : m_inner(std::move(other.m_inner))
+    {}
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    Matrix& operator=(Matrix<OtherScalar,
+                             OtherRows,
+                             OtherCols,
+                             OtherOptions,
+                             OtherMaxRows,
+                             OtherMaxCols>&& other) {
+        m_inner = std::move(other.m_inner);
+        return *this;
+    }
 #endif
 
     // Build and assign from anything Eigen supports building or assigning from
@@ -88,7 +142,18 @@ public:
     void conservativeResize(ArgTypes... args) {
         m_inner.conservativeResize(args...);
     }
-    void conservativeResizeLike(const Matrix& other) {
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    void conservativeResizeLike(const Matrix<OtherScalar,
+                                             OtherRows,
+                                             OtherCols,
+                                             OtherOptions,
+                                             OtherMaxRows,
+                                             OtherMaxCols>& other) {
         m_inner.conservativeResizeLike(other.m_inner);
     }
     template <typename OtherDerived>
@@ -99,7 +164,18 @@ public:
     void resize(ArgTypes... args) {
         m_inner.resize(args...);
     }
-    void resizeLike(const Matrix& other) {
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    void resizeLike(const Matrix<OtherScalar,
+                                 OtherRows,
+                                 OtherCols,
+                                 OtherOptions,
+                                 OtherMaxRows,
+                                 OtherMaxCols>& other) {
         m_inner.resizeLike(other.m_inner);
     }
     template <typename OtherDerived>
@@ -112,7 +188,18 @@ public:
     const Scalar* data() const { return m_inner.data(); }
 
     // Lazy assignment
-    Matrix& lazyAssign(const Matrix& other) {
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    Matrix& lazyAssign(const Matrix<OtherScalar,
+                                    OtherRows,
+                                    OtherCols,
+                                    OtherOptions,
+                                    OtherMaxRows,
+                                    OtherMaxCols>& other) {
         m_inner.lazyAssign(other.m_inner);
         return *this;
     }
