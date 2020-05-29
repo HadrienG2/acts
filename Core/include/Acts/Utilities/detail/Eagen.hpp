@@ -502,9 +502,9 @@ public:
 
     // FIXME: Support Cholesky decompositions (LLT, LDLT), used by Acts
 
-    // NOTE: noalias() should almost never be needed in an eagerly evaluated
-    //       world. Eagen should just signal absence of aliasing to Eigen for
-    //       underlying matrix multiplications, if needed.
+    // NOTE: noalias() will probably never be supported, as it should almost
+    //       never be needed in an eagerly evaluated world, where AFAIK its only
+    //       use is to make operator*= slightly more efficient.
 
     // Operators
     template <typename OtherDerived>
@@ -555,7 +555,7 @@ public:
     }
     template <typename OtherDerived>
     Matrix& operator*=(const Eigen::MatrixBase<OtherDerived>& other) {
-        m_inner.noalias() *= other;
+        m_inner *= other;
         return *this;
     }
     template <typename OtherScalar,
