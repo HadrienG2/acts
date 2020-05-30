@@ -151,7 +151,7 @@ public:
     }
 
     // Map foreign data
-    // TODO: Consider avoiding copies by providing a first-class Map type
+    // TODO: Consider providing a first-class Map type to avoid copies
     template <typename... ArgTypes>
     static Derived Map(ArgTypes&&... args) {
         return Derived(Inner::Map(std::forward(args)...));
@@ -303,6 +303,8 @@ public:
     // FIXME: Support array(), which is used by Acts (requires Array type)
 
     // Reinterpret a vector as a diagonal matrix
+    // TODO: Consider providing a dedicated diagonal wrapper type to avoid
+    //       copies and extra run-time storage and computation overhead
     Matrix<Scalar, std::max(Rows, Cols), std::max(Rows, Cols)>
     asDiagonal() const {
         assert(std::min(Rows, Cols) == 1);
@@ -409,6 +411,7 @@ public:
     // Diagonal and associated properties
     // FIXME: Support non-const diagonal access, which is used by Acts for
     //        comma initialization based diagonal assignment.
+    //        Use that to make the diagonal access method below more efficient.
     template <typename... Index>
     Vector<Scalar, Rows> diagonal(Index... indices) const {
         return Vector<Scalar, Rows>(m_inner.diagonal(indices...));
