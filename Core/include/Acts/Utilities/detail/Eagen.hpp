@@ -324,6 +324,9 @@ public:
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
 
+    // Quick way to construct a matrix of the same size, but w/o the options
+    using PlainBase = Matrix<Scalar, Rows, Cols>;
+
     // === Eigen::Matrix interface ===
 
     // Basic lifecycle
@@ -441,7 +444,7 @@ public:
     void normalize() {
         m_inner.normalize();
     }
-    Matrix<Scalar, Rows, Cols> normalized() {
+    PlainBase normalized() {
         return m_inner.normalized();
     }
     RealScalar operatorNorm() const {
@@ -456,7 +459,7 @@ public:
     void stableNormalize() {
         m_inner.stableNormalize();
     }
-    Matrix<Scalar, Rows, Cols> stableNormalized() const {
+    PlainBase stableNormalized() const {
         return m_inner.stableNormalized();
     }
 
@@ -469,9 +472,9 @@ public:
 
     // Cross products
     template <typename OtherDerived>
-    Matrix<Scalar, Rows, Cols>
+    PlainBase
     cross(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return Matrix<Scalar, Rows, Cols>(m_inner.cross(other));
+        return PlainBase(m_inner.cross(other));
     }
     template <typename OtherScalar,
               int OtherRows,
@@ -479,19 +482,19 @@ public:
               int OtherOptions,
               int OtherMaxRows,
               int OtherMaxCols>
-    Matrix<Scalar, Rows, Cols>
+    PlainBase
     cross(const Matrix<OtherScalar,
                        OtherRows,
                        OtherCols,
                        OtherOptions,
                        OtherMaxRows,
                        OtherMaxCols>& other) const {
-        return Matrix<Scalar, Rows, Cols>(m_inner.cross(other.m_inner));
+        return PlainBase(m_inner.cross(other.m_inner));
     }
     template <typename OtherDerived>
-    Matrix<Scalar, Rows, Cols>
+    PlainBase
     cross3(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return Matrix<Scalar, Rows, Cols>(m_inner.cross3(other));
+        return PlainBase(m_inner.cross3(other));
     }
     template <typename OtherScalar,
               int OtherRows,
@@ -499,14 +502,14 @@ public:
               int OtherOptions,
               int OtherMaxRows,
               int OtherMaxCols>
-    Matrix<Scalar, Rows, Cols>
+    PlainBase
     cross3(const Matrix<OtherScalar,
                        OtherRows,
                        OtherCols,
                        OtherOptions,
                        OtherMaxRows,
                        OtherMaxCols>& other) const {
-        return Matrix<Scalar, Rows, Cols>(m_inner.cross3(other.m_inner));
+        return PlainBase(m_inner.cross3(other.m_inner));
     }
 
     // Determinant
@@ -564,8 +567,8 @@ public:
     //       This is not currently used by Acts, so lower-priority.
 
     // Matrix inversion
-    Matrix<Scalar, Rows, Cols> inverse() const {
-        return Matrix<Scalar, Rows, Cols>(m_inner.inverse());
+    PlainBase inverse() const {
+        return PlainBase(m_inner.inverse());
     }
 
     // Special matrix queries
