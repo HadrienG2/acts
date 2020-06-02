@@ -65,7 +65,6 @@ private:
     using Inner = typename Derived::Inner;
 
     // Template parameters of derived class
-    using Scalar = typename Derived::Scalar;
     static constexpr int Rows = Derived::Rows;
     static constexpr int Cols = Derived::Cols;
     static constexpr int Options = Derived::Options;
@@ -73,6 +72,8 @@ private:
     static constexpr int MaxCols = Derived::MaxCols;
 
 public:
+    using Scalar = typename Derived::Scalar;
+
     // === Eigen::PlainObjectBase interface ===
 
     // Coefficient access
@@ -162,6 +163,108 @@ public:
     template <typename... ArgTypes>
     static Derived MapAligned(ArgTypes&&... args) {
         return Derived(Inner::MapAligned(std::forward(args)...));
+    }
+
+    // === Eigen::DenseBase interface ===
+
+    // Eigen-style compilation constants
+    static constexpr int RowsAtCompileTime = Rows;
+    static constexpr int ColsAtCompileTime = Cols;
+    static constexpr int SizeAtCompileTime = Inner::SizeAtCompileTime;
+    static constexpr int MaxRowsAtCompileTime = MaxRows;
+    static constexpr int MaxColsAtCompileTime = MaxCols;
+    static constexpr int MaxSizeAtCompileTime = Inner::MaxSizeAtCompileTime;
+    static constexpr bool IsVectorAtCompileTime = Inner::IsVectorAtCompileTime;
+    static constexpr unsigned int Flags = Inner::Flags;
+    static constexpr bool IsRowMajor = Inner::IsRowMajor;
+
+private:
+    static constexpr int PlainMatrixOptions =
+        AutoAlign | (Flags & (IsRowMajor ? RowMajor : ColMajor));
+
+public:
+    // Eigen-style typedefs
+    // NOTE: Scalar was defined above
+    // TODO: Add PlainArray support if Array support is added
+    using PlainMatrix = Matrix<Scalar,
+                               Rows,
+                               Cols,
+                               PlainMatrixOptions,
+                               MaxRows,
+                               MaxCols>;
+    // TODO: Adapt if PlainArray support is added
+    using PlainObject = PlainMatrix;
+    using StorageIndex = typename Inner::StorageIndex;
+    using value_type = Scalar;
+
+    // "Array of bool" interface
+    bool all() const {
+        return derivedInner().all();
+    }
+    bool any() const {
+        return derivedInner().any();
+    }
+    Index count() const {
+        return derivedInner().count();
+    }
+    template <typename ThenDerived, typename ElseDerived>
+    PlainMatrix select(const DenseBase<ThenDerived>& thenMatrix,
+                       const DenseBase<ElseDerived>& elseMatrix) const {
+        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+                                                 elseMatrix.derivedInner()));
+    }
+    template <typename ThenDerived, typename ElseDerived>
+    PlainMatrix select(
+        const Eigen::DenseBase<ThenDerived>& thenMatrix,
+        const DenseBase<ElseDerived>& elseMatrix
+    ) const {
+        return PlainMatrix(derivedInner().select(thenMatrix,
+                                                 elseMatrix.derivedInner()));
+    }
+    template <typename ThenDerived, typename ElseDerived>
+    PlainMatrix select(
+        const DenseBase<ThenDerived>& thenMatrix,
+        const Eigen::DenseBase<ElseDerived>& elseMatrix
+    ) const {
+        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+                                                 elseMatrix));
+    }
+    template <typename ThenDerived, typename ElseDerived>
+    PlainMatrix select(
+        const Eigen::DenseBase<ThenDerived>& thenMatrix,
+        const Eigen::DenseBase<ElseDerived>& elseMatrix
+    ) const {
+        return PlainMatrix(derivedInner().select(thenMatrix, elseMatrix));
+    }
+    template <typename ThenDerived>
+    PlainMatrix select(
+        const DenseBase<ThenDerived>& thenMatrix,
+        const typename ThenDerived::Scalar& elseScalar
+    ) const {
+        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+                                                 elseScalar));
+    }
+    template <typename ThenDerived>
+    PlainMatrix select(
+        const Eigen::DenseBase<ThenDerived>& thenMatrix,
+        const typename ThenDerived::Scalar& elseScalar
+    ) const {
+        return PlainMatrix(derivedInner().select(thenMatrix, elseScalar));
+    }
+    template <typename ElseDerived>
+    PlainMatrix select(
+        const typename ElseDerived::Scalar& thenScalar,
+        const DenseBase<ElseDerived>& elseMatrix
+    ) const {
+        return PlainMatrix(derivedInner().select(thenScalar,
+                                                 elseMatrix.derivedInner()));
+    }
+    template <typename ElseDerived>
+    PlainMatrix select(
+        const typename ElseDerived::Scalar& thenScalar,
+        const Eigen::DenseBase<ElseDerived>& elseMatrix
+    ) const {
+        return PlainMatrix(derivedInner().select(thenScalar, elseMatrix));
     }
 
     // TODO: Replicate interface of Eigen::DenseBase
