@@ -581,11 +581,98 @@ public:
         return s << m.derivedInner();
     }
 
-    // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
-    // TODO: Replicate interface of Eigen::EigenBase
+    // === Eigen::DenseCoeffsBase interfaces ===
+
+    // Storage layout (DirectWriteAccessors specific)
+    Index colStride() const {
+        return derivedInner().colStride();
+    }
+    Index innerStride() const {
+        return derivedInner().innerStride();
+    }
+    Index outerStride() const {
+        return derivedInner().outerStride();
+    }
+    Index rowStride() const {
+        return derivedInner().rowStride();
+    }
+
+    // Access elements for writing (WriteAccessors specific)
+    template <typename... Index>
+    Scalar& coeffRef(Index... indices) {
+        return derivedInner().coeffRef(indices...);
+    }
+    template <typename... Index>
+    Scalar& operator()(Index... indices) {
+        return derivedInner()(indices...);
+    }
+    Scalar& operator[](Index index) {
+        return derivedInner()[index];
+    }
+    Scalar& w() {
+        return derivedInner().w();
+    }
+    Scalar& x() {
+        return derivedInner().x();
+    }
+    Scalar& y() {
+        return derivedInner().y();
+    }
+    Scalar& z() {
+        return derivedInner().z();
+    }
+
+    // Read elements (ReadOnlyAccessors specific)
+    template <typename... Index>
+    decltype(auto) coeff(Index... indices) const {
+        return derivedInner().coeff(indices...);
+    }
+    template <typename... Index>
+    decltype(auto) operator()(Index... indices) const {
+        return derivedInner()(indices...);
+    }
+    decltype(auto) operator[](Index index) const {
+        return derivedInner()[index];
+    }
+    decltype(auto) w() const {
+        return derivedInner().w();
+    }
+    decltype(auto) x() const {
+        return derivedInner().x();
+    }
+    decltype(auto) y() const {
+        return derivedInner().y();
+    }
+    decltype(auto) z() const {
+        return derivedInner().z();
+    }
+
+    // === Eigen::EigenBase interfaces ===
+
+    // Index convenience typedef
+    using Index = Eigen::Index;
+
+    // Matrix dimensions
+    Index cols() const {
+        return derivedInner().cols();
+    }
+    Index rows() const {
+        return derivedInner().rows();
+    }
+    Index size() const {
+        return derivedInner().size();
+    }
+
+    // CRTP daughter class access
+    Derived& derived() {
+        return *static_cast<Derived*>(this);
+    }
+    const Derived& derived() const {
+        return *static_cast<const Derived*>(this);
+    }
 
 protected:
-    // Access the inner object held by the CRTP daughter class
+    // Access the inner Eigen object held by the CRTP daughter class
     Inner& derivedInner() {
         return derived().getInner();
     }
@@ -597,14 +684,6 @@ protected:
     }
 
 private:
-    // Access the CRTP daughter class
-    Derived& derived() {
-        return *static_cast<Derived*>(this);
-    }
-    const Derived& derived() const {
-        return *static_cast<const Derived*>(this);
-    }
-
     static const RealScalar s_dummy_precision =
         Eigen::NumTraits<Scalar>::dummy_precision();
 };
