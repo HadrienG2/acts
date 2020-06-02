@@ -30,6 +30,9 @@ namespace Eagen {
 // Propagate some Eigen types and constants
 using Index = Eigen::Index;
 using NoChange_t = Eigen::NoChange_t;
+constexpr int AutoAlign = Eigen::AutoAlign;
+constexpr int RowMajor = Eigen::RowMajor;
+constexpr int ColMajor = Eigen::ColMajor;
 
 // Forward declarations
 template <typename Scalar, int Rows, int Cols,
