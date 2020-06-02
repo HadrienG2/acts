@@ -53,6 +53,66 @@ template <typename Derived> using DenseCoeffsBaseW = PlainObjectBase<Derived>;
 template <typename Derived> using DenseCoeffsBaseRO = PlainObjectBase<Derived>;
 template <typename Derived> using EigenBase = PlainObjectBase<Derived>;
 
+// Comma initializer support
+template <typename Derived>
+class CommaInitializer {
+public:
+    using Scalar = typename Derived::Scalar;
+
+    // Constructor from (expression, scalar) pair
+    CommaInitializer(Derived& derived, const Scalar& s)
+        : m_derived(derived)
+        , m_inner(derived.getInner(), s)
+    {}
+
+    // Constructor from (expression, expression) pair
+    template<typename OtherDerived>
+    CommaInitializer(Derived& derived, const DenseBase<OtherDerived>& other)
+        : m_derived(derived)
+        , m_inner(derived.getInner(), other.getInner())
+    {}
+    template<typename OtherDerived>
+    CommaInitializer(Derived& derived,
+                     const Eigen::DenseBase<OtherDerived>& other)
+        : m_inner(derived.getInner(), other)
+    {}
+
+    // Copy/Move constructor that transfers ownership
+    // NOTE: Added to be bugward compatible with Eigen, but this is just wrong
+    CommaInitializer(const CommaInitializer& o)
+        : m_derived(o.m_derived)
+        , m_inner(o.m_inner)
+    {}
+
+    // Scalar insertion
+    CommaInitializer& operator,(const Scalar& s) {
+        m_inner, s;
+        return *this;
+    }
+
+    // Expression insertion
+    template<typename OtherDerived>
+    CommaInitializer& operator,(const DenseBase<OtherDerived>& other) {
+        m_inner, other.derivedInner();
+        return *this;
+    }
+    template<typename OtherDerived>
+    CommaInitializer& operator,(const Eigen::DenseBase<OtherDerived>& other) {
+        m_inner, other;
+        return *this;
+    }
+
+    // Get the built matrix
+    Derived& finished() {
+        m_inner.finished();
+        return m_derived;
+    }
+
+private:
+    Derived& m_derived;
+    Eigen::CommaInitializer<typename Derived::Inner> m_inner;
+};
+
 // Spiritual equivalent of Eigen::PlainObjectBase and lower layers
 //
 // (We need to replicate that layer of the Eigen class hierarchy to support both
@@ -404,7 +464,19 @@ public:
     // TODO: Understand and support nestByValue()
     //       This is not currently used by Acts, so lower-priority.
 
-    // FIXME: Support comma initializer, heavily used by Acts
+    // Comma initializer
+    template <typename OtherDerived>
+    CommaInitializer<Derived> operator<<(const DenseBase<OtherDerived>& other) {
+        return CommaInitializer(derived(), other);
+    }
+    template <typename OtherDerived>
+    CommaInitializer<Derived>
+    operator<<(const Eigen::DenseBase<OtherDerived>& other) {
+        return CommaInitializer(derived(), other);
+    }
+    CommaInitializer<Derived> operator<<(const Scalar& s) {
+        return CommaInitializer(derived(), s);
+    }
 
     // Assignment operator
     template <typename OtherDerived = Derived>
