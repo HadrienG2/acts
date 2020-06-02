@@ -71,6 +71,9 @@ private:
     static constexpr int MaxRows = Derived::MaxRows;
     static constexpr int MaxCols = Derived::MaxCols;
 
+    // Eigen convenience
+    using RealScalar = typename Inner::RealScalar;
+
 public:
     using Scalar = typename Derived::Scalar;
 
@@ -208,66 +211,272 @@ public:
         return derivedInner().count();
     }
     template <typename ThenDerived, typename ElseDerived>
-    PlainMatrix select(const DenseBase<ThenDerived>& thenMatrix,
+    PlainObject select(const DenseBase<ThenDerived>& thenMatrix,
                        const DenseBase<ElseDerived>& elseMatrix) const {
-        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+        return PlainObject(derivedInner().select(thenMatrix.derivedInner(),
                                                  elseMatrix.derivedInner()));
     }
     template <typename ThenDerived, typename ElseDerived>
-    PlainMatrix select(
+    PlainObject select(
         const Eigen::DenseBase<ThenDerived>& thenMatrix,
         const DenseBase<ElseDerived>& elseMatrix
     ) const {
-        return PlainMatrix(derivedInner().select(thenMatrix,
+        return PlainObject(derivedInner().select(thenMatrix,
                                                  elseMatrix.derivedInner()));
     }
     template <typename ThenDerived, typename ElseDerived>
-    PlainMatrix select(
+    PlainObject select(
         const DenseBase<ThenDerived>& thenMatrix,
         const Eigen::DenseBase<ElseDerived>& elseMatrix
     ) const {
-        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+        return PlainObject(derivedInner().select(thenMatrix.derivedInner(),
                                                  elseMatrix));
     }
     template <typename ThenDerived, typename ElseDerived>
-    PlainMatrix select(
+    PlainObject select(
         const Eigen::DenseBase<ThenDerived>& thenMatrix,
         const Eigen::DenseBase<ElseDerived>& elseMatrix
     ) const {
-        return PlainMatrix(derivedInner().select(thenMatrix, elseMatrix));
+        return PlainObject(derivedInner().select(thenMatrix, elseMatrix));
     }
     template <typename ThenDerived>
-    PlainMatrix select(
+    PlainObject select(
         const DenseBase<ThenDerived>& thenMatrix,
         const typename ThenDerived::Scalar& elseScalar
     ) const {
-        return PlainMatrix(derivedInner().select(thenMatrix.derivedInner(),
+        return PlainObject(derivedInner().select(thenMatrix.derivedInner(),
                                                  elseScalar));
     }
     template <typename ThenDerived>
-    PlainMatrix select(
+    PlainObject select(
         const Eigen::DenseBase<ThenDerived>& thenMatrix,
         const typename ThenDerived::Scalar& elseScalar
     ) const {
-        return PlainMatrix(derivedInner().select(thenMatrix, elseScalar));
+        return PlainObject(derivedInner().select(thenMatrix, elseScalar));
     }
     template <typename ElseDerived>
-    PlainMatrix select(
+    PlainObject select(
         const typename ElseDerived::Scalar& thenScalar,
         const DenseBase<ElseDerived>& elseMatrix
     ) const {
-        return PlainMatrix(derivedInner().select(thenScalar,
+        return PlainObject(derivedInner().select(thenScalar,
                                                  elseMatrix.derivedInner()));
     }
     template <typename ElseDerived>
-    PlainMatrix select(
+    PlainObject select(
         const typename ElseDerived::Scalar& thenScalar,
         const Eigen::DenseBase<ElseDerived>& elseMatrix
     ) const {
-        return PlainMatrix(derivedInner().select(thenScalar, elseMatrix));
+        return PlainObject(derivedInner().select(thenScalar, elseMatrix));
     }
 
-    // TODO: Replicate interface of Eigen::DenseBase
+    // IEEE 754 error handling stupidity
+    bool allFinite() const {
+        return derivedInner().allFinite();
+    }
+    bool hasNaN() const {
+        return derivedInner().hasNaN();
+    }
+
+    // FIXME: Support colwise() and rowwise(), which are used by Acts
+
+    // eval() is only provided for Eigen API compatibility reasons, it is
+    // perfectly useless here since eager evaluation is the default already
+    Derived eval() const {
+        return derivedInner();
+    }
+
+    // Filling various patterns into the inner data
+    void fill(const Scalar& value) {
+        derivedInner().fill(value);
+    }
+    Derived& setConstant(const Scalar& value) {
+        return derivedInner().setConstant(value);
+    }
+    Derived& setLinSpaced(const Scalar& low, const Scalar& high) {
+        return derivedInner().setLinSpaced(low, high);
+    }
+    Derived& setLinSpaced(Index size, const Scalar& low, const Scalar& high) {
+        return derivedInner().setLinSpaced(size, low, high);
+    }
+    Derived& setOnes() {
+        return derivedInner().setOnes();
+    }
+    Derived& setRandom() {
+        return derivedInner().setRandom();
+    }
+    Derived& setZero() {
+        return derivedInner().setZero();
+    }
+
+    // NOTE: flagged() is deprecated and unused by Acts, thus unsupported
+
+    // TODO: Support format() text formatting controls
+    //       These are not currently used by Acts, so lower-priority.
+
+    // Size queries
+    Index innerSize() const {
+        return derivedInner().innerSize();
+    }
+    Index outerSize() const {
+        return derivedInner().outerSize();
+    }
+
+    // Approximate comparisons
+    template <typename OtherDerived>
+    bool isApprox(const DenseBase<OtherDerived>& other,
+                  const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isApprox(other.derivedInner(), prec);
+    }
+    template <typename OtherDerived>
+    bool isApprox(const Eigen::DenseBase<OtherDerived>& other,
+                  const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isApprox(other, prec);
+    }
+    bool isApproxToConstant(const Scalar& value,
+                            const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isApproxToConstant(value, prec);
+    }
+    bool isConstant(const Scalar& value,
+                    const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isConstant(value, prec);
+    }
+    template <typename OtherDerived>
+    bool isMuchSmallerThan(const DenseBase<OtherDerived>& other,
+                           const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isMuchSmallerThan(other.derivedInner(), prec);
+    }
+    template <typename OtherDerived>
+    bool isMuchSmallerThan(const Eigen::DenseBase<OtherDerived>& other,
+                           const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isMuchSmallerThan(other, prec);
+    }
+    bool isMuchSmallerThan(const RealScalar& other,
+                           const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isMuchSmallerThan(other, prec);
+    }
+    bool isOnes(const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isOnes(prec);
+    }
+    bool isZero(const RealScalar& prec = s_dummy_precision) const {
+        return derivedInner().isZero(prec);
+    }
+
+    // Data reduction
+    Scalar maxCoeff() const {
+        return derivedInner().maxCoeff();
+    }
+    Scalar maxCoeff(Index* index) const {
+        return derivedInner().maxCoeff(index);
+    }
+    Scalar maxCoeff(Index* row, Index* col) const {
+        return derivedInner().maxCoeff(row, col);
+    }
+    Scalar mean() const {
+        return derivedInner().mean();
+    }
+    Scalar minCoeff() const {
+        return derivedInner().minCoeff();
+    }
+    Scalar minCoeff(Index* index) const {
+        return derivedInner().minCoeff(index);
+    }
+    Scalar minCoeff(Index* row, Index* col) const {
+        return derivedInner().minCoeff(row, col);
+    }
+    Index nonZeros() {
+        return derivedInner().nonZeros();
+    }
+    Scalar prod() const {
+        return derivedInner().prod();
+    }
+    template <typename Func>
+    Scalar redux(const Func& func) const {
+        return derivedInner().redux(func);
+    }
+    Scalar sum() const {
+        return derivedInner().sum();
+    }
+    Scalar value() const {
+        return derivedInner().value();
+    }
+
+    // TODO: Understand and support nestByValue()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // FIXME: Support comma initializer, heavily used by Acts
+
+    // Assignment operator
+    template <typename OtherDerived = Derived>
+    Derived& operator=(const DenseBase<OtherDerived>& other) {
+        derivedInner() = other.derivedInner();
+        return *this;
+    }
+    template <typename OtherDerived = Inner>
+    Derived& operator=(const Eigen::DenseBase<OtherDerived>& other) {
+        derivedInner() = other;
+        return *this;
+    }
+    // NOTE: No need for an Eagen::EigenBase overload yet as we don't replicate
+    //       that layer of the Eigen class hierarchy yet.
+    template <typename OtherDerived>
+    Derived& operator=(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner() = other;
+        return *this;
+    }
+
+    // TODO: Support replicate()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Inner array resizing
+    void resize(Index newSize) {
+        derivedInner().resize(newSize);
+    }
+    void resize(Index rows, Index cols) {
+        derivedInner().resize(rows, cols);
+    }
+
+    // TODO: Support reverse(InPlace)?()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Swapping matrices
+    template <typename OtherDerived>
+    void swap(const DenseBase<OtherDerived>& other) {
+        return derivedInner().swap(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void swap(const Eigen::DenseBase<OtherDerived>& other) {
+        return derivedInner().swap(other);
+    }
+    template <typename OtherDerived>
+    void swap(PlainObjectBase<OtherDerived>& other) {
+        return derivedInner().swap(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void swap(Eigen::PlainObjectBase<OtherDerived>& other) {
+        return derivedInner().swap(other);
+    }
+
+    // Matrix transposition
+    // NOTE: Will need adaptations if array support is needed
+    Matrix<Scalar, Cols, Rows> transpose() {
+        return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
+    }
+    Matrix<Scalar, Cols, Rows> transpose() const {
+        return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
+    }
+    void transposeInPlace() {
+        derivedInner().transposeInPlace();
+    }
+
+    // Visit coefficients
+    template <typename Visitor>
+    void visit(Visitor& func) const {
+        derivedInner().visit(func);
+    }
+
+
+    // TODO: Replicate static methods of Eigen::DenseBase
     // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
     // TODO: Replicate interface of Eigen::EigenBase
 
@@ -291,6 +500,9 @@ private:
     const Derived& derived() const {
         return *static_cast<const Derived*>(this);
     }
+
+    static const RealScalar s_dummy_precision =
+        Eigen::NumTraits<Scalar>::dummy_precision();
 };
 
 // Equivalent of Eigen's vector typedefs
@@ -571,7 +783,7 @@ public:
         return PlainBase(m_inner.inverse());
     }
 
-    // Special matrix queries
+    // Approximate comparisons
     bool isDiagonal(const RealScalar& prec = s_dummy_precision) const {
         return m_inner.isDiagonal(prec);
     }
