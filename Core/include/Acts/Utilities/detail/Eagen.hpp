@@ -547,8 +547,32 @@ public:
         derivedInner().visit(func);
     }
 
+    // Special plain object generators
+    template <typename... ArgTypes>
+    static PlainObject Constant(ArgTypes&&... args) {
+        return PlainObject(Inner::Constant(std::forward(args)...));
+    }
+    template <typename... ArgTypes>
+    static PlainObject LinSpaced(ArgTypes&&... args) {
+        return PlainObject(Inner::LinSpaced(std::forward(args)...));
+    }
+    template <typename... ArgTypes>
+    static PlainObject NullaryExpr(ArgTypes&&... args) {
+        return PlainObject(Inner::NullaryExpr(std::forward(args)...));
+    }
+    template <typename... Index>
+    static PlainObject Ones(Index... indices) {
+        return PlainObject(Inner::Ones(indices...));
+    }
+    template <typename... Index>
+    static PlainObject Random(Index... indices) {
+        return PlainObject(Inner::Random(indices...));
+    }
+    template <typename... Index>
+    static PlainObject Zero(Index... indices) {
+        return PlainObject(Inner::Zero(indices...));
+    }
 
-    // TODO: Replicate static methods of Eigen::DenseBase
     // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
     // TODO: Replicate interface of Eigen::EigenBase
 
