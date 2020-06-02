@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <utility>
 
 // for GNU: ignore this specific warning, otherwise just include Eigen/Dense
@@ -571,6 +572,13 @@ public:
     template <typename... Index>
     static PlainObject Zero(Index... indices) {
         return PlainObject(Inner::Zero(indices...));
+    }
+
+    // Display
+    template <typename OtherDerived>
+    friend std::ostream& operator<<(std::ostream& s,
+                                    const DenseBase<OtherDerived>& m) {
+        return s << m.derivedInner();
     }
 
     // TODO: Replicate interface of all Eigen::DenseCoeffsBase types
