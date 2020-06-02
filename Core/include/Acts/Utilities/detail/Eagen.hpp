@@ -53,11 +53,33 @@ template <typename Derived> using DenseCoeffsBaseW = PlainObjectBase<Derived>;
 template <typename Derived> using DenseCoeffsBaseRO = PlainObjectBase<Derived>;
 template <typename Derived> using EigenBase = PlainObjectBase<Derived>;
 
+// Some type traits to ease manipulating incomplete types
+template <typename EagenType>
+struct TypeTraits;
+template <typename _Scalar,
+          int _Rows,
+          int _Cols,
+          int _Options,
+          int _MaxRows,
+          int _MaxCols>
+struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
+    using Scalar = _Scalar;
+    static constexpr int Rows = _Rows;
+    static constexpr int Cols = _Cols;
+    static constexpr int Options = _Options;
+    static constexpr int MaxRows = _MaxRows;
+    static constexpr int MaxCols = _MaxCols;
+    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+};
+
 // Comma initializer support
 template <typename Derived>
 class CommaInitializer {
+private:
+    using DerivedTraits = TypeTraits<Derived>;
+
 public:
-    using Scalar = typename Derived::Scalar;
+    using Scalar = typename DerivedTraits::Scalar;
 
     // Constructor from (expression, scalar) pair
     CommaInitializer(Derived& derived, const Scalar& s)
@@ -112,7 +134,7 @@ public:
 
 private:
     Derived& m_derived;
-    Eigen::CommaInitializer<typename Derived::Inner> m_inner;
+    Eigen::CommaInitializer<typename DerivedTraits::Inner> m_inner;
 };
 
 // Spiritual equivalent of Eigen::PlainObjectBase and lower layers
@@ -124,21 +146,22 @@ template <typename Derived>
 class PlainObjectBase {
 private:
     // Eigen type wrapped by the CRTP daughter class
-    using Inner = typename Derived::Inner;
+    using DerivedTraits = TypeTraits<Derived>;
+    using Inner = typename DerivedTraits::Inner;
 
     // Template parameters of derived class
-    static constexpr int Rows = Derived::Rows;
-    static constexpr int Cols = Derived::Cols;
-    static constexpr int Options = Derived::Options;
-    static constexpr int MaxRows = Derived::MaxRows;
-    static constexpr int MaxCols = Derived::MaxCols;
+    static constexpr int Rows = DerivedTraits::Rows;
+    static constexpr int Cols = DerivedTraits::Cols;
+    static constexpr int Options = DerivedTraits::Options;
+    static constexpr int MaxRows = DerivedTraits::MaxRows;
+    static constexpr int MaxCols = DerivedTraits::MaxCols;
 
     // Eigen convenience
     using RealScalar = typename Inner::RealScalar;
 
 public:
     // Derived class scalar type
-    using Scalar = typename Derived::Scalar;
+    using Scalar = typename DerivedTraits::Scalar;
 
     // === Eigen::EigenBase interface ===
 
@@ -387,40 +410,40 @@ public:
     // Approximate comparisons
     template <typename OtherDerived>
     bool isApprox(const DenseBase<OtherDerived>& other,
-                  const RealScalar& prec = s_dummy_precision) const {
+                  const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApprox(other.derivedInner(), prec);
     }
     template <typename OtherDerived>
     bool isApprox(const Eigen::DenseBase<OtherDerived>& other,
-                  const RealScalar& prec = s_dummy_precision) const {
+                  const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApprox(other, prec);
     }
     bool isApproxToConstant(const Scalar& value,
-                            const RealScalar& prec = s_dummy_precision) const {
+                            const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApproxToConstant(value, prec);
     }
     bool isConstant(const Scalar& value,
-                    const RealScalar& prec = s_dummy_precision) const {
+                    const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isConstant(value, prec);
     }
     template <typename OtherDerived>
     bool isMuchSmallerThan(const DenseBase<OtherDerived>& other,
-                           const RealScalar& prec = s_dummy_precision) const {
+                           const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isMuchSmallerThan(other.derivedInner(), prec);
     }
     template <typename OtherDerived>
     bool isMuchSmallerThan(const Eigen::DenseBase<OtherDerived>& other,
-                           const RealScalar& prec = s_dummy_precision) const {
+                           const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isMuchSmallerThan(other, prec);
     }
     bool isMuchSmallerThan(const RealScalar& other,
-                           const RealScalar& prec = s_dummy_precision) const {
+                           const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isMuchSmallerThan(other, prec);
     }
-    bool isOnes(const RealScalar& prec = s_dummy_precision) const {
+    bool isOnes(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isOnes(prec);
     }
-    bool isZero(const RealScalar& prec = s_dummy_precision) const {
+    bool isZero(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isZero(prec);
     }
 
@@ -550,17 +573,17 @@ public:
     }
 
     // Special plain object generators
-    template <typename... ArgTypes>
-    static PlainObject Constant(ArgTypes&&... args) {
-        return PlainObject(Inner::Constant(std::forward(args)...));
+    template <typename... Args>
+    static PlainObject Constant(Args&&... args) {
+        return PlainObject(Inner::Constant(std::forward<Args>(args)...));
     }
-    template <typename... ArgTypes>
-    static PlainObject LinSpaced(ArgTypes&&... args) {
-        return PlainObject(Inner::LinSpaced(std::forward(args)...));
+    template <typename... Args>
+    static PlainObject LinSpaced(Args&&... args) {
+        return PlainObject(Inner::LinSpaced(std::forward<Args>(args)...));
     }
-    template <typename... ArgTypes>
-    static PlainObject NullaryExpr(ArgTypes&&... args) {
-        return PlainObject(Inner::NullaryExpr(std::forward(args)...));
+    template <typename... Args>
+    static PlainObject NullaryExpr(Args&&... args) {
+        return PlainObject(Inner::NullaryExpr(std::forward<Args>(args)...));
     }
     template <typename... Index>
     static PlainObject Ones(Index... indices) {
@@ -575,18 +598,11 @@ public:
         return PlainObject(Inner::Zero(indices...));
     }
 
-    // Display
-    template <typename OtherDerived>
-    friend std::ostream& operator<<(std::ostream& s,
-                                    const DenseBase<OtherDerived>& m) {
-        return s << m.derivedInner();
-    }
-
     // === Eigen::PlainObjectBase interface ===
 
     // Resizing
-    template <typename... ArgTypes>
-    void conservativeResize(ArgTypes... args) {
+    template <typename... Args>
+    void conservativeResize(Args... args) {
         derivedInner().conservativeResize(args...);
     }
     template <typename OtherDerived>
@@ -597,8 +613,8 @@ public:
     void conservativeResizeLike(const Eigen::DenseBase<OtherDerived>& other) {
         derivedInner().conservativeResizeLike(other);
     }
-    template <typename... ArgTypes>
-    void resize(ArgTypes... args) {
+    template <typename... Args>
+    void resize(Args... args) {
         derivedInner().resize(args...);
     }
     template <typename OtherDerived>
@@ -627,9 +643,9 @@ public:
     }
 
     // Set inner values from various scalar sources
-    template <typename... ArgTypes>
-    Derived& setConstant(ArgTypes&&... args) {
-        derivedInner().setConstant(std::forward(args)...);
+    template <typename... Args>
+    Derived& setConstant(Args&&... args) {
+        derivedInner().setConstant(std::forward<Args>(args)...);
         return *this;
     }
     template <typename... Index>
@@ -650,13 +666,13 @@ public:
 
     // Map foreign data
     // TODO: Consider providing a first-class Map type to avoid copies
-    template <typename... ArgTypes>
-    static Derived Map(ArgTypes&&... args) {
-        return Derived(Inner::Map(std::forward(args)...));
+    template <typename... Args>
+    static Derived Map(Args&&... args) {
+        return Derived(Inner::Map(std::forward<Args>(args)...));
     }
-    template <typename... ArgTypes>
-    static Derived MapAligned(ArgTypes&&... args) {
-        return Derived(Inner::MapAligned(std::forward(args)...));
+    template <typename... Args>
+    static Derived MapAligned(Args&&... args) {
+        return Derived(Inner::MapAligned(std::forward<Args>(args)...));
     }
 
 protected:
@@ -672,9 +688,16 @@ protected:
     }
 
 private:
-    static const RealScalar s_dummy_precision =
-        Eigen::NumTraits<Scalar>::dummy_precision();
+    static RealScalar dummy_precision() {
+        return Eigen::NumTraits<Scalar>::dummy_precision();
+    }
 };
+
+// Display of DenseBase and above
+template <typename Derived>
+std::ostream& operator<<(std::ostream& s, const DenseBase<Derived>& m) {
+    return s << m.derived().getInner();
+}
 
 // Equivalent of Eigen's vector typedefs
 template <typename Type, int Size>
@@ -739,16 +762,16 @@ public:
 #endif
 
     // Build and assign from anything Eigen supports building or assigning from
-    template <typename... ArgTypes>
-    Matrix(ArgTypes&&... args) : m_inner(std::forward(args)...) {}
+    template <typename... Args>
+    Matrix(Args&&... args) : m_inner(std::forward<Args>(args)...) {}
     template <typename Other>
     Matrix& operator=(Other&& other) {
-        m_inner = std::forward(other);
+        m_inner = std::forward<Other>(other);
         return *this;
     }
 
     // Underlying Eigen matrix type (used for CRTP)
-    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxRows>;
+    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
     // Access the inner Eigen matrix (used for CRTP)
     Inner& getInner() {
@@ -778,17 +801,17 @@ public:
     //       These are not currently used by Acts, so lower-priority.
 
     // In-place products
-    template <typename... ArgTypes>
-    void applyOnTheLeft(ArgTypes&&... args) {
-        m_inner.applyOnTheLeft(std::forward(args)...);
+    template <typename... Args>
+    void applyOnTheLeft(Args&&... args) {
+        m_inner.applyOnTheLeft(std::forward<Args>(args)...);
     }
     template <typename OtherDerived>
     void applyOnTheLeft(const EigenBase<OtherDerived>& other) {
         m_inner.applyOnTheLeft(other.derivedInner());
     }
-    template <typename... ArgTypes>
-    void applyOnTheRight(ArgTypes&&... args) {
-        m_inner.applyOnTheRight(std::forward(args)...);
+    template <typename... Args>
+    void applyOnTheRight(Args&&... args) {
+        m_inner.applyOnTheRight(std::forward<Args>(args)...);
     }
     template <typename OtherDerived>
     void applyOnTheRight(const EigenBase<OtherDerived>& other) {
@@ -958,19 +981,19 @@ public:
     }
 
     // Approximate comparisons
-    bool isDiagonal(const RealScalar& prec = s_dummy_precision) const {
+    bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
         return m_inner.isDiagonal(prec);
     }
-    bool isIdentity(const RealScalar& prec = s_dummy_precision) const {
+    bool isIdentity(const RealScalar& prec = dummy_precision()) const {
         return m_inner.isIdentity(prec);
     }
-    bool isLowerTriangular(const RealScalar& prec = s_dummy_precision) const {
+    bool isLowerTriangular(const RealScalar& prec = dummy_precision()) const {
         return m_inner.isLowerTriangular(prec);
     }
-    bool isUnitary(const RealScalar& prec = s_dummy_precision) const {
+    bool isUnitary(const RealScalar& prec = dummy_precision()) const {
         return m_inner.isUnitary(prec);
     }
-    bool isUpperTriangular(const RealScalar& prec = s_dummy_precision) const {
+    bool isUpperTriangular(const RealScalar& prec = dummy_precision()) const {
         return m_inner.isUpperTriangular(prec);
     }
 
@@ -1127,8 +1150,9 @@ public:
 private:
     Inner m_inner;
 
-    static const RealScalar s_dummy_precision =
-        Eigen::NumTraits<Scalar>::dummy_precision();
+    static RealScalar dummy_precision() {
+        return Eigen::NumTraits<Scalar>::dummy_precision();
+    }
 };
 
 // More Eigen typedef exposure
