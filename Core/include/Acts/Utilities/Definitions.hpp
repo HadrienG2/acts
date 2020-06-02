@@ -69,7 +69,7 @@ template <unsigned int rows, unsigned int cols>
 using ActsMatrixF = ActsMatrix<float, rows, cols>;
 
 template <typename T, unsigned int rows>
-using ActsSymMatrix = Eigen::Matrix<T, rows, rows>;
+using ActsSymMatrix = ActsMatrix<T, rows, rows>;
 
 template <unsigned int rows>
 using ActsSymMatrixD = ActsSymMatrix<double, rows>;
@@ -78,7 +78,7 @@ template <unsigned int rows>
 using ActsSymMatrixF = ActsSymMatrix<float, rows>;
 
 template <typename T, unsigned int rows>
-using ActsVector = Eigen::Matrix<T, rows, 1>;
+using ActsVector = ActsMatrix<T, rows, 1>;
 
 template <unsigned int rows>
 using ActsVectorD = ActsVector<double, rows>;
@@ -87,7 +87,7 @@ template <unsigned int rows>
 using ActsVectorF = ActsVector<float, rows>;
 
 template <typename T, unsigned int cols>
-using ActsRowVector = Eigen::Matrix<T, 1, cols>;
+using ActsRowVector = ActsMatrix<T, 1, cols>;
 
 template <unsigned int cols>
 using ActsRowVectorD = ActsRowVector<double, cols>;
@@ -171,12 +171,12 @@ using Translation2D = Eigen::Translation<double, 2>;
 using Translation3D = Eigen::Translation<double, 3>;
 using Translation4D = Eigen::Translation<double, 4>;
 // linear (rotation) matrices
-using RotationMatrix2F = Eigen::Matrix<float, 2, 2>;
-using RotationMatrix3F = Eigen::Matrix<float, 3, 3>;
-using RotationMatrix4F = Eigen::Matrix<float, 4, 4>;
-using RotationMatrix2D = Eigen::Matrix<double, 2, 2>;
-using RotationMatrix3D = Eigen::Matrix<double, 3, 3>;
-using RotationMatrix4D = Eigen::Matrix<double, 4, 4>;
+using RotationMatrix2F = ActsMatrixF<2, 2>;
+using RotationMatrix3F = ActsMatrixF<3, 3>;
+using RotationMatrix4F = ActsMatrixF<4, 4>;
+using RotationMatrix2D = ActsMatrixD<2, 2>;
+using RotationMatrix3D = ActsMatrixD<3, 3>;
+using RotationMatrix4D = ActsMatrixD<4, 4>;
 // pure rotation transformations. only available in 2d and 3d
 using Rotation2F = Eigen::Rotation2D<float>;
 using Rotation3F = Eigen::Quaternion<float>;
