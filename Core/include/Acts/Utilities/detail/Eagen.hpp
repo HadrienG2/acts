@@ -29,7 +29,6 @@ namespace detail {
 namespace Eagen {
 
 // Propagate some Eigen types and constants
-using Index = Eigen::Index;
 using NoChange_t = Eigen::NoChange_t;
 constexpr int AutoAlign = Eigen::AutoAlign;
 constexpr int RowMajor = Eigen::RowMajor;
@@ -69,17 +68,20 @@ public:
     // Constructor from (expression, expression) pair
     template<typename OtherDerived>
     CommaInitializer(Derived& derived, const DenseBase<OtherDerived>& other)
-        : m_derived(derived)
-        , m_inner(derived.getInner(), other.getInner())
+        : CommaInitializer(derived, other.getInner())
     {}
     template<typename OtherDerived>
     CommaInitializer(Derived& derived,
                      const Eigen::DenseBase<OtherDerived>& other)
-        : m_inner(derived.getInner(), other)
+        : m_derived(derived)
+        , m_inner(derived.getInner(), other)
     {}
 
     // Copy/Move constructor that transfers ownership
-    // NOTE: Added to be bugward compatible with Eigen, but this is just wrong
+    //
+    // NOTE: Added to be bugward compatible with Eigen, but the semantics of
+    //       this API are just wrong in the post-C++11 era.
+    //
     CommaInitializer(const CommaInitializer& o)
         : m_derived(o.m_derived)
         , m_inner(o.m_inner)
@@ -94,8 +96,7 @@ public:
     // Expression insertion
     template<typename OtherDerived>
     CommaInitializer& operator,(const DenseBase<OtherDerived>& other) {
-        m_inner, other.derivedInner();
-        return *this;
+        return *this, other.derivedInner();
     }
     template<typename OtherDerived>
     CommaInitializer& operator,(const Eigen::DenseBase<OtherDerived>& other) {
@@ -136,97 +137,97 @@ private:
     using RealScalar = typename Inner::RealScalar;
 
 public:
+    // Derived class scalar type
     using Scalar = typename Derived::Scalar;
 
-    // === Eigen::PlainObjectBase interface ===
+    // === Eigen::EigenBase interface ===
 
-    // Coefficient access
-    template <typename... Index>
-    const Scalar& coeff(Index... indices) const {
-        return derivedInner().coeff(indices...);
+    // Index convenience typedef
+    using Index = Eigen::Index;
+
+    // Matrix dimensions
+    Index cols() const {
+        return derivedInner().cols();
     }
-    template <typename... Index>
-    const Scalar& coeffRef(Index... indices) const {
-        return derivedInner().coeffRef(indices...);
+    Index rows() const {
+        return derivedInner().rows();
     }
+    Index size() const {
+        return derivedInner().size();
+    }
+
+    // CRTP daughter class access
+    Derived& derived() {
+        return *static_cast<Derived*>(this);
+    }
+    const Derived& derived() const {
+        return *static_cast<const Derived*>(this);
+    }
+
+    // === Eigen::DenseCoeffsBase interfaces ===
+
+    // Storage layout (DirectWriteAccessors specific)
+    Index colStride() const {
+        return derivedInner().colStride();
+    }
+    Index innerStride() const {
+        return derivedInner().innerStride();
+    }
+    Index outerStride() const {
+        return derivedInner().outerStride();
+    }
+    Index rowStride() const {
+        return derivedInner().rowStride();
+    }
+
+    // Access elements for writing (WriteAccessors specific)
     template <typename... Index>
     Scalar& coeffRef(Index... indices) {
         return derivedInner().coeffRef(indices...);
     }
-
-    // Resizing
-    template <typename... ArgTypes>
-    void conservativeResize(ArgTypes... args) {
-        derivedInner().conservativeResize(args...);
+    template <typename... Index>
+    Scalar& operator()(Index... indices) {
+        return derivedInner()(indices...);
     }
-    template <typename OtherDerived>
-    void conservativeResizeLike(const DenseBase<OtherDerived>& other) {
-        derivedInner().conservativeResizeLike(other.derivedInner());
+    Scalar& operator[](Index index) {
+        return derivedInner()[index];
     }
-    template <typename OtherDerived>
-    void conservativeResizeLike(const Eigen::DenseBase<OtherDerived>& other) {
-        derivedInner().conservativeResizeLike(other);
+    Scalar& w() {
+        return derivedInner().w();
     }
-    template <typename... ArgTypes>
-    void resize(ArgTypes... args) {
-        derivedInner().resize(args...);
+    Scalar& x() {
+        return derivedInner().x();
     }
-    template <typename OtherDerived>
-    void resizeLike(const EigenBase<OtherDerived>& other) {
-        derivedInner().resizeLike(other.derivedInner());
+    Scalar& y() {
+        return derivedInner().y();
     }
-    template <typename OtherDerived>
-    void resizeLike(const Eigen::EigenBase<OtherDerived>& other) {
-        derivedInner().resizeLike(other);
+    Scalar& z() {
+        return derivedInner().z();
     }
 
-    // Data access
-    Scalar* data() { return derivedInner().data(); }
-    const Scalar* data() const { return derivedInner().data(); }
-
-    // Lazy assignment (?)
-    template <typename OtherDerived>
-    Derived& lazyAssign(const DenseBase<OtherDerived>& other) {
-        derivedInner().lazyAssign(other.derivedInner());
-        return *this;
-    }
-    template <typename OtherDerived>
-    Derived& lazyAssign(const Eigen::DenseBase<OtherDerived>& other) {
-        derivedInner().lazyAssign(other);
-        return *this;
-    }
-
-    // Set inner values from various scalar sources
-    template <typename... ArgTypes>
-    Derived& setConstant(ArgTypes&&... args) {
-        derivedInner().setConstant(std::forward(args)...);
-        return *this;
+    // Read elements (ReadOnlyAccessors specific)
+    template <typename... Index>
+    decltype(auto) coeff(Index... indices) const {
+        return derivedInner().coeff(indices...);
     }
     template <typename... Index>
-    Derived& setZero(Index... indices) {
-        derivedInner().setZero(indices...);
-        return *this;
+    decltype(auto) operator()(Index... indices) const {
+        return derivedInner()(indices...);
     }
-    template <typename... Index>
-    Derived& setOnes(Index... indices) {
-        derivedInner().setOnes(indices...);
-        return *this;
+    decltype(auto) operator[](Index index) const {
+        return derivedInner()[index];
     }
-    template <typename... Index>
-    Derived& setRandom(Index... indices) {
-        derivedInner().setRandom(indices...);
-        return *this;
+    decltype(auto) w() const {
+        return derivedInner().w();
     }
-
-    // Map foreign data
-    // TODO: Consider providing a first-class Map type to avoid copies
-    template <typename... ArgTypes>
-    static Derived Map(ArgTypes&&... args) {
-        return Derived(Inner::Map(std::forward(args)...));
+    decltype(auto) x() const {
+        return derivedInner().x();
     }
-    template <typename... ArgTypes>
-    static Derived MapAligned(ArgTypes&&... args) {
-        return Derived(Inner::MapAligned(std::forward(args)...));
+    decltype(auto) y() const {
+        return derivedInner().y();
+    }
+    decltype(auto) z() const {
+        return derivedInner().z();
     }
 
     // === Eigen::DenseBase interface ===
@@ -581,94 +582,81 @@ public:
         return s << m.derivedInner();
     }
 
-    // === Eigen::DenseCoeffsBase interfaces ===
+    // === Eigen::PlainObjectBase interface ===
 
-    // Storage layout (DirectWriteAccessors specific)
-    Index colStride() const {
-        return derivedInner().colStride();
+    // Resizing
+    template <typename... ArgTypes>
+    void conservativeResize(ArgTypes... args) {
+        derivedInner().conservativeResize(args...);
     }
-    Index innerStride() const {
-        return derivedInner().innerStride();
+    template <typename OtherDerived>
+    void conservativeResizeLike(const DenseBase<OtherDerived>& other) {
+        derivedInner().conservativeResizeLike(other.derivedInner());
     }
-    Index outerStride() const {
-        return derivedInner().outerStride();
+    template <typename OtherDerived>
+    void conservativeResizeLike(const Eigen::DenseBase<OtherDerived>& other) {
+        derivedInner().conservativeResizeLike(other);
     }
-    Index rowStride() const {
-        return derivedInner().rowStride();
+    template <typename... ArgTypes>
+    void resize(ArgTypes... args) {
+        derivedInner().resize(args...);
+    }
+    template <typename OtherDerived>
+    void resizeLike(const EigenBase<OtherDerived>& other) {
+        derivedInner().resizeLike(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void resizeLike(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner().resizeLike(other);
     }
 
-    // Access elements for writing (WriteAccessors specific)
+    // Data access
+    Scalar* data() { return derivedInner().data(); }
+    const Scalar* data() const { return derivedInner().data(); }
+
+    // Lazy assignment (?)
+    template <typename OtherDerived>
+    Derived& lazyAssign(const DenseBase<OtherDerived>& other) {
+        derivedInner().lazyAssign(other.derivedInner());
+        return *this;
+    }
+    template <typename OtherDerived>
+    Derived& lazyAssign(const Eigen::DenseBase<OtherDerived>& other) {
+        derivedInner().lazyAssign(other);
+        return *this;
+    }
+
+    // Set inner values from various scalar sources
+    template <typename... ArgTypes>
+    Derived& setConstant(ArgTypes&&... args) {
+        derivedInner().setConstant(std::forward(args)...);
+        return *this;
+    }
     template <typename... Index>
-    Scalar& coeffRef(Index... indices) {
-        return derivedInner().coeffRef(indices...);
+    Derived& setZero(Index... indices) {
+        derivedInner().setZero(indices...);
+        return *this;
     }
     template <typename... Index>
-    Scalar& operator()(Index... indices) {
-        return derivedInner()(indices...);
-    }
-    Scalar& operator[](Index index) {
-        return derivedInner()[index];
-    }
-    Scalar& w() {
-        return derivedInner().w();
-    }
-    Scalar& x() {
-        return derivedInner().x();
-    }
-    Scalar& y() {
-        return derivedInner().y();
-    }
-    Scalar& z() {
-        return derivedInner().z();
-    }
-
-    // Read elements (ReadOnlyAccessors specific)
-    template <typename... Index>
-    decltype(auto) coeff(Index... indices) const {
-        return derivedInner().coeff(indices...);
+    Derived& setOnes(Index... indices) {
+        derivedInner().setOnes(indices...);
+        return *this;
     }
     template <typename... Index>
-    decltype(auto) operator()(Index... indices) const {
-        return derivedInner()(indices...);
-    }
-    decltype(auto) operator[](Index index) const {
-        return derivedInner()[index];
-    }
-    decltype(auto) w() const {
-        return derivedInner().w();
-    }
-    decltype(auto) x() const {
-        return derivedInner().x();
-    }
-    decltype(auto) y() const {
-        return derivedInner().y();
-    }
-    decltype(auto) z() const {
-        return derivedInner().z();
+    Derived& setRandom(Index... indices) {
+        derivedInner().setRandom(indices...);
+        return *this;
     }
 
-    // === Eigen::EigenBase interfaces ===
-
-    // Index convenience typedef
-    using Index = Eigen::Index;
-
-    // Matrix dimensions
-    Index cols() const {
-        return derivedInner().cols();
+    // Map foreign data
+    // TODO: Consider providing a first-class Map type to avoid copies
+    template <typename... ArgTypes>
+    static Derived Map(ArgTypes&&... args) {
+        return Derived(Inner::Map(std::forward(args)...));
     }
-    Index rows() const {
-        return derivedInner().rows();
-    }
-    Index size() const {
-        return derivedInner().size();
-    }
-
-    // CRTP daughter class access
-    Derived& derived() {
-        return *static_cast<Derived*>(this);
-    }
-    const Derived& derived() const {
-        return *static_cast<const Derived*>(this);
+    template <typename... ArgTypes>
+    static Derived MapAligned(ArgTypes&&... args) {
+        return Derived(Inner::MapAligned(std::forward(args)...));
     }
 
 protected:
@@ -718,6 +706,9 @@ public:
     static constexpr int Options = _Options;
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
+
+    // Re-expose Index typedef
+    using Index = Eigen::Index;
 
     // Quick way to construct a matrix of the same size, but w/o the options
     using PlainBase = Matrix<Scalar, Rows, Cols>;
@@ -1139,6 +1130,9 @@ private:
     static const RealScalar s_dummy_precision =
         Eigen::NumTraits<Scalar>::dummy_precision();
 };
+
+// More Eigen typedef exposure
+using Index = Eigen::Index;
 
 }  // namespace Eagen
 
