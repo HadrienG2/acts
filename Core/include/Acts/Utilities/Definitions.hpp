@@ -18,7 +18,7 @@
 #include <Eigen/Dense>
 #endif
 
-#include "detail/Eagen.hpp"
+#include "detail/Eagen/Eagen.hpp"
 
 namespace Acts {
 
