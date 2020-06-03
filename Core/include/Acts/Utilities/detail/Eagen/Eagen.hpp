@@ -24,9 +24,9 @@ namespace Eagen {
 
 // Forward declarations
 template <typename Scalar, int Rows, int Cols,
-          int Options = Eigen::AutoAlign |
-                        ( (Rows==1 && Cols!=1) ? Eigen::RowMajor
-                          : (Cols==1 && Rows!=1) ? Eigen::ColMajor
+          int Options = AutoAlign |
+                        ( (Rows==1 && Cols!=1) ? RowMajor
+                          : (Cols==1 && Rows!=1) ? ColMajor
                           : EIGEN_DEFAULT_MATRIX_STORAGE_ORDER_OPTION ),
           int MaxRows = Rows,
           int MaxCols = Cols>
@@ -36,9 +36,12 @@ template <typename Derived> class PlainObjectBase;
 // We don't need to replicate Eigen's full class hierarchy for now, but let's
 // keep the useful metadata from Eigen's method signatures around
 template <typename Derived> using DenseBase = PlainObjectBase<Derived>;
-template <typename Derived> using DenseCoeffsBaseDW = PlainObjectBase<Derived>;
-template <typename Derived> using DenseCoeffsBaseW = PlainObjectBase<Derived>;
-template <typename Derived> using DenseCoeffsBaseRO = PlainObjectBase<Derived>;
+template <typename Derived>
+using DenseCoeffsBaseDirectWrite = PlainObjectBase<Derived>;
+template <typename Derived>
+using DenseCoeffsBaseWrite = PlainObjectBase<Derived>;
+template <typename Derived>
+using DenseCoeffsBaseReadOnly = PlainObjectBase<Derived>;
 template <typename Derived> using EigenBase = PlainObjectBase<Derived>;
 
 // Some type traits to ease manipulating incomplete types
