@@ -11,7 +11,9 @@
 #include <ostream>
 #include <utility>
 
+// Eagen is an eagerly evaluated Eigen wrapper, bypassing expression templates
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 
 namespace Acts {
 
@@ -19,12 +21,6 @@ namespace detail {
 
 /// Eagerly evaluated variant of Eigen, without expression templates
 namespace Eagen {
-
-// Propagate some Eigen types and constants
-using NoChange_t = Eigen::NoChange_t;
-constexpr int AutoAlign = Eigen::AutoAlign;
-constexpr int RowMajor = Eigen::RowMajor;
-constexpr int ColMajor = Eigen::ColMajor;
 
 // Forward declarations
 template <typename Scalar, int Rows, int Cols,
@@ -1147,11 +1143,10 @@ private:
     }
 };
 
-// More Eigen typedef exposure
-using Index = Eigen::Index;
-
 }  // namespace Eagen
 
 }  // namespace detail
 
 }  // namespace Acts
+
+#include "EigenEpilogue.hpp"
