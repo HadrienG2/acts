@@ -15,6 +15,7 @@
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
+#include "TypeTraits.hpp"
 
 namespace Acts {
 
@@ -22,25 +23,6 @@ namespace detail {
 
 /// Eagerly evaluated variant of Eigen, without expression templates
 namespace Eagen {
-
-// Some type traits to ease manipulating incomplete types
-template <typename EagenType>
-struct TypeTraits;
-template <typename _Scalar,
-          int _Rows,
-          int _Cols,
-          int _Options,
-          int _MaxRows,
-          int _MaxCols>
-struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
-    using Scalar = _Scalar;
-    static constexpr int Rows = _Rows;
-    static constexpr int Cols = _Cols;
-    static constexpr int Options = _Options;
-    static constexpr int MaxRows = _MaxRows;
-    static constexpr int MaxCols = _MaxCols;
-    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
-};
 
 // Comma initializer support
 template <typename Derived>
