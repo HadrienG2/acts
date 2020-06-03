@@ -11,15 +11,7 @@
 #include <ostream>
 #include <utility>
 
-// for GNU: ignore this specific warning, otherwise just include Eigen/Dense
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmisleading-indentation"
-#include <Eigen/Dense>
-#pragma GCC diagnostic pop
-#else
-#include <Eigen/Dense>
-#endif
+#include "EigenDense.hpp"
 
 namespace Acts {
 
