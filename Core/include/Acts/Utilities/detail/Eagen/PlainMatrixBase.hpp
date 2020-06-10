@@ -20,13 +20,15 @@ namespace detail {
 
 namespace Eagen {
 
-// Spiritual equivalent of Eigen::PlainObjectBase and lower layers
+// Spiritual equivalent of the superclasses of Eigen::Matrix
 //
-// (We need to replicate that layer of the Eigen class hierarchy to support both
-// Matrix and Array wrappers without code duplication.)
+// Since we do not currently provide an Eigen::Array wrapper, this is slightly
+// specialized towards the needs of Eigen::Matrix, and therefore less general
+// than Eigen::PlainObjectBase (hence the different name). But it can be turned
+// into a true Eigen::PlainObjectBase equivalent if needed.
 //
 template <typename Derived>
-class PlainObjectBase {
+class PlainMatrixBase {
 private:
     // Eigen type wrapped by the CRTP daughter class
     using DerivedTraits = TypeTraits<Derived>;
@@ -429,7 +431,7 @@ public:
         return derivedInner().swap(other);
     }
     template <typename OtherDerived>
-    void swap(PlainObjectBase<OtherDerived>& other) {
+    void swap(PlainMatrixBase<OtherDerived>& other) {
         return derivedInner().swap(other.derivedInner());
     }
     template <typename OtherDerived>

@@ -10,7 +10,7 @@
 
 #include "EigenDense.hpp"
 #include "ForwardDeclarations.hpp"
-#include "PlainObjectBase.hpp"
+#include "PlainMatrixBase.hpp"
 
 namespace Acts {
 
@@ -31,7 +31,7 @@ template <typename _Scalar,
           int _Options,
           int _MaxRows,
           int _MaxCols>
-class Matrix : public PlainObjectBase<Matrix<_Scalar,
+class Matrix : public PlainMatrixBase<Matrix<_Scalar,
                                              _Rows,
                                              _Cols,
                                              _Options,

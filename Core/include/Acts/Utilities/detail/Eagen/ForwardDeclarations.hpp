@@ -26,18 +26,19 @@ template <typename Scalar, int Rows, int Cols,
           int MaxRows = Rows,
           int MaxCols = Cols>
 class Matrix;
-template <typename Derived> class PlainObjectBase;
+template <typename Derived> class PlainMatrixBase;
 
 // We don't need to replicate Eigen's full class hierarchy for now, but let's
 // keep the useful metadata from Eigen's method signatures around
-template <typename Derived> using DenseBase = PlainObjectBase<Derived>;
+template <typename Derived> using PlainObjectBase = PlainMatrixBase<Derived>;
+template <typename Derived> using DenseBase = PlainMatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseDirectWrite = PlainObjectBase<Derived>;
+using DenseCoeffsBaseDirectWrite = PlainMatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseWrite = PlainObjectBase<Derived>;
+using DenseCoeffsBaseWrite = PlainMatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseReadOnly = PlainObjectBase<Derived>;
-template <typename Derived> using EigenBase = PlainObjectBase<Derived>;
+using DenseCoeffsBaseReadOnly = PlainMatrixBase<Derived>;
+template <typename Derived> using EigenBase = PlainMatrixBase<Derived>;
 
 }  // namespace Eagen
 
