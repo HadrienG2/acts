@@ -48,6 +48,11 @@ public:
     // Derived class scalar type
     using Scalar = typename DerivedTraits::Scalar;
 
+private:
+    // Quick way to construct a matrix of the same size, but w/o the options
+    using PlainBase = Matrix<Scalar, Rows, Cols>;
+
+public:
     // === Eigen::EigenBase interface ===
 
     // Index convenience typedef
@@ -484,6 +489,428 @@ public:
     template <typename... Index>
     static PlainObject Zero(Index... indices) {
         return PlainObject(Inner::Zero(indices...));
+    }
+
+    // === Eigen::MatrixBase interface ===
+
+    // Adjoint = conjugate + transpose
+    Matrix<Scalar, Cols, Rows> adjoint() const {
+        return Matrix<Scalar, Cols, Rows>(derivedInner().adjoint());
+    }
+    void adjointInPlace() {
+        derivedInner().adjointInPlace();
+    }
+
+    // TODO: Support methods involving Householder transformations
+    //       These are not currently used by Acts, so lower-priority.
+
+    // In-place products
+    template <typename... Args>
+    void applyOnTheLeft(Args&&... args) {
+        derivedInner().applyOnTheLeft(std::forward<Args>(args)...);
+    }
+    template <typename OtherDerived>
+    void applyOnTheLeft(const EigenBase<OtherDerived>& other) {
+        derivedInner().applyOnTheLeft(other.derivedInner());
+    }
+    template <typename... Args>
+    void applyOnTheRight(Args&&... args) {
+        derivedInner().applyOnTheRight(std::forward<Args>(args)...);
+    }
+    template <typename OtherDerived>
+    void applyOnTheRight(const EigenBase<OtherDerived>& other) {
+        derivedInner().applyOnTheRight(other.derivedInner());
+    }
+
+    // Switch to array view of this matrix
+    //
+    // FIXME: This currently leaves all the work to Eigen::Array, with the usual
+    //        compile-time bloat problems that using Eigen types entails.
+    //
+    //        An eagerly evaluated Eagen::Array wrapper would be preferrable,
+    //        but is very costly in terms of Eagen code complexity and
+    //        development time (large API surface, need to replicate more Eigen
+    //        metaprogramming sorcery for PlainObjectBase base class
+    //        selection...), while the usage of Eigen::Array in the Acts
+    //        codebase is actually very low.
+    //
+    //        So for now, I'm punting on this particular development.
+    //
+    Eigen::ArrayWrapper<Inner> array() {
+        return derivedInner().array();
+    }
+    Eigen::ArrayWrapper<const Inner> array() const {
+        return derivedInner().array();
+    }
+
+    // Reinterpret a vector as a diagonal matrix
+    // TODO: Consider providing a dedicated diagonal wrapper type to avoid
+    //       copies and extra run-time storage and computation overhead
+    Matrix<Scalar, std::max(Rows, Cols), std::max(Rows, Cols)>
+    asDiagonal() const {
+        assert(std::min(Rows, Cols) == 1);
+        return Matrix<Scalar, std::max(Rows, Cols), std::max(Rows, Cols)>(
+            derivedInner().asDiagonal()
+        );
+    }
+    // TODO: Support SVD-related methods bdcSvd() and jacobiSvd()
+    //       These are not currently used by Acts, so lower-priority.
+
+    // Norms and normalization
+    RealScalar blueNorm() const {
+        return derivedInner().blueNorm();
+    }
+    // TODO: Support hnormalized()
+    //       This is not currently used by Acts, so lower-priority.
+    RealScalar hypotNorm() const {
+        return derivedInner().hypotNorm();
+    }
+    RealScalar lpNorm() const {
+        return derivedInner().lpNorm();
+    }
+    RealScalar norm() const {
+        return derivedInner().norm();
+    }
+    void normalize() {
+        derivedInner().normalize();
+    }
+    PlainBase normalized() {
+        return derivedInner().normalized();
+    }
+    RealScalar operatorNorm() const {
+        return derivedInner().operatorNorm();
+    }
+    RealScalar squaredNorm() const {
+        return derivedInner().squaredNorm();
+    }
+    RealScalar stableNorm() const {
+        return derivedInner().stableNorm();
+    }
+    void stableNormalize() {
+        derivedInner().stableNormalize();
+    }
+    PlainBase stableNormalized() const {
+        return derivedInner().stableNormalized();
+    }
+
+    // TODO: Support orthogonal matrix and decomposition features
+    //       This is not currently used by Acts, so lower-priority.
+    // TODO: Support computeInverse(AndDet)?WithCheck
+    //       This is not currently used by Acts, so lower-priority.
+    // TODO: Support Eigen's unsupported MatrixFunctions module
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Cross products
+    template <typename OtherDerived>
+    PlainBase
+    cross(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cross(other));
+    }
+    template <typename OtherDerived>
+    PlainBase
+    cross(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cross(other.derivedInner()));
+    }
+    template <typename OtherDerived>
+    PlainBase
+    cross3(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cross3(other));
+    }
+    template <typename OtherDerived>
+    PlainBase
+    cross3(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cross3(other.derivedInner()));
+    }
+
+    // Determinant
+    Scalar determinant() const {
+        return derivedInner().determinant();
+    }
+
+    // Diagonal and associated properties
+    // FIXME: Support non-const diagonal access, which is used by Acts for
+    //        comma initialization based diagonal assignment.
+    //        Use that to make the diagonal access method below more efficient.
+    template <typename... Index>
+    Vector<Scalar, Rows> diagonal(Index... indices) const {
+        return Vector<Scalar, Rows>(derivedInner().diagonal(indices...));
+    }
+    Index diagonalSize() const {
+        return derivedInner().diagonalSize();
+    }
+
+    // Dot product
+    template <typename OtherDerived>
+    Scalar dot(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return derivedInner().dot(other);
+    }
+    template <typename OtherDerived>
+    Scalar dot(const MatrixBase<OtherDerived>& other) const {
+        return derivedInner().dot(other.derivedInner());
+    }
+
+    // Eigenvalues
+    Vector<Scalar, Rows> eigenvalues() const {
+        return Vector<Scalar, Rows>(derivedInner().eigenvalues());
+    }
+
+    // Euler angles
+    Vector<Scalar, 3> eulerAngles(Index a0, Index a1, Index a2) const {
+        return Vector<Scalar, 3>(derivedInner().eulerAngles());
+    }
+
+    // TODO: Support aligned access enforcement
+    //       This is not currently used by Acts, so lower-priority.
+    // TODO: Support LU decomposition
+    //       This is not currently used by Acts, so lower-priority.
+    // TODO: Support homogeneous()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Matrix inversion
+    PlainBase inverse() const {
+        return PlainBase(derivedInner().inverse());
+    }
+
+    // Approximate comparisons
+    bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
+        return derivedInner().isDiagonal(prec);
+    }
+    bool isIdentity(const RealScalar& prec = dummy_precision()) const {
+        return derivedInner().isIdentity(prec);
+    }
+    bool isLowerTriangular(const RealScalar& prec = dummy_precision()) const {
+        return derivedInner().isLowerTriangular(prec);
+    }
+    bool isUnitary(const RealScalar& prec = dummy_precision()) const {
+        return derivedInner().isUnitary(prec);
+    }
+    bool isUpperTriangular(const RealScalar& prec = dummy_precision()) const {
+        return derivedInner().isUpperTriangular(prec);
+    }
+
+    // TODO: Support lazyProduct()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // FIXME: Support Cholesky decompositions (LLT, LDLT), used by Acts
+
+    // NOTE: noalias() will probably never be supported, as it should almost
+    //       never be needed in an eagerly evaluated world, where AFAIK its only
+    //       use is to make operator*= slightly more efficient.
+
+    // Equality and inequality
+    template <typename OtherDerived>
+    bool operator==(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return (derivedInner() == other);
+    }
+    template <typename OtherDerived>
+    bool operator==(const MatrixBase<OtherDerived>& other) const {
+        return (derivedInner() == other.derivedInner());
+    }
+    template <typename Other>
+    bool operator!=(const Other& other) const {
+        return !(*this == other);
+    }
+
+    // Matrix-scalar multiplication
+    template <typename OtherScalar>
+    PlainBase operator*(const OtherScalar& scalar) const {
+        return PlainBase(derivedInner() * scalar);
+    }
+    template <typename OtherScalar>
+    friend PlainBase operator*(const OtherScalar& scalar, const Derived& matrix) {
+        return matrix * scalar;
+    }
+    template <typename OtherScalar>
+    Derived& operator*=(const OtherScalar& scalar) {
+        derivedInner() *= scalar;
+        return *this;
+    }
+
+    // Matrix-scalar division
+    template <typename OtherScalar>
+    PlainBase operator/(const OtherScalar& scalar) const {
+        return PlainBase(derivedInner() / scalar);
+    }
+    template <typename OtherScalar>
+    Derived& operator/=(const OtherScalar& scalar) {
+        derivedInner() /= scalar;
+        return *this;
+    }
+
+    // Matrix-matrix multiplication
+    template <typename DiagonalDerived>
+    PlainBase
+    operator*(const Eigen::DiagonalBase<DiagonalDerived>& other) const {
+        return PlainBase(derivedInner() * other);
+    }
+    template <typename OtherDerived>
+    Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>
+    operator*(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>(
+            derivedInner() * other
+        );
+    }
+    template <typename OtherDerived>
+    Matrix<Scalar, Rows, OtherDerived::Cols>
+    operator*(const MatrixBase<OtherDerived>& other) const {
+        return Matrix<Scalar, Rows, OtherDerived::Cols>(
+            derivedInner() * other.derivedInner()
+        );
+    }
+    template <typename OtherDerived>
+    Derived& operator*=(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner() *= other;
+        return *this;
+    }
+    template <typename OtherDerived>
+    Derived& operator*=(const EigenBase<OtherDerived>& other) {
+        derivedInner() *= other.derivedInner();
+        return *this;
+    }
+
+    // Matrix addition
+    template <typename OtherEigen>
+    PlainBase operator+(const OtherEigen& other) const {
+        return PlainBase(derivedInner() + other);
+    }
+    template <typename OtherDerived>
+    PlainBase operator+(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner() + other.derivedInner());
+    }
+    template <typename OtherDerived>
+    Derived& operator+=(const Eigen::MatrixBase<OtherDerived>& other) {
+        derivedInner() += other;
+        return *this;
+    }
+    template <typename OtherDerived>
+    Derived& operator+=(const MatrixBase<OtherDerived>& other) {
+        derivedInner() += other.derivedInner();
+        return *this;
+    }
+
+    // Matrix subtraction
+    template <typename OtherEigen>
+    PlainBase operator-(const OtherEigen& other) const {
+        return PlainBase(derivedInner() + other);
+    }
+    template <typename OtherDerived>
+    PlainBase operator-(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner() + other.derivedInner());
+    }
+    template <typename OtherDerived>
+    Derived& operator-=(const Eigen::MatrixBase<OtherDerived>& other) {
+        derivedInner() -= other;
+        return *this;
+    }
+    template <typename OtherDerived>
+    Derived& operator-=(const MatrixBase<OtherDerived>& other) {
+        derivedInner() -= other.derivedInner();
+        return *this;
+    }
+
+    // TODO: Support selfadjointView()
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Set to identity matrix
+    template <typename... Index>
+    Derived& setIdentity(Index... indices) {
+        derivedInner().setIdentity(indices...);
+        return *this;
+    }
+
+    // TODO: Support sparse matrices
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Matrix trace
+    Scalar trace() const {
+        return derivedInner().trace();
+    }
+
+    // TODO: Support triangular view
+    //       This is not currently used by Acts, so lower-priority.
+
+    // Coefficient-wise operations
+    template <typename Other>
+    PlainBase cwiseMin(const Other& other) const {
+        return PlainBase(derivedInner().cwiseMin(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseMin(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseMin(other.derivedInner()));
+    }
+    template <typename Other>
+    PlainBase cwiseMax(const Other& other) const {
+        return PlainBase(derivedInner().cwiseMax(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseMax(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseMax(other.derivedInner()));
+    }
+    Matrix<RealScalar, Rows, Cols> cwiseAbs2() const {
+        return Matrix<RealScalar, Rows, Cols>(derivedInner().cwiseAbs2());
+    }
+    Matrix<RealScalar, Rows, Cols> cwiseAbs() const {
+        return Matrix<RealScalar, Rows, Cols>(derivedInner().cwiseAbs());
+    }
+    PlainBase cwiseSqrt() const {
+        return PlainBase(derivedInner().cwiseSqrt());
+    }
+    PlainBase cwiseInverse() const {
+        return PlainBase(derivedInner().cwiseInverse());
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseProduct(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseProduct(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseProduct(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseProduct(other.derivedInner()));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseQuotient(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseQuotient(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseQuotient(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseQuotient(other.derivedInner()));
+    }
+    template <typename Other>
+    PlainBase cwiseEqual(const Other& other) const {
+        return PlainBase(derivedInner().cwiseEqual(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseEqual(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseEqual(other.derivedInner()));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseNotEqual(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseNotEqual(other));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseNotEqual(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner().cwiseNotEqual(other.derivedInner()));
+    }
+
+    // Special matrix generators
+    template <typename... Index>
+    static Derived Identity(Index... indices) {
+        return Derived(Inner::Identity(indices...));
+    }
+    template <typename... Index>
+    static Derived Unit(Index... indices) {
+        return Derived(Inner::Unit(indices...));
+    }
+    static Derived UnitW() {
+        return Derived(Inner::UnitW());
+    }
+    static Derived UnitX() {
+        return Derived(Inner::UnitX());
+    }
+    static Derived UnitY() {
+        return Derived(Inner::UnitY());
+    }
+    static Derived UnitZ() {
+        return Derived(Inner::UnitZ());
     }
 
     // === Eigen::PlainObjectBase interface ===
