@@ -41,6 +41,8 @@ public:
     // TODO: If this works, reduce reliance on variadic templates by using the
     //       true method signatures instead.
 
+    // === Eagen wrapper API ===
+
     // Re-expose template parameters
     using Scalar = _Scalar;
     static constexpr int Rows = _Rows;
@@ -55,40 +57,6 @@ public:
     // Quick way to construct a matrix of the same size, but w/o the options
     using PlainBase = Matrix<Scalar, Rows, Cols>;
 
-    // === Eigen::Matrix interface ===
-
-    // Basic lifecycle
-    Matrix() = default;
-    template <typename OtherDerived>
-    Matrix(const EigenBase<OtherDerived>& other)
-        : m_inner(other.derivedInner())
-    {}
-    template <typename OtherDerived>
-    Matrix& operator=(const EigenBase<OtherDerived>& other) {
-        m_inner = other.derivedInner();
-        return *this;
-    }
-#if EIGEN_HAS_RVALUE_REFERENCES
-    template <typename OtherDerived>
-    Matrix(EigenBase<OtherDerived>&& other)
-        : m_inner(other.moveDerivedInner())
-    {}
-    template <typename OtherDerived>
-    Matrix& operator=(EigenBase<OtherDerived>&& other) {
-        m_inner = other.moveDerivedInner();
-        return *this;
-    }
-#endif
-
-    // Build and assign from anything Eigen supports building or assigning from
-    template <typename... Args>
-    Matrix(Args&&... args) : m_inner(std::forward<Args>(args)...) {}
-    template <typename Other>
-    Matrix& operator=(Other&& other) {
-        m_inner = std::forward<Other>(other);
-        return *this;
-    }
-
     // Underlying Eigen matrix type (used for CRTP)
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
@@ -102,9 +70,6 @@ public:
     Inner&& moveInner() {
         return std::move(m_inner);
     }
-
-    // Emulate Eigen::Matrix's base class typedef
-    using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
     // === Eigen::MatrixBase interface ===
 
@@ -685,6 +650,43 @@ public:
     static Matrix UnitZ() {
         return Matrix(Inner::UnitZ());
     }
+
+    // === Eigen::Matrix interface ===
+
+    // Basic lifecycle
+    Matrix() = default;
+    template <typename OtherDerived>
+    Matrix(const EigenBase<OtherDerived>& other)
+        : m_inner(other.derivedInner())
+    {}
+    template <typename OtherDerived>
+    Matrix& operator=(const EigenBase<OtherDerived>& other) {
+        m_inner = other.derivedInner();
+        return *this;
+    }
+#if EIGEN_HAS_RVALUE_REFERENCES
+    template <typename OtherDerived>
+    Matrix(EigenBase<OtherDerived>&& other)
+        : m_inner(other.moveDerivedInner())
+    {}
+    template <typename OtherDerived>
+    Matrix& operator=(EigenBase<OtherDerived>&& other) {
+        m_inner = other.moveDerivedInner();
+        return *this;
+    }
+#endif
+
+    // Build and assign from anything Eigen supports building or assigning from
+    template <typename... Args>
+    Matrix(Args&&... args) : m_inner(std::forward<Args>(args)...) {}
+    template <typename Other>
+    Matrix& operator=(Other&& other) {
+        m_inner = std::forward<Other>(other);
+        return *this;
+    }
+
+    // Emulate Eigen::Matrix's base class typedef
+    using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
 private:
     Inner m_inner;
