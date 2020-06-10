@@ -350,27 +350,27 @@ public:
     }
 
     // Matrix-scalar multiplication
-    template <typename Scalar>
-    PlainBase operator*(const Scalar& scalar) const {
+    template <typename OtherScalar>
+    PlainBase operator*(const OtherScalar& scalar) const {
         return PlainBase(m_inner * scalar);
     }
-    template <typename Scalar>
-    friend PlainBase operator*(const Scalar& scalar, const Matrix& matrix) {
+    template <typename OtherScalar>
+    friend PlainBase operator*(const OtherScalar& scalar, const Matrix& matrix) {
         return matrix * scalar;
     }
-    template <typename Scalar>
-    Matrix& operator*=(const Scalar& scalar) {
+    template <typename OtherScalar>
+    Matrix& operator*=(const OtherScalar& scalar) {
         m_inner *= scalar;
         return *this;
     }
 
     // Matrix-scalar division
-    template <typename Scalar>
-    PlainBase operator/(const Scalar& scalar) const {
+    template <typename OtherScalar>
+    PlainBase operator/(const OtherScalar& scalar) const {
         return PlainBase(m_inner / scalar);
     }
-    template <typename Scalar>
-    Matrix& operator/=(const Scalar& scalar) {
+    template <typename OtherScalar>
+    Matrix& operator/=(const OtherScalar& scalar) {
         m_inner /= scalar;
         return *this;
     }
