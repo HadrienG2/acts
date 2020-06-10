@@ -325,7 +325,7 @@ public:
     //       never be needed in an eagerly evaluated world, where AFAIK its only
     //       use is to make operator*= slightly more efficient.
 
-    // Operators
+    // Equality and inequality
     template <typename OtherDerived>
     bool operator==(const Eigen::MatrixBase<OtherDerived>& other) const {
         return (m_inner == other);
@@ -348,10 +348,45 @@ public:
     bool operator!=(const Other& other) const {
         return !(*this == other);
     }
-    template <typename OtherEigen>
-    Matrix<Scalar, Rows, OtherEigen::ColsAtCompileTime>
-    operator*(const OtherEigen& other) const {
-        return Matrix<Scalar, Rows, OtherEigen::ColsAtCompileTime>(
+
+    // Matrix-scalar multiplication
+    template <typename Scalar>
+    PlainBase operator*(const Scalar& scalar) const {
+        return PlainBase(m_inner * scalar);
+    }
+    template <typename Scalar>
+    friend PlainBase operator*(const Scalar& scalar, const Matrix& matrix) {
+        return matrix * scalar;
+    }
+    template <typename Scalar>
+    Matrix& operator*=(const Scalar& scalar) {
+        m_inner *= scalar;
+        return *this;
+    }
+
+    // Matrix-scalar division
+    template <typename Scalar>
+    PlainBase operator/(const Scalar& scalar) const {
+        return PlainBase(m_inner / scalar);
+    }
+    template <typename Scalar>
+    Matrix& operator/=(const Scalar& scalar) {
+        m_inner /= scalar;
+        return *this;
+    }
+
+    // Matrix-matrix multiplication
+    template <typename DiagonalDerived>
+    PlainBase
+    operator*(const Eigen::DiagonalBase<DiagonalDerived>& other) const {
+        return PlainBase(m_inner * other);
+    }
+    template <typename OtherDerived>
+    Matrix<Scalar, Rows, Eigen::MatrixBase<OtherDerived>::ColsAtCompileTime>
+    operator*(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return Matrix<Scalar,
+                      Rows,
+                      Eigen::MatrixBase<OtherDerived>::ColsAtCompileTime>(
             m_inner * other
         );
     }
@@ -382,6 +417,28 @@ public:
         m_inner *= other.m_inner;
         return *this;
     }
+
+    // Matrix addition
+    template <typename OtherEigen>
+    PlainBase
+    operator+(const OtherEigen& other) const {
+        return PlainBase(m_inner + other);
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase
+    operator+(const Matrix<OtherScalar,
+                           OtherRows,
+                           OtherCols,
+                           OtherOptions,
+                           OtherMaxRows,
+                           OtherMaxCols>& other) const {
+        return PlainBase(m_inner + other.m_inner);
+    }
     template <typename OtherDerived>
     Matrix& operator+=(const Eigen::MatrixBase<OtherDerived>& other) {
         m_inner += other;
@@ -401,6 +458,28 @@ public:
                                     OtherMaxCols>& other) {
         m_inner += other.m_inner;
         return *this;
+    }
+
+    // Matrix subtraction
+    template <typename OtherEigen>
+    PlainBase
+    operator-(const OtherEigen& other) const {
+        return PlainBase(m_inner + other);
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase
+    operator-(const Matrix<OtherScalar,
+                           OtherRows,
+                           OtherCols,
+                           OtherOptions,
+                           OtherMaxRows,
+                           OtherMaxCols>& other) const {
+        return PlainBase(m_inner + other.m_inner);
     }
     template <typename OtherDerived>
     Matrix& operator-=(const Eigen::MatrixBase<OtherDerived>& other) {
