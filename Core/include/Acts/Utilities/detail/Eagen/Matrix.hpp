@@ -137,7 +137,26 @@ public:
         m_inner.applyOnTheRight(other.derivedInner());
     }
 
-    // FIXME: Support array(), which is used by Acts (requires Array type)
+    // Switch to array view of this matrix
+    //
+    // FIXME: This currently leaves all the work to Eigen::Array, with the usual
+    //        compile-time bloat problems that using Eigen types entails.
+    //
+    //        An eagerly evaluated Eagen::Array wrapper would be preferrable,
+    //        but is very costly in terms of Eagen code complexity and
+    //        development time (large API surface, need to replicate more Eigen
+    //        metaprogramming sorcery for PlainObjectBase base class
+    //        selection...), while the usage of Eigen::Array in the Acts
+    //        codebase is actually very low.
+    //
+    //        So for now, I'm punting on this particular development.
+    //
+    Eigen::ArrayWrapper<Inner> array() {
+        return m_inner.array();
+    }
+    Eigen::ArrayWrapper<const Inner> array() const {
+        return m_inner.array();
+    }
 
     // Reinterpret a vector as a diagonal matrix
     // TODO: Consider providing a dedicated diagonal wrapper type to avoid
