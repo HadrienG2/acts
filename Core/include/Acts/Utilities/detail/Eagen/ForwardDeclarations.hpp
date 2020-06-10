@@ -27,6 +27,7 @@ template <typename Scalar, int Rows, int Cols,
           int MaxCols = Cols>
 class Matrix;
 template <typename Derived> class PlainMatrixBase;
+template <typename Derived> class MatrixBase;
 
 // Equivalent of Eigen's vector typedefs
 template <typename Type, int Size>
@@ -37,15 +38,14 @@ using RowVector = Matrix<Type, 1, Size>;
 // We don't need to replicate Eigen's full class hierarchy for now, but let's
 // keep the useful metadata from Eigen's method signatures around
 template <typename Derived> using PlainObjectBase = PlainMatrixBase<Derived>;
-template <typename Derived> using MatrixBase = PlainMatrixBase<Derived>;
-template <typename Derived> using DenseBase = PlainMatrixBase<Derived>;
+template <typename Derived> using DenseBase = MatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseDirectWrite = PlainMatrixBase<Derived>;
+using DenseCoeffsBaseDirectWrite = MatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseWrite = PlainMatrixBase<Derived>;
+using DenseCoeffsBaseWrite = MatrixBase<Derived>;
 template <typename Derived>
-using DenseCoeffsBaseReadOnly = PlainMatrixBase<Derived>;
-template <typename Derived> using EigenBase = PlainMatrixBase<Derived>;
+using DenseCoeffsBaseReadOnly = MatrixBase<Derived>;
+template <typename Derived> using EigenBase = MatrixBase<Derived>;
 
 }  // namespace Eagen
 
