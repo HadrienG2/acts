@@ -34,6 +34,11 @@ private:
     using DerivedTraits = TypeTraits<Derived>;
     using Inner = typename DerivedTraits::Inner;
 
+public:
+    // Derived class scalar type
+    using Scalar = typename DerivedTraits::Scalar;
+
+private:
     // Template parameters of derived class
     static constexpr int Rows = DerivedTraits::Rows;
     static constexpr int Cols = DerivedTraits::Cols;
@@ -44,11 +49,6 @@ private:
     // Eigen convenience
     using RealScalar = typename Inner::RealScalar;
 
-public:
-    // Derived class scalar type
-    using Scalar = typename DerivedTraits::Scalar;
-
-private:
     // Quick way to construct a matrix of the same size, but w/o the options
     using PlainBase = Matrix<Scalar, Rows, Cols>;
 
