@@ -523,6 +523,128 @@ public:
     // TODO: Support triangular view
     //       This is not currently used by Acts, so lower-priority.
 
+    // Coefficient-wise operations
+    template <typename Other>
+    PlainBase cwiseMin(const Other& other) const {
+        return PlainBase(m_inner.cwiseMin(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseMin(const Matrix<OtherScalar,
+                                    OtherRows,
+                                    OtherCols,
+                                    OtherOptions,
+                                    OtherMaxRows,
+                                    OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseMin(other.m_inner));
+    }
+    template <typename Other>
+    PlainBase cwiseMax(const Other& other) const {
+        return PlainBase(m_inner.cwiseMax(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseMax(const Matrix<OtherScalar,
+                                    OtherRows,
+                                    OtherCols,
+                                    OtherOptions,
+                                    OtherMaxRows,
+                                    OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseMax(other.m_inner));
+    }
+    Matrix<RealScalar, Rows, Cols> cwiseAbs2() const {
+        return Matrix<RealScalar, Rows, Cols>(m_inner.cwiseAbs2());
+    }
+    Matrix<RealScalar, Rows, Cols> cwiseAbs() const {
+        return Matrix<RealScalar, Rows, Cols>(m_inner.cwiseAbs());
+    }
+    PlainBase cwiseSqrt() const {
+        return PlainBase(m_inner.cwiseSqrt());
+    }
+    PlainBase cwiseInverse() const {
+        return PlainBase(m_inner.cwiseInverse());
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseProduct(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(m_inner.cwiseProduct(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseProduct(const Matrix<OtherScalar,
+                                        OtherRows,
+                                        OtherCols,
+                                        OtherOptions,
+                                        OtherMaxRows,
+                                        OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseProduct(other.m_inner));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseQuotient(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(m_inner.cwiseQuotient(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseQuotient(const Matrix<OtherScalar,
+                                         OtherRows,
+                                         OtherCols,
+                                         OtherOptions,
+                                         OtherMaxRows,
+                                         OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseQuotient(other.m_inner));
+    }
+    template <typename Other>
+    PlainBase cwiseEqual(const Other& other) const {
+        return PlainBase(m_inner.cwiseEqual(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseEqual(const Matrix<OtherScalar,
+                                      OtherRows,
+                                      OtherCols,
+                                      OtherOptions,
+                                      OtherMaxRows,
+                                      OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseEqual(other.m_inner));
+    }
+    template <typename OtherDerived>
+    PlainBase cwiseNotEqual(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(m_inner.cwiseNotEqual(other));
+    }
+    template <typename OtherScalar,
+              int OtherRows,
+              int OtherCols,
+              int OtherOptions,
+              int OtherMaxRows,
+              int OtherMaxCols>
+    PlainBase cwiseNotEqual(const Matrix<OtherScalar,
+                                         OtherRows,
+                                         OtherCols,
+                                         OtherOptions,
+                                         OtherMaxRows,
+                                         OtherMaxCols>& other) const {
+        return PlainBase(m_inner.cwiseNotEqual(other.m_inner));
+    }
+
     // Special matrix generators
     template <typename... Index>
     static Matrix Identity(Index... indices) {

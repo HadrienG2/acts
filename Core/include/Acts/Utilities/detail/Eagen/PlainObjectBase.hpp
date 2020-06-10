@@ -455,6 +455,9 @@ public:
         derivedInner().visit(func);
     }
 
+    // TODO: Support unaryExpr
+    //       This is not used by Acts, and therefore not a priority.
+
     // Special plain object generators
     template <typename... Args>
     static PlainObject Constant(Args&&... args) {
@@ -556,6 +559,22 @@ public:
     template <typename... Args>
     static Derived MapAligned(Args&&... args) {
         return Derived(Inner::MapAligned(std::forward<Args>(args)...));
+    }
+
+    // === Coefficient-wise ops, unknown Eigen base class ===
+    //
+    // FIXME: I'm not sure which base class these methods should belong to, but
+    //        Eigen docs claim that all expressions should have it, so perhaps
+    //        EigenBase would be the right pick?
+    //
+    PlainObject real() const {
+        return PlainObject(derivedInner().real());
+    }
+    PlainObject imag() const {
+        return PlainObject(derivedInner().imag());
+    }
+    PlainObject conjugate() const {
+        return PlainObject(derivedInner().conjugate());
     }
 
 protected:
