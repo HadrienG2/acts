@@ -101,7 +101,11 @@ public:
     }
 
     // Map foreign data
-    // TODO: Consider providing a first-class Map type to avoid copies
+    //
+    // FIXME: In addition to being a possible performance issue, copying like
+    //        this is also wrong at the semantic level, because Eigen's maps can
+    //        be written to...
+    //
     template <typename... Args>
     static Derived Map(Args&&... args) {
         return Derived(Inner::Map(std::forward<Args>(args)...));
