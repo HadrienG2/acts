@@ -35,14 +35,10 @@ private:
     using Index = Eigen::Index;
 
 public:
-    // Eigen-compatible constructors
+    // Eigen-style constructor from an Eagen expression
     Block(Derived& xpr, Index i) : m_inner(xpr.getInner(), i) {}
-    Block(DerivedInner& xpr, Index i) : m_inner(xpr, i) {}
     Block(Derived& xpr, Index startRow, Index startCol)
         : m_inner(xpr.getInner(), startRow, startCol)
-    {}
-    Block(DerivedInner& xpr, Index startRow, Index startCol)
-        : m_inner(xpr, startRow, startCol)
     {}
     Block(Derived& xpr,
           Index startRow,
@@ -51,16 +47,34 @@ public:
           Index blockCols)
         : m_inner(xpr.getInner(), startRow, startCol, blockRows, blockCols)
     {}
-    Block(DerivedInner& xpr,
-          Index startRow,
-          Index startCol,
-          Index blockRows,
-          Index blockCols)
-        : m_inner(xpr, startRow, startCol, blockRows, blockCols)
-    {}
 
     // Wrap a pre-existing Eigen block expression
-    Block(Inner&& inner) : m_inner(std::move(inner)) {}
+    template <typename BlockXpr>
+    Block(BlockXpr&& block) : m_inner(std::move(block)) {}
+
+    // Assignment from Eagen and Eigen expressions
+    template <typename OtherDerived>
+    Block& operator=(const EigenBase<OtherDerived>& other) {
+        m_inner = other.derivedInner();
+        return *this;
+    }
+    template <typename OtherDerived>
+    Block& operator=(const Eigen::EigenBase<OtherDerived>& other) {
+        m_inner = other;
+        return *this;
+    }
+#if EIGEN_HAS_RVALUE_REFERENCES
+    template <typename OtherDerived>
+    Block& operator=(EigenBase<OtherDerived>&& other) {
+        m_inner = other.moveDerivedInner();
+        return *this;
+    }
+    template <typename OtherDerived>
+    Block& operator=(Eigen::EigenBase<OtherDerived>&& other) {
+        m_inner = std::move(other);
+        return *this;
+    }
+#endif
 
 private:
     Inner m_inner;
