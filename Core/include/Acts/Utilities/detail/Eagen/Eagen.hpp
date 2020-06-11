@@ -16,6 +16,7 @@
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
+#include "Hyperplane.hpp"
 #include "TypeTraits.hpp"
 #include "CommaInitializer.hpp"
 #include "MatrixBase.hpp"

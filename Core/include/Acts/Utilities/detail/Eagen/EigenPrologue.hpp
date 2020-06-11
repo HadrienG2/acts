@@ -27,6 +27,7 @@ constexpr int ColMajor = Eigen::ColMajor;
 constexpr int Dynamic = Eigen::Dynamic;
 using NoChange_t = Eigen::NoChange_t;
 constexpr int RowMajor = Eigen::RowMajor;
+using TransformTraits = Eigen::TransformTraits;
 
 }  // namespace Eagen
 
