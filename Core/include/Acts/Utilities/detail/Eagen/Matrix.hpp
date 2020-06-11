@@ -42,7 +42,7 @@ public:
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
 
-    // Underlying Eigen matrix type (used for CRTP)
+    // Underlying Eigen matrix type
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
     // Access the inner Eigen matrix (used for CRTP)
@@ -86,6 +86,8 @@ public:
 #endif
 
     // Build and assign from anything Eigen supports building or assigning from
+    // FIXME: These catch-all templates cause overload ambiguities. Must write
+    //        the actual signatures here.
     template <typename... Args>
     Matrix(Args&&... args) : m_inner(std::forward<Args>(args)...) {}
     template <typename Other>
