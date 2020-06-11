@@ -21,4 +21,7 @@
 #include "MatrixBase.hpp"
 #include "PlainMatrixBase.hpp"
 #include "Matrix.hpp"
+#include "VectorBlock.hpp"
+
+// These declarations must occur after everything else has been declared
 #include "EigenEpilogue.hpp"

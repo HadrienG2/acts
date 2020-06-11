@@ -28,6 +28,7 @@ template <typename Scalar, int Rows, int Cols,
 class Matrix;
 template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
 class Block;
+template <typename Derived, int Size> class VectorBlock;
 template <typename Derived> class PlainMatrixBase;
 template <typename Derived> class MatrixBase;
 

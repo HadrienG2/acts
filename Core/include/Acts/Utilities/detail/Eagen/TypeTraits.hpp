@@ -38,7 +38,7 @@ struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 };
 
-// Block expression type traits
+// Sub-matrix type traits
 template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
 struct TypeTraits<Block<Derived, BlockRows, BlockCols, InnerPanel>> {
 private:
@@ -52,6 +52,22 @@ public:
     static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
     static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
     using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
+};
+
+// Sub-vector type traits
+template <typename Derived, int Size>
+struct TypeTraits<VectorBlock<Derived, Size>> {
+private:
+    using DerivedTraits = TypeTraits<Derived>;
+    using DerivedInner = typename DerivedTraits::Inner;
+public:
+    using Scalar = typename DerivedTraits::Scalar;
+    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
+    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
+    static constexpr int Options = DerivedTraits::Options;
+    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
 };
 
 }  // namespace Eagen
