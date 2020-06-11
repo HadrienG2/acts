@@ -395,19 +395,19 @@ public:
     template <typename OtherDerived = Derived>
     Derived& operator=(const DenseBase<OtherDerived>& other) {
         derivedInner() = other.derivedInner();
-        return *this;
+        return derived();
     }
     template <typename OtherDerived = Inner>
     Derived& operator=(const Eigen::DenseBase<OtherDerived>& other) {
         derivedInner() = other;
-        return *this;
+        return derived();
     }
     // NOTE: No need for an Eagen::EigenBase overload yet as we don't replicate
     //       that layer of the Eigen class hierarchy yet.
     template <typename OtherDerived>
     Derived& operator=(const Eigen::EigenBase<OtherDerived>& other) {
         derivedInner() = other;
-        return *this;
+        return derived();
     }
 
     // TODO: Support replicate()
@@ -710,29 +710,44 @@ public:
     }
 
     // Matrix-scalar multiplication
-    template <typename OtherScalar>
-    PlainBase operator*(const OtherScalar& scalar) const {
+    PlainBase operator*(const Scalar& scalar) const {
         return PlainBase(derivedInner() * scalar);
     }
-    template <typename OtherScalar>
-    friend PlainBase operator*(const OtherScalar& scalar, const Derived& matrix) {
+    friend PlainBase operator*(const Scalar& scalar, const Derived& matrix) {
         return matrix * scalar;
     }
-    template <typename OtherScalar>
-    Derived& operator*=(const OtherScalar& scalar) {
+    Derived& operator*=(const Scalar& scalar) {
         derivedInner() *= scalar;
-        return *this;
+        return derived();
     }
 
     // Matrix-scalar division
-    template <typename OtherScalar>
-    PlainBase operator/(const OtherScalar& scalar) const {
+    PlainBase operator/(const Scalar& scalar) const {
         return PlainBase(derivedInner() / scalar);
     }
-    template <typename OtherScalar>
-    Derived& operator/=(const OtherScalar& scalar) {
+    Derived& operator/=(const Scalar& scalar) {
         derivedInner() /= scalar;
-        return *this;
+        return derived();
+    }
+
+    // Edge case of handling a 1x1 matrix as a scalar
+    template <typename OtherDerived>
+    PlainBase operator/(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner() / other.value());
+    }
+    template <typename OtherDerived>
+    PlainBase operator/(const MatrixBase<OtherDerived>& other) const {
+        return PlainBase(derivedInner() / other.derivedInner().value());
+    }
+    template <typename OtherDerived>
+    Derived& operator/=(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner() /= other.value();
+        return derived();
+    }
+    template <typename OtherDerived>
+    Derived& operator/=(const EigenBase<OtherDerived>& other) {
+        derivedInner() /= other.derivedInner().value();
+        return derived();
     }
 
     // Matrix-matrix multiplication
@@ -758,17 +773,17 @@ public:
     template <typename OtherDerived>
     Derived& operator*=(const Eigen::EigenBase<OtherDerived>& other) {
         derivedInner() *= other;
-        return *this;
+        return derived();
     }
     template <typename OtherDerived>
     Derived& operator*=(const EigenBase<OtherDerived>& other) {
         derivedInner() *= other.derivedInner();
-        return *this;
+        return derived();
     }
 
     // Matrix addition
-    template <typename OtherEigen>
-    PlainBase operator+(const OtherEigen& other) const {
+    template <typename OtherDerived>
+    PlainBase operator+(const Eigen::MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner() + other);
     }
     template <typename OtherDerived>
@@ -778,17 +793,17 @@ public:
     template <typename OtherDerived>
     Derived& operator+=(const Eigen::MatrixBase<OtherDerived>& other) {
         derivedInner() += other;
-        return *this;
+        return derived();
     }
     template <typename OtherDerived>
     Derived& operator+=(const MatrixBase<OtherDerived>& other) {
         derivedInner() += other.derivedInner();
-        return *this;
+        return derived();
     }
 
     // Matrix subtraction
-    template <typename OtherEigen>
-    PlainBase operator-(const OtherEigen& other) const {
+    template <typename OtherDerived>
+    PlainBase operator-(const Eigen::MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner() + other);
     }
     template <typename OtherDerived>
@@ -798,12 +813,12 @@ public:
     template <typename OtherDerived>
     Derived& operator-=(const Eigen::MatrixBase<OtherDerived>& other) {
         derivedInner() -= other;
-        return *this;
+        return derived();
     }
     template <typename OtherDerived>
     Derived& operator-=(const MatrixBase<OtherDerived>& other) {
         derivedInner() -= other.derivedInner();
-        return *this;
+        return derived();
     }
 
     // TODO: Support selfadjointView()
@@ -813,7 +828,7 @@ public:
     template <typename... Index>
     Derived& setIdentity(Index... indices) {
         derivedInner().setIdentity(indices...);
-        return *this;
+        return derived();
     }
 
     // TODO: Support sparse matrices
