@@ -946,55 +946,59 @@ public:
     }
 
     // Sub-vector accessors
-    //
-    // NOTE: Always using block expressions here because discriminating row and
-    //       column vectors is Ugly Business (tm) that's best left to Eigen
-    //
 private:
+    // FIXME: Not perfect row vector detection, but should be good enough
+    static constexpr bool IsRowVector = IsVectorAtCompileTime && (Rows == 1);
+    template <int Length>
+    using SubVector = Matrix<
+        Scalar,
+        IsRowVector ? 1 : Length,
+        IsRowVector ? Length : 1
+    >;
     template <int Length>
     using SubVectorBlock = VectorBlock<Derived, Length>;
 public:
     SubVectorBlock<Dynamic> head(int n) {
-        return SubVectorBlock<Dynamic>(derivedInner().head(n));
+        return segment(0, n);
     }
-    SubVectorBlock<Dynamic> head(int n) const {
-        return SubVectorBlock<Dynamic>(derivedInner().head(n));
+    SubVector<Dynamic> head(int n) const {
+        return segment(0, n);
     }
     template <int n>
     SubVectorBlock<n> head() {
-        return SubVectorBlock<n>(derivedInner().template head<n>());
+        return segment<n>(0);
     }
     template <int n>
-    SubVectorBlock<n> head() const {
-        return SubVectorBlock<n>(derivedInner().template head<n>());
+    SubVector<n> head() const {
+        return segment<n>(0);
     }
     SubVectorBlock<Dynamic> tail(int n) {
-        return SubVectorBlock<Dynamic>(derivedInner().tail(n));
+        return segment(size()-1-n, n);
     }
-    SubVectorBlock<Dynamic> tail(int n) const {
-        return SubVectorBlock<Dynamic>(derivedInner().tail(n));
+    SubVector<Dynamic> tail(int n) const {
+        return segment(size()-1-n, n);
     }
     template <int n>
     SubVectorBlock<n> tail() {
-        return SubVectorBlock<n>(derivedInner().template tail<n>());
+        return segment<n>(size()-1-n);
     }
     template <int n>
-    SubVectorBlock<n> tail() const {
-        return SubVectorBlock<n>(derivedInner().template tail<n>());
+    SubVector<n> tail() const {
+        return segment<n>(size()-1-n);
     }
     SubVectorBlock<Dynamic> segment(Index pos, int n) {
-        return SubVectorBlock<Dynamic>(derivedInner().segment(pos, n));
+        return SubVectorBlock<Dynamic>(derived(), pos, n);
     }
-    SubVectorBlock<Dynamic> segment(Index pos, int n) const {
-        return SubVectorBlock<Dynamic>(derivedInner().segment(pos, n));
+    SubVector<Dynamic> segment(Index pos, int n) const {
+        return SubVector<Dynamic>(derivedInner().segment(pos, n));
     }
     template <int n>
     SubVectorBlock<n> segment(Index pos) {
-        return SubVectorBlock<n>(derivedInner().template segment<n>(pos));
+        return SubVectorBlock<n>(derived(), pos);
     }
     template <int n>
-    SubVectorBlock<n> segment(Index pos) const {
-        return SubVectorBlock<n>(derivedInner().template segment<n>(pos));
+    SubVector<n> segment(Index pos) const {
+        return SubVector<n>(derivedInner().template segment<n>(pos));
     }
 
     // Sub-matrix accessors

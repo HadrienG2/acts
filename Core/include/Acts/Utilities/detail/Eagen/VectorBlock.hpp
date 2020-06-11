@@ -38,10 +38,6 @@ public:
         : m_inner(xpr.getInner(), start, size)
     {}
 
-    // Wrap a pre-existing Eigen block expression
-    template <typename VectorBlockXpr>
-    VectorBlock(VectorBlockXpr&& block) : m_inner(std::move(block)) {}
-
     // Assignment from Eagen and Eigen expressions
     template <typename OtherDerived>
     VectorBlock& operator=(const EigenBase<OtherDerived>& other) {

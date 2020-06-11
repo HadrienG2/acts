@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "MatrixBase.hpp"
