@@ -32,9 +32,6 @@ class Matrix : public PlainMatrixBase<Matrix<_Scalar,
                                              _MaxRows,
                                              _MaxCols>> {
 public:
-    // TODO: If this works, reduce reliance on variadic templates by using the
-    //       true method signatures instead.
-
     // === Eagen wrapper API ===
 
     // Re-expose template parameters
@@ -48,10 +45,6 @@ public:
     // Underlying Eigen matrix type (used for CRTP)
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
-    // Re-expose typedefs from Eigen
-    using Index = Eigen::Index;
-    using RealScalar = typename Inner::RealScalar;
-
     // Access the inner Eigen matrix (used for CRTP)
     Inner& getInner() {
         return m_inner;
@@ -62,6 +55,10 @@ public:
     Inner&& moveInner() {
         return std::move(m_inner);
     }
+
+    // Re-expose typedefs from Eigen
+    using Index = Eigen::Index;
+    using RealScalar = typename Inner::RealScalar;
 
     // === Eigen::Matrix interface ===
 

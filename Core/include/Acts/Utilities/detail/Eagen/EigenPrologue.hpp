@@ -22,10 +22,11 @@ namespace Eagen {
 // because it would conflict with a class-local typedef or constexpr with the
 // same name, put it in EigenEpilogue.hpp
 //
-using NoChange_t = Eigen::NoChange_t;
 constexpr int AutoAlign = Eigen::AutoAlign;
-constexpr int RowMajor = Eigen::RowMajor;
 constexpr int ColMajor = Eigen::ColMajor;
+constexpr int Dynamic = Eigen::Dynamic;
+using NoChange_t = Eigen::NoChange_t;
+constexpr int RowMajor = Eigen::RowMajor;
 
 }  // namespace Eagen
 

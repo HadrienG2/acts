@@ -26,6 +26,8 @@ template <typename Scalar, int Rows, int Cols,
           int MaxRows = Rows,
           int MaxCols = Cols>
 class Matrix;
+template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
+class Block;
 template <typename Derived> class PlainMatrixBase;
 template <typename Derived> class MatrixBase;
 

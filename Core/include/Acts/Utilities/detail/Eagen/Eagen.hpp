@@ -12,6 +12,7 @@
 #include <utility>
 
 // Eagen is an eagerly evaluated Eigen wrapper, bypassing expression templates
+#include "Block.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"

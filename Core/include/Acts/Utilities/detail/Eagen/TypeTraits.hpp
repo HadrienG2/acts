@@ -20,6 +20,8 @@ namespace Eagen {
 // Some type traits to ease manipulating incomplete types
 template <typename EagenType>
 struct TypeTraits;
+
+// Matrix type traits
 template <typename _Scalar,
           int _Rows,
           int _Cols,
@@ -34,6 +36,22 @@ struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+};
+
+// Block expression type traits
+template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
+struct TypeTraits<Block<Derived, BlockRows, BlockCols, InnerPanel>> {
+private:
+    using DerivedTraits = TypeTraits<Derived>;
+    using DerivedInner = typename DerivedTraits::Inner;
+public:
+    using Scalar = typename DerivedTraits::Scalar;
+    static constexpr int Rows = BlockRows;
+    static constexpr int Cols = BlockCols;
+    static constexpr int Options = DerivedTraits::Options;
+    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
 };
 
 }  // namespace Eagen
