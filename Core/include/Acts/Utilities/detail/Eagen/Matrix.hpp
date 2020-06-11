@@ -62,39 +62,74 @@ public:
 
     // === Eigen::Matrix interface ===
 
-    // Basic lifecycle
+    // Default constructor
     Matrix() = default;
+
+    // Copy constructor and assignment from an expression
     template <typename OtherDerived>
     Matrix(const EigenBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
+    {}
+    template <typename OtherDerived>
+    Matrix(const Eigen::EigenBase<OtherDerived>& other)
+        : m_inner(other)
     {}
     template <typename OtherDerived>
     Matrix& operator=(const EigenBase<OtherDerived>& other) {
         m_inner = other.derivedInner();
         return *this;
     }
+    template <typename OtherDerived>
+    Matrix& operator=(const Eigen::EigenBase<OtherDerived>& other) {
+        m_inner = other;
+        return *this;
+    }
+
+    // Move construction and assignment, if supported by Eigen
 #if EIGEN_HAS_RVALUE_REFERENCES
     template <typename OtherDerived>
     Matrix(EigenBase<OtherDerived>&& other)
         : m_inner(other.moveDerivedInner())
     {}
     template <typename OtherDerived>
+    Matrix(Eigen::EigenBase<OtherDerived>&& other)
+        : m_inner(std::move(other))
+    {}
+    template <typename OtherDerived>
     Matrix& operator=(EigenBase<OtherDerived>&& other) {
         m_inner = other.moveDerivedInner();
         return *this;
     }
-#endif
-
-    // Build and assign from anything Eigen supports building or assigning from
-    // FIXME: These catch-all templates cause overload ambiguities. Must write
-    //        the actual signatures here.
-    template <typename... Args>
-    Matrix(Args&&... args) : m_inner(std::forward<Args>(args)...) {}
-    template <typename Other>
-    Matrix& operator=(Other&& other) {
-        m_inner = std::forward<Other>(other);
+    template <typename OtherDerived>
+    Matrix& operator=(Eigen::EigenBase<OtherDerived>&& other) {
+        m_inner = std::move(other);
         return *this;
     }
+#endif
+
+    // Construction and assignment from Eigen rotation
+    // NOTE: No Eagen equivalent of this special matrix type yet
+    template <typename OtherDerived>
+    Matrix(const Eigen::RotationBase<OtherDerived, Cols>& r)
+        : m_inner(r)
+    {}
+    template <typename OtherDerived>
+    Matrix& operator=(const Eigen::RotationBase<OtherDerived, Cols>& r) {
+        m_inner = r;
+        return *this;
+    }
+
+    // Vector construction from a set of scalars
+    Matrix(const Scalar& x) : m_inner(x) {}
+    template <typename... Scalars>
+    Matrix(const Scalar& x, const Scalars&... other) : m_inner(x, other...) {}
+
+    // Matrix construction from a C-style array of coefficients
+    Matrix(const Scalar* data) : m_inner(data) {}
+
+    // Uninitialized matrix or vector constructor
+    Matrix(Index dim) : m_inner(dim) {}
+    Matrix(Index rows, Index cols) : m_inner(rows, cols) {}
 
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
