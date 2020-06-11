@@ -572,7 +572,7 @@ public:
     void normalize() {
         derivedInner().normalize();
     }
-    PlainBase normalized() {
+    PlainBase normalized() const {
         return derivedInner().normalized();
     }
     RealScalar operatorNorm() const {
