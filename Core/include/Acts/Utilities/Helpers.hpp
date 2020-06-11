@@ -48,8 +48,8 @@ using has_phi_method = concept ::is_detected<phi_method_t, T>;
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The value of the angle in the transverse plane.
 template <typename Derived>
-double phi(const Eigen::MatrixBase<Derived>& v) noexcept {
-  constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
+double phi(const Acts::detail::Eagen::MatrixBase<Derived>& v) noexcept {
+  constexpr int rows = Acts::detail::Eagen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
     static_assert(rows >= 2,
@@ -84,8 +84,8 @@ double phi(const T& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The transverse radius value.
 template <typename Derived>
-double perp(const Eigen::MatrixBase<Derived>& v) noexcept {
-  constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
+double perp(const Acts::detail::Eagen::MatrixBase<Derived>& v) noexcept {
+  constexpr int rows = Acts::detail::Eagen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
     static_assert(rows >= 2,
@@ -108,8 +108,8 @@ double perp(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The theta value
 template <typename Derived>
-double theta(const Eigen::MatrixBase<Derived>& v) noexcept {
-  constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
+double theta(const Acts::detail::Eagen::MatrixBase<Derived>& v) noexcept {
+  constexpr int rows = Acts::detail::Eagen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
     static_assert(rows >= 3, "Theta function not valid for non-3D vectors.");
@@ -131,8 +131,8 @@ double theta(const Eigen::MatrixBase<Derived>& v) noexcept {
 /// in case of dynamic size, will abort execution if that is not the case.
 /// @return The pseudorapidity value
 template <typename Derived>
-double eta(const Eigen::MatrixBase<Derived>& v) noexcept {
-  constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
+double eta(const Acts::detail::Eagen::MatrixBase<Derived>& v) noexcept {
+  constexpr int rows = Acts::detail::Eagen::MatrixBase<Derived>::RowsAtCompileTime;
   if constexpr (rows != -1) {
     // static size, do compile time check
     static_assert(rows >= 3, "Eta function not valid for non-3D vectors.");
@@ -384,8 +384,8 @@ MatrixType bitsetToMatrix(const std::bitset<MatrixType::RowsAtCompileTime *
 /// @param m Matrix that is converted
 /// @return The converted bitset.
 template <typename Derived>
-auto matrixToBitset(const Eigen::PlainObjectBase<Derived>& m) {
-  using MatrixType = Eigen::PlainObjectBase<Derived>;
+auto matrixToBitset(const Acts::detail::Eagen::PlainObjectBase<Derived>& m) {
+  using MatrixType = Acts::detail::Eagen::PlainObjectBase<Derived>;
   constexpr size_t rows = MatrixType::RowsAtCompileTime;
   constexpr size_t cols = MatrixType::ColsAtCompileTime;
 

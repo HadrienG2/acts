@@ -8,16 +8,6 @@
 
 #pragma once
 
-// for GNU: ignore this specific warning, otherwise just include Eigen/Dense
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmisleading-indentation"
-#include <Eigen/Dense>
-#pragma GCC diagnostic pop
-#else
-#include <Eigen/Dense>
-#endif
-
 #include "detail/Eagen/Eagen.hpp"
 
 namespace Acts {
@@ -60,7 +50,7 @@ enum NoiseUpdateMode : int { removeNoise = -1, addNoise = 1 };
 
 // Eigen definitions
 template <typename T, unsigned int rows, unsigned int cols>
-using ActsMatrix = Eigen::Matrix<T, rows, cols>;
+using ActsMatrix = detail::Eagen::Matrix<T, rows, cols>;
 
 template <unsigned int rows, unsigned int cols>
 using ActsMatrixD = ActsMatrix<double, rows, cols>;
@@ -96,19 +86,19 @@ template <unsigned int cols>
 using ActsRowVectorF = ActsRowVector<float, cols>;
 
 template <typename T>
-using ActsMatrixX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+using ActsMatrixX = detail::Eagen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 using ActsMatrixXd = ActsMatrixX<double>;
 using ActsMatrixXf = ActsMatrixX<float>;
 
 template <typename T>
-using ActsVectorX = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+using ActsVectorX = detail::Eagen::Matrix<T, Eigen::Dynamic, 1>;
 
 using ActsVectorXd = ActsVectorX<double>;
 using ActsVectorXf = ActsVectorX<float>;
 
 template <typename T>
-using ActsRowVectorX = Eigen::Matrix<T, 1, Eigen::Dynamic>;
+using ActsRowVectorX = detail::Eagen::Matrix<T, 1, Eigen::Dynamic>;
 
 using ActsRowVectorXd = ActsRowVectorX<double>;
 using ActsRowVectorXf = ActsRowVectorX<float>;
