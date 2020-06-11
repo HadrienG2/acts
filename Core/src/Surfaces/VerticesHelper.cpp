@@ -104,7 +104,7 @@ bool Acts::detail::VerticesHelper::onHyperPlane(
     return true;
   }
   // Create the hyperplane
-  auto hyperPlane = Eigen::Hyperplane<double, 3>::Through(
+  auto hyperPlane = detail::Eagen::Hyperplane<double, 3>::Through(
       vertices[0], vertices[1], vertices[2]);
   for (size_t ip = 3; ip < vertices.size(); ++ip) {
     if (hyperPlane.absDistance(vertices[ip]) > tolerance) {

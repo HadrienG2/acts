@@ -32,7 +32,7 @@
 #include "TGeoTrd2.h"
 #include "TGeoTube.h"
 
-using Line2D = Eigen::Hyperplane<double, 2>;
+using Line2D = Acts::detail::Eagen::Hyperplane<double, 2>;
 
 Acts::TGeoDetectorElement::TGeoDetectorElement(
     const Identifier& identifier, const TGeoNode& tGeoNode,

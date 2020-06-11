@@ -114,7 +114,7 @@ Acts::TGeoSurfaceConverter::discComponents(const TGeoShape& tgShape,
                                            const Double_t* translation,
                                            const std::string& axes,
                                            double scalor) noexcept(false) {
-  using Line2D = Eigen::Hyperplane<double, 2>;
+  using Line2D = detail::Eagen::Hyperplane<double, 2>;
   std::shared_ptr<const DiscBounds> bounds = nullptr;
   std::shared_ptr<const Transform3D> transform = nullptr;
 
