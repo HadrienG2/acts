@@ -21,7 +21,7 @@ namespace detail {
 namespace Eagen {
 
 // Wrapper of Eigen::Hyperplane
-template <typename _Scalar, int _AmbientDim, int _Options>
+template <typename _Scalar, int _AmbientDim, int _Options = AutoAlign>
 class Hyperplane {
 public:
     // Eigen-style typedefs and constant propagation
@@ -183,6 +183,67 @@ public:
                           TransformTraits traits = TransformTraits::Affine) {
         m_inner.transform(t, traits);
         return *this;
+    }
+
+    // Construct a hyperplane passing through two points
+    static Hyperplane Through(const VectorType& p0, const VectorType& p1) {
+        return Hyperplane(Inner::Through(p0.getInner(), p1.getInner()));
+    }
+    static Hyperplane Through(const InnerVectorType& p0, const VectorType& p1) {
+        return Hyperplane(Inner::Through(p0, p1.getInner()));
+    }
+    static Hyperplane Through(const VectorType& p0, const InnerVectorType& p1) {
+        return Hyperplane(Inner::Through(p0.getInner(), p1));
+    }
+    static Hyperplane Through(const InnerVectorType& p0,
+                              const InnerVectorType& p1) {
+        return Hyperplane(Inner::Through(p0, p1));
+    }
+
+    // Construct a hyperplane passing through three points
+    static Hyperplane Through(const VectorType& p0,
+                              const VectorType& p1,
+                              const VectorType& p2) {
+        return Hyperplane(
+            Inner::Through(p0.getInner(), p1.getInner(), p2.getInner())
+        );
+    }
+    static Hyperplane Through(const InnerVectorType& p0,
+                              const VectorType& p1,
+                              const VectorType& p2) {
+        return Hyperplane(Inner::Through(p0, p1.getInner(), p2.getInner()));
+    }
+    static Hyperplane Through(const VectorType& p0,
+                              const InnerVectorType& p1,
+                              const VectorType& p2) {
+        return Hyperplane(Inner::Through(p0.getInner(), p1, p2.getInner()));
+    }
+    static Hyperplane Through(const InnerVectorType& p0,
+                              const InnerVectorType& p1,
+                              const VectorType& p2) {
+        return Hyperplane(Inner::Through(p0, p1, p2.getInner()));
+    }
+    static Hyperplane Through(const VectorType& p0,
+                              const VectorType& p1,
+                              const InnerVectorType& p2) {
+        return Hyperplane(
+            Inner::Through(p0.getInner(), p1.getInner(), p2)
+        );
+    }
+    static Hyperplane Through(const InnerVectorType& p0,
+                              const VectorType& p1,
+                              const InnerVectorType& p2) {
+        return Hyperplane(Inner::Through(p0, p1.getInner(), p2));
+    }
+    static Hyperplane Through(const VectorType& p0,
+                              const InnerVectorType& p1,
+                              const InnerVectorType& p2) {
+        return Hyperplane(Inner::Through(p0.getInner(), p1, p2));
+    }
+    static Hyperplane Through(const InnerVectorType& p0,
+                              const InnerVectorType& p1,
+                              const InnerVectorType& p2) {
+        return Hyperplane(Inner::Through(p0, p1, p2));
     }
 
 private:
