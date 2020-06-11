@@ -76,6 +76,17 @@ public:
     }
 #endif
 
+    // Access the inner Eigen block (used for CRTP)
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
 private:
     Inner m_inner;
 };
