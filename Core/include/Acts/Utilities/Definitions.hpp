@@ -178,12 +178,12 @@ using AngleAxis3D = Eigen::AngleAxis<double>;
 // - 2d affine compact stored as 2x3 matrix
 // - 3d affine stored as 4x4 matrix
 // - 4d affine compact stored as 4x5 matrix
-using Transform2F = Eigen::Transform<float, 2, Eigen::AffineCompact>;
-using Transform3F = Eigen::Transform<float, 3, Eigen::Affine>;
-using Transform4F = Eigen::Transform<float, 4, Eigen::AffineCompact>;
-using Transform2D = Eigen::Transform<double, 2, Eigen::AffineCompact>;
-using Transform3D = Eigen::Transform<double, 3, Eigen::Affine>;
-using Transform4D = Eigen::Transform<double, 4, Eigen::AffineCompact>;
+using Transform2F = detail::Eagen::Transform<float, 2, detail::Eagen::AffineCompact>;
+using Transform3F = detail::Eagen::Transform<float, 3, detail::Eagen::Affine>;
+using Transform4F = detail::Eagen::Transform<float, 4, detail::Eagen::AffineCompact>;
+using Transform2D = detail::Eagen::Transform<double, 2, detail::Eagen::AffineCompact>;
+using Transform3D = detail::Eagen::Transform<double, 3, detail::Eagen::Affine>;
+using Transform4D = detail::Eagen::Transform<double, 4, detail::Eagen::AffineCompact>;
 
 /// @}
 

@@ -393,7 +393,9 @@ std::ostream& Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::svg(
 
   VertexType mid(w / 2., h / 2.);
 
-  using transform_t = Eigen::Transform<value_t, DIM, Eigen::Affine>;
+  using transform_t = detail::Eagen::Transform<value_t,
+                                               DIM,
+                                               detail::Eagen::Affine>;
 
   transform_t trf = transform_t::Identity();
   trf.translate(mid);

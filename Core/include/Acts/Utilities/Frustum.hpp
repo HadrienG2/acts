@@ -38,7 +38,9 @@ class Frustum {
   /// Vertex array type corresponding to the vertex type
   using vertex_array_type = Eigen::Array<value_t, DIM, 1>;
   /// Associated transform type
-  using transform_type = Eigen::Transform<value_t, DIM, Eigen::Affine>;
+  using transform_type = detail::Eagen::Transform<value_t,
+                                                  DIM,
+                                                  detail::Eagen::Affine>;
 
   /// Re expose the number of dimensions
   static constexpr size_t dim = DIM;

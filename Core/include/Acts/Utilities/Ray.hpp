@@ -27,7 +27,9 @@ class Ray {
   /// Vertex array type corresponding to the vertex type
   using vertex_array_type = Eigen::Array<value_t, DIM, 1>;
   /// Associated transform type
-  using transform_type = Eigen::Transform<value_t, DIM, Eigen::Affine>;
+  using transform_type = detail::Eagen::Transform<value_t,
+                                                  DIM,
+                                                  detail::Eagen::Affine>;
 
   /// Constructor from an origin point and a direction
   /// @param origin The origin of the ray

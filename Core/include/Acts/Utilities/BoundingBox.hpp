@@ -82,7 +82,9 @@ class AxisAlignedBoundingBox {
   /**
    * The transform type based on the `value_type`
    */
-  using transform_type = Eigen::Transform<value_type, DIM, Eigen::Affine>;
+  using transform_type = detail::Eagen::Transform<value_type,
+                                                  DIM,
+                                                  detail::Eagen::Affine>;
 
   /**
    * Strong type to select the correct constructor
