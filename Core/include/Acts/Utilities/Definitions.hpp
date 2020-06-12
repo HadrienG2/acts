@@ -86,19 +86,19 @@ template <unsigned int cols>
 using ActsRowVectorF = ActsRowVector<float, cols>;
 
 template <typename T>
-using ActsMatrixX = detail::Eagen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+using ActsMatrixX = detail::Eagen::Matrix<T, detail::Eagen::Dynamic, detail::Eagen::Dynamic>;
 
 using ActsMatrixXd = ActsMatrixX<double>;
 using ActsMatrixXf = ActsMatrixX<float>;
 
 template <typename T>
-using ActsVectorX = detail::Eagen::Matrix<T, Eigen::Dynamic, 1>;
+using ActsVectorX = detail::Eagen::Matrix<T, detail::Eagen::Dynamic, 1>;
 
 using ActsVectorXd = ActsVectorX<double>;
 using ActsVectorXf = ActsVectorX<float>;
 
 template <typename T>
-using ActsRowVectorX = detail::Eagen::Matrix<T, 1, Eigen::Dynamic>;
+using ActsRowVectorX = detail::Eagen::Matrix<T, 1, detail::Eagen::Dynamic>;
 
 using ActsRowVectorXd = ActsRowVectorX<double>;
 using ActsRowVectorXf = ActsRowVectorX<float>;

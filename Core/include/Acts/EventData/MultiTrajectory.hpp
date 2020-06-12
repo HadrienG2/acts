@@ -90,13 +90,13 @@ struct GrowableColumns {
 template <size_t Size, bool ReadOnlyMaps = true>
 struct Types {
   enum {
-    Flags = Eigen::ColMajor | Eigen::AutoAlign,
+    Flags = detail::Eagen::ColMajor | detail::Eagen::AutoAlign,
     SizeIncrement = 8,
   };
   using Scalar = double;
   // single items
-  using Coefficients = Eigen::Matrix<Scalar, Size, 1, Flags>;
-  using Covariance = Eigen::Matrix<Scalar, Size, Size, Flags>;
+  using Coefficients = detail::Eagen::Matrix<Scalar, Size, 1, Flags>;
+  using Covariance = detail::Eagen::Matrix<Scalar, Size, Size, Flags>;
   using CoefficientsMap = Eigen::Map<ConstIf<Coefficients, ReadOnlyMaps>>;
   using CovarianceMap = Eigen::Map<ConstIf<Covariance, ReadOnlyMaps>>;
   // storage of multiple items in flat arrays
@@ -151,12 +151,16 @@ class TrackStateProxy {
   // map)
   // @TODO: Does not copy flags, because this fails: can't have col major row
   // vector, but that's required for 1xN projection matrices below.
-  constexpr static auto ProjectorFlags = Eigen::RowMajor | Eigen::AutoAlign;
-  using Projector = Eigen::Matrix<typename Covariance::Scalar, M,
-                                  eBoundParametersSize, ProjectorFlags>;
+  constexpr static auto ProjectorFlags = detail::Eagen::RowMajor | detail::Eagen::AutoAlign;
+  using Projector = detail::Eagen::Matrix<typename Covariance::Scalar, M,
+                                          eBoundParametersSize, ProjectorFlags>;
   using EffectiveProjector =
-      Eigen::Matrix<typename Projector::Scalar, Eigen::Dynamic, Eigen::Dynamic,
-                    ProjectorFlags, M, eBoundParametersSize>;
+      detail::Eagen::Matrix<typename Projector::Scalar,
+                            detail::Eagen::Dynamic,
+                            detail::Eagen::Dynamic,
+                            ProjectorFlags,
+                            M,
+                            eBoundParametersSize>;
 
   /// Index within the trajectory.
   /// @return the index
@@ -346,9 +350,9 @@ class TrackStateProxy {
   /// @note @p projector is assumed to only have 0s or 1s as components.
   template <typename Derived, bool RO = ReadOnly,
             typename = std::enable_if_t<!RO>>
-  void setProjector(const Eigen::MatrixBase<Derived>& projector) {
-    constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
-    constexpr int cols = Eigen::MatrixBase<Derived>::ColsAtCompileTime;
+  void setProjector(const detail::Eagen::MatrixBase<Derived>& projector) {
+    constexpr int rows = detail::Eagen::MatrixBase<Derived>::Rows;
+    constexpr int cols = detail::Eagen::MatrixBase<Derived>::Cols;
 
     static_assert(rows != -1 && cols != -1,
                   "Assignment of dynamic matrices is currently not supported.");

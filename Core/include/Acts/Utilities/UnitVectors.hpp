@@ -64,7 +64,7 @@ inline ActsVector<T, 3> makeDirectionUnitFromPhiTheta(T phi, T theta) {
 /// handled by forcing the unit vector to along the x-axis.
 template <typename InputVector>
 inline auto makeCurvilinearUnitU(
-    const Eigen::MatrixBase<InputVector>& direction) {
+    const detail::Eagen::MatrixBase<InputVector>& direction) {
   EIGEN_STATIC_ASSERT_FIXED_SIZE(InputVector);
   EIGEN_STATIC_ASSERT_VECTOR_ONLY(InputVector);
   static_assert(3 <= InputVector::RowsAtCompileTime,
@@ -106,7 +106,7 @@ inline auto makeCurvilinearUnitU(
 /// with the additional condition that `U` is located in the global x-y plane.
 template <typename InputVector>
 inline auto makeCurvilinearUnitVectors(
-    const Eigen::MatrixBase<InputVector>& direction) {
+    const detail::Eagen::MatrixBase<InputVector>& direction) {
   EIGEN_STATIC_ASSERT_FIXED_SIZE(InputVector);
   EIGEN_STATIC_ASSERT_VECTOR_ONLY(InputVector);
   static_assert(3 <= InputVector::RowsAtCompileTime,

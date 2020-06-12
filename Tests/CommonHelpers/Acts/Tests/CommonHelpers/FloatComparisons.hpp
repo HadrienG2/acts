@@ -112,16 +112,16 @@ ScalarComparison closeAbs(double abstol) {
 
 // Matrix comparison backend (called by Eigen-related compare() overloads)
 template <typename Derived1, typename Derived2>
-predicate_result matrixCompare(const Eigen::DenseBase<Derived1>& val,
-                               const Eigen::DenseBase<Derived2>& ref,
+predicate_result matrixCompare(const detail::Eagen::DenseBase<Derived1>& val,
+                               const detail::Eagen::DenseBase<Derived2>& ref,
                                ScalarComparison&& compareImpl) {
-  constexpr int rows1 = Eigen::DenseBase<Derived1>::RowsAtCompileTime;
-  constexpr int rows2 = Eigen::DenseBase<Derived2>::RowsAtCompileTime;
-  constexpr int cols1 = Eigen::DenseBase<Derived1>::ColsAtCompileTime;
-  constexpr int cols2 = Eigen::DenseBase<Derived2>::ColsAtCompileTime;
+  constexpr int rows1 = detail::Eagen::DenseBase<Derived1>::Rows;
+  constexpr int rows2 = detail::Eagen::DenseBase<Derived2>::Rows;
+  constexpr int cols1 = detail::Eagen::DenseBase<Derived1>::Cols;
+  constexpr int cols2 = detail::Eagen::DenseBase<Derived2>::Cols;
 
-  if constexpr (rows1 != Eigen::Dynamic && rows2 != Eigen::Dynamic &&
-                cols1 != Eigen::Dynamic && cols2 != Eigen::Dynamic) {
+  if constexpr (rows1 != detail::Eagen::Dynamic && rows2 != detail::Eagen::Dynamic &&
+                cols1 != detail::Eagen::Dynamic && cols2 != detail::Eagen::Dynamic) {
     // All dimensions on both are static. Static assert compatibility.
     static_assert(rows1 == rows2,
                   "Input matrices do not have the same number of rows");
@@ -207,8 +207,8 @@ predicate_result compare(const Container& val, const Container& ref,
 
 // Eigen expression template frontend
 template <typename T, typename U>
-predicate_result compare(const Eigen::DenseBase<T>& val,
-                         const Eigen::DenseBase<U>& ref,
+predicate_result compare(const detail::Eagen::DenseBase<T>& val,
+                         const detail::Eagen::DenseBase<U>& ref,
                          ScalarComparison&& compareImpl) {
   return matrixCompare(val.eval(), ref.eval(), std::move(compareImpl));
 }
@@ -261,7 +261,7 @@ template <typename Scalar, int dim>
 boost::test_tools::predicate_result checkCloseCovariance(
     const ActsSymMatrix<Scalar, dim>& val,
     const ActsSymMatrix<Scalar, dim>& ref, double tol) {
-  static_assert(dim != Eigen::Dynamic,
+  static_assert(dim != detail::Eagen::Dynamic,
                 "Dynamic-size matrices are currently unsupported.");
 
   for (int col = 0; col < dim; ++col) {
