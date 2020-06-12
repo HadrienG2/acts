@@ -26,6 +26,7 @@ constexpr int AutoAlign = Eigen::AutoAlign;
 constexpr int ColMajor = Eigen::ColMajor;
 constexpr int Dynamic = Eigen::Dynamic;
 using NoChange_t = Eigen::NoChange_t;
+constexpr NoChange_t NoChange = Eigen::NoChange;
 constexpr int RowMajor = Eigen::RowMajor;
 using TransformTraits = Eigen::TransformTraits;
 
