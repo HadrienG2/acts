@@ -40,7 +40,7 @@ public:
 
     // Cast to a different scalar type
     template <typename NewScalarType>
-    Transform<NewScalarType, Dim, Mode Options> cast() const {
+    Transform<NewScalarType, Dim, Mode, Options> cast() const {
         return Transform<NewScalarType, Dim, Mode, Options>(
             m_inner.template cast<NewScalarType>()
         );
