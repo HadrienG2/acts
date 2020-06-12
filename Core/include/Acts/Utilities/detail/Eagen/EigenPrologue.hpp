@@ -25,10 +25,16 @@ namespace Eagen {
 constexpr int AutoAlign = Eigen::AutoAlign;
 constexpr int ColMajor = Eigen::ColMajor;
 constexpr int Dynamic = Eigen::Dynamic;
+constexpr int RowMajor = Eigen::RowMajor;
+//
 using NoChange_t = Eigen::NoChange_t;
 constexpr NoChange_t NoChange = Eigen::NoChange;
-constexpr int RowMajor = Eigen::RowMajor;
+//
 using TransformTraits = Eigen::TransformTraits;
+constexpr TransformTraits Isometry = Eigen::Isometry;
+constexpr TransformTraits Affine = Eigen::Affine;
+constexpr TransformTraits AffineCompact = Eigen::AffineCompact;
+constexpr TransformTraits Projective = Eigen::Projective;
 
 }  // namespace Eagen
 

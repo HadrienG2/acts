@@ -22,6 +22,7 @@
 #include "MatrixBase.hpp"
 #include "PlainMatrixBase.hpp"
 #include "Matrix.hpp"
+#include "Transform.hpp"
 #include "VectorBlock.hpp"
 
 // These declarations must occur after everything else has been declared
