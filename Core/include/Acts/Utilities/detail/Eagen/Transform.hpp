@@ -10,6 +10,8 @@
 
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
+#include "Map.hpp"
+#include "Matrix.hpp"
 
 namespace Acts {
 
@@ -18,6 +20,10 @@ namespace detail {
 namespace Eagen {
 
 // Wrapper of Eigen::Transform
+//
+// NOTE: QTransform interoperability is currently not supported, probably never
+//       will be supported unless a need for it appears.
+//
 template <typename _Scalar, int _Dim, int _Mode, int _Options>
 class Transform {
 public:
@@ -33,7 +39,29 @@ public:
     // Eigen-style typedefs and consts
     using Index = Eigen::Index;
     using RealScalar = typename Inner::RealScalar;
-    using ConstLinearPart = Matrix<Scalar, Dim, Dim>;
+
+    // Default constructor
+    Transform() = default;
+
+    // Constructor from a transformation matrix
+    template <typename OtherDerived>
+    Transform(const EigenBase<OtherDerived>& other)
+        : m_inner(other.getInner())
+    {}
+    template <typename OtherDerived>
+    Transform(const Eigen::EigenBase<OtherDerived>& other)
+        : m_inner(other)
+    {}
+
+    // Constructor from another transform
+    template <typename OtherScalarType>
+    Transform(const Transform<OtherScalarType, Dim, Mode, Options>& other)
+        : m_inner(other.m_inner)
+    {}
+    template <typename OtherScalarType>
+    Transform(const Eigen::Transform<OtherScalarType, Dim, Mode, Options>& other)
+        : m_inner(other)
+    {}
 
     // TODO: Support affine()
     //       This requires quite a bit of work, and isn't used by Acts yet.
@@ -75,14 +103,37 @@ public:
         return m_inner.isApprox(other, prec);
     }
 
-    // Linear part access
-    //
-    // FIXME: No in place access to the linear part yet, and thus no write
-    //        access, because that's hard to do in a wrapper design and Acts
-    //        doesn't use this Eigen feature yet.
-    //
-    ConstLinearPart linear() const {
+    // Access the linear part of the transform
+private:
+    using LinearPart = Matrix<Scalar, Dim, Dim>;
+    using LinearPartMap = Map<LinearPart,
+                              Unaligned,
+                              Stride<Dim+1, 1>>;
+public:
+    LinearPart linear() const {
         return ConstLinearPart(m_inner.linear());
+    }
+    LinearPartMap linear() {
+        return LinearPartMap(m_inner.linear().data());
+    }
+
+    // Access the rotation part of the transform
+    Matrix<Dim, Dim> rotation() const {
+        return m_inner.rotation();
+    }
+
+    // Access the translation part of the transform
+private:
+    using TranslationPart = Vector<Scalar, Dim>;
+    using TranslationPartMap = Map<TranslationPart,
+                                   Unaligned,
+                                   Stride<Dim+1, Dim+1>>;
+public:
+    TranslationPart translation() const {
+        return TranslationPart(m_inner.translation());
+    }
+    TranslationPartMap translation() {
+        return TranslationPartMap(m_inner.translation().data());
     }
 
     // Set the last row to [0 ... 0 1]
@@ -90,9 +141,143 @@ public:
         m_inner.makeAffine();
     }
 
-    // TODO: Support rest of the Transform API. matrix() basically requires some
-    //       kind of Map trick for in-place access, and this time I can't evade
-    //       it with a dangerous FIXME as it's heavily used by Acts...
+    // Access the inner transformation matrix
+private:
+    using MatrixType = Matrix<Scalar, Inner::Rows, Inner::HDim, Options>;
+    using MatrixTypeMap = Map<MatrixType>;
+public:
+    MatrixType matrix() const {
+        return MatrixType(m_inner.matrix());
+    }
+    MatrixTypeMap matrix() {
+        return MatrixTypeMap(m_inner.matrix().data());
+    }
+
+    // Coefficient accessors
+    Scalar& operator()(Index row, Index col) {
+        return m_inner(row, col);
+    }
+    Scalar operator()(Index row, Index col) const {
+        return m_inner(row, col);
+    }
+
+    // Apply the transform to some Eigen object
+    // NOTE: No Eagen-style Diagonal for now
+    template <typename DiagonalDerived>
+    Matrix<Dim, Dim> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
+        return Matrix<Dim, Dim>(m_inner * b);
+    }
+    template <typename OtherDerived>
+    OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
+        return OtherDerived(m_inner * other.getInner());
+    }
+    // TODO: Support transforming Eigen::EigenBase too, requires figuring out
+    //       the right matrix type.
+    template <int OtherMode, int OtherOptions>
+    Transform operator*(
+        const Transform<Scalar, OtherMode, OtherOptions>& other
+    ) const {
+        return Transform(m_inner * other.m_inner);
+    }
+
+    // Assign an Eigen object (presumably a transform matrix)
+    template <typename OtherDerived>
+    Transform& operator=(const EigenBase<OtherDerived>& other) {
+        m_inner = other.m_inner;
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& operator=(const Eigen::EigenBase<OtherDerived>& other) {
+        m_inner = other;
+        return *this;
+    }
+
+    // Pre-apply various transforms
+    // FIXME: Figure out how to integrate Eagen rotations here, once available
+    template <typename RotationType>
+    Transform& prerotate(const RotationType& rotation) {
+        m_inner.prerotate(rotation);
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& prescale(const MatrixBase<OtherDerived>& other) {
+        m_inner.prescale(other.getInner());
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& prescale(const Eigen::MatrixBase<OtherDerived>& other) {
+        m_inner.prescale(other);
+        return *this;
+    }
+    Transform& prescale(const Scalar& s) {
+        m_inner.prescale(s);
+        return *this;
+    }
+    Transform& preshear(const Scalar& sx, const Scalar& sy) {
+        m_inner.preshear(sx, sy);
+        return *this;
+    }
+    Transform& pretranslate(const MatrixBase<OtherDerived>& other) {
+        m_inner.pretranslate(other.getInner());
+        return *this;
+    }
+    Transform& pretranslate(const Eigen::MatrixBase<OtherDerived>& other) {
+        m_inner.pretranslate(other);
+        return *this;
+    }
+
+    // Post-apply various transforms
+    // FIXME: Figure out how to integrate Eagen rotations here, once available
+    template <typename RotationType>
+    Transform& rotate(const RotationType& rotation) {
+        m_inner.rotate(rotation);
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& scale(const MatrixBase<OtherDerived>& other) {
+        m_inner.scale(other.getInner());
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& scale(const Eigen::MatrixBase<OtherDerived>& other) {
+        m_inner.scale(other);
+        return *this;
+    }
+    Transform& scale(const Scalar& s) {
+        m_inner.scale(s);
+        return *this;
+    }
+    Transform& shear(const Scalar& sx, const Scalar& sy) {
+        m_inner.shear(sx, sy);
+        return *this;
+    }
+    Transform& translate(const MatrixBase<OtherDerived>& other) {
+        m_inner.translate(other.getInner());
+        return *this;
+    }
+    Transform& translate(const Eigen::MatrixBase<OtherDerived>& other) {
+        m_inner.translate(other);
+        return *this;
+    }
+
+    // Set to the identity transform
+    void setIdentity() {
+        m_inner.setIdentity();
+    }
+
+    // Build an identity transform
+    static Transform Identity() {
+        return Transform(Inner::Identity());
+    }
+
+    // Left-side multiplication
+    // NOTE: No diagonal support in Eagen yet
+    template <typename DiagonalDerived>
+    friend Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& a,
+                               const Transform& b) {
+        return Transform(a * b.m_inner);
+    }
+    // TODO: Support left-side transform multiplication
 
 private:
     Inner m_inner;
