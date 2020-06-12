@@ -18,7 +18,10 @@ namespace detail {
 
 namespace Eagen {
 
-template <typename Derived, int MapOptions, typename StrideType>
+template <typename Derived,
+          int MapOptions = Unaligned,
+          typename StrideType = Stride<TypeTraits<Derived>::OuterStride,
+                                       TypeTraits<Derived>::InnerStride>>
 class Map : public PlainMatrixBase<Map<Derived,
                                        MapOptions,
                                        StrideType>> {
