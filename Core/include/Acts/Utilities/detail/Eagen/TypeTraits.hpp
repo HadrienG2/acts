@@ -9,6 +9,7 @@
 #pragma once
 
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
 
 namespace Acts {
@@ -35,6 +36,8 @@ struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
     static constexpr int Options = _Options;
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
+    static constexpr int InnerStride = 1;
+    static constexpr int OuterStride = (Options & RowMajor) ? Cols : Rows;
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 };
 
@@ -51,6 +54,8 @@ public:
     static constexpr int Options = DerivedTraits::Options;
     static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
     static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int InnerStride = DerivedTraits::InnerStride;
+    static constexpr int OuterStride = DerivedTraits::OuterStride;
     using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
 };
 
@@ -67,7 +72,27 @@ public:
     static constexpr int Options = DerivedTraits::Options;
     static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
     static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int InnerStride = DerivedTraits::InnerStride;
+    static constexpr int OuterStride = DerivedTraits::OuterStride;
     using Inner = Eigen::VectorBlock<DerivedInner, Size>;
+};
+
+// Mapped array type traits
+template <typename Derived, int MapOptions, typename StrideType>
+struct TypeTraits<Map<Derived, MapOptions, StrideType>> {
+private:
+    using DerivedTraits = TypeTraits<Derived>;
+    using DerivedInner = typename DerivedTraits::Inner;
+public:
+    using Scalar = typename DerivedTraits::Scalar;
+    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
+    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
+    static constexpr int Options = DerivedTraits::Options;
+    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int InnerStride = StrideType::InnerStrideAtCompileTime;
+    static constexpr int OuterStride = StrideType::OuterStrideAtCompileTime;
+    using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
 };
 
 }  // namespace Eagen

@@ -9,6 +9,8 @@
 #pragma once
 
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
+#include "ForwardDeclarations.hpp"
 #include "MatrixBase.hpp"
 
 namespace Acts {
@@ -27,8 +29,10 @@ namespace Eagen {
 template <typename Derived>
 class PlainMatrixBase : public MatrixBase<Derived> {
 private:
-    // Eigen type wrapped by the CRTP daughter class
+    // Bring some MatrixBase typedefs into scope
     using Inner = typename MatrixBase<Derived>::Inner;
+    using Index = typename MatrixBase<Derived>::Index;
+    using DerivedTraits = typename MatrixBase<Derived>::DerivedTraits;
 
 public:
     // Derived class scalar type
@@ -101,18 +105,81 @@ public:
     }
 
     // Map foreign data
-    //
-    // FIXME: In addition to being a possible performance issue, copying like
-    //        this is also wrong at the semantic level, because Eigen's maps can
-    //        be written to...
-    //
+private:
+    template <typename Stride>
+    using StridedMapType = Map<Derived, Unaligned, Stride>;
+    template <typename Stride>
+    using StridedAlignedMapType = Map<Derived, Aligned16, Stride>;
+    using DefaultStride = Stride<DerivedTraits::OuterStride,
+                                 DerivedTraits::InnerStride>;
+    using MapType = StridedMapType<DefaultStride>;
+    using AlignedMapType = StridedAlignedMapType<DefaultStride>;
+public:
     template <typename... Args>
-    static Derived Map(Args&&... args) {
-        return Derived(Inner::Map(std::forward<Args>(args)...));
+    static Derived Map(const Scalar* data, Args&&... args) {
+        return Derived(Inner::Map(data, std::forward<Args>(args)...));
     }
     template <typename... Args>
-    static Derived MapAligned(Args&&... args) {
-        return Derived(Inner::MapAligned(std::forward<Args>(args)...));
+    static Derived MapAligned(const Scalar* data, Args&&... args) {
+        return Derived(Inner::MapAligned(data, std::forward<Args>(args)...));
+    }
+    static MapType Map(Scalar* data) {
+        return MapType(data);
+    }
+    static MapType Map(Scalar* data, Index size) {
+        return MapType(data, size);
+    }
+    static MapType Map(Scalar* data, Index rows, Index cols) {
+        return MapType(data, rows, cols);
+    }
+    static AlignedMapType MapAligned(Scalar* data) {
+        return AlignedMapType(data);
+    }
+    static AlignedMapType MapAligned(Scalar* data, Index size) {
+        return AlignedMapType(data, size);
+    }
+    static AlignedMapType MapAligned(Scalar* data, Index rows, Index cols) {
+        return AlignedMapType(data, rows, cols);
+    }
+    template <int Outer, int Inner>
+    static StridedMapType<Stride<Outer, Inner>>
+    Map(Scalar* data, const Stride<Outer, Inner>& stride) {
+        return StridedMapType<Stride<Outer, Inner>>(data, stride);
+    }
+    template <int Outer, int Inner>
+    static StridedMapType<Stride<Outer, Inner>>
+    Map(Scalar* data, Index size, const Stride<Outer, Inner>& stride) {
+        return StridedMapType<Stride<Outer, Inner>>(data, size, stride);
+    }
+    template <int Outer, int Inner>
+    static StridedMapType<Stride<Outer, Inner>>
+    Map(Scalar* data,
+        Index rows,
+        Index cols,
+        const Stride<Outer, Inner>& stride)
+    {
+        return StridedMapType<Stride<Outer, Inner>>(data, rows, cols, stride);
+    }
+    template <int Outer, int Inner>
+    static StridedAlignedMapType<Stride<Outer, Inner>>
+    MapAligned(Scalar* data, const Stride<Outer, Inner>& stride) {
+        return StridedAlignedMapType<Stride<Outer, Inner>>(data, stride);
+    }
+    template <int Outer, int Inner>
+    static StridedAlignedMapType<Stride<Outer, Inner>>
+    MapAligned(Scalar* data, Index size, const Stride<Outer, Inner>& stride) {
+        return StridedAlignedMapType<Stride<Outer, Inner>>(data, size, stride);
+    }
+    template <int Outer, int Inner>
+    static StridedAlignedMapType<Stride<Outer, Inner>>
+    MapAligned(Scalar* data,
+               Index rows,
+               Index cols,
+               const Stride<Outer, Inner>& stride) {
+        return StridedAlignedMapType<Stride<Outer, Inner>>(data,
+                                                           rows,
+                                                           cols,
+                                                           stride);
     }
 
 protected:

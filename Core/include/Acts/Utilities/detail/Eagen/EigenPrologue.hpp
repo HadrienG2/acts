@@ -27,6 +27,17 @@ constexpr int ColMajor = Eigen::ColMajor;
 constexpr int Dynamic = Eigen::Dynamic;
 constexpr int RowMajor = Eigen::RowMajor;
 //
+template<int OuterStride, int InnerStride>
+using Stride = Eigen::Stride<OuterStride, InnerStride>;
+//
+using AlignmentType = Eigen::AlignmentType;
+constexpr AlignmentType Unaligned = Eigen::Unaligned;
+constexpr AlignmentType Aligned8 = Eigen::Aligned8;
+constexpr AlignmentType Aligned16 = Eigen::Aligned16;
+constexpr AlignmentType Aligned32 = Eigen::Aligned32;
+constexpr AlignmentType Aligned64 = Eigen::Aligned64;
+constexpr AlignmentType Aligned128 = Eigen::Aligned128;
+//
 using NoChange_t = Eigen::NoChange_t;
 constexpr NoChange_t NoChange = Eigen::NoChange;
 //

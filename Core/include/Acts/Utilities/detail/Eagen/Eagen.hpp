@@ -19,6 +19,7 @@
 #include "Hyperplane.hpp"
 #include "TypeTraits.hpp"
 #include "CommaInitializer.hpp"
+#include "Map.hpp"
 #include "MatrixBase.hpp"
 #include "PlainMatrixBase.hpp"
 #include "Matrix.hpp"
