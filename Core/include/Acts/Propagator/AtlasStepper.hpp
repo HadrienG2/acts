@@ -815,8 +815,10 @@ class AtlasStepper {
     state.jacobian[34] = P[43];  // dT/dCM
     state.jacobian[35] = P[51];  // dT/dT
 
-    Eigen::Map<Eigen::Matrix<double, eBoundParametersSize, eBoundParametersSize,
-                             Eigen::RowMajor>>
+    detail::Eagen::Map<detail::Eagen::Matrix<double,
+                                             eBoundParametersSize,
+                                             eBoundParametersSize,
+                                             detail::Eagen::RowMajor>>
         J(state.jacobian);
     state.cov = J * (*state.covariance) * J.transpose();
   }
@@ -1073,8 +1075,10 @@ class AtlasStepper {
     state.jacobian[34] = state.pVector[43];  // dT/dCM
     state.jacobian[35] = state.pVector[51];  // dT/dT
 
-    Eigen::Map<Eigen::Matrix<double, eBoundParametersSize, eBoundParametersSize,
-                             Eigen::RowMajor>>
+    detail::Eagen::Map<detail::Eagen::Matrix<double,
+                                             eBoundParametersSize,
+                                             eBoundParametersSize,
+                                             detail::Eagen::RowMajor>>
         J(state.jacobian);
     state.cov = J * (*state.covariance) * J.transpose();
   }

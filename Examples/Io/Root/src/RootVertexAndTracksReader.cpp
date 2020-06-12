@@ -121,7 +121,8 @@ ActsExamples::ProcessCode ActsExamples::RootVertexAndTracksReader::read(
 
             // Construct track covariance
             Acts::BoundSymMatrix covMat =
-                Eigen::Map<Acts::BoundSymMatrix>(trkCovVec.data());
+                Acts::detail::Eagen::Map<Acts::BoundSymMatrix>(
+                    trkCovVec.data());
 
             // Create track parameters and add to track list
             tracks.emplace_back(perigeeSurface, newTrackParams,

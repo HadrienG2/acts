@@ -97,8 +97,8 @@ struct Types {
   // single items
   using Coefficients = detail::Eagen::Matrix<Scalar, Size, 1, Flags>;
   using Covariance = detail::Eagen::Matrix<Scalar, Size, Size, Flags>;
-  using CoefficientsMap = Eigen::Map<ConstIf<Coefficients, ReadOnlyMaps>>;
-  using CovarianceMap = Eigen::Map<ConstIf<Covariance, ReadOnlyMaps>>;
+  using CoefficientsMap = detail::Eagen::Map<ConstIf<Coefficients, ReadOnlyMaps>>;
+  using CovarianceMap = detail::Eagen::Map<ConstIf<Covariance, ReadOnlyMaps>>;
   // storage of multiple items in flat arrays
   using StorageCoefficients =
       GrowableColumns<Eigen::Array<Scalar, Size, Eigen::Dynamic, Flags>,
