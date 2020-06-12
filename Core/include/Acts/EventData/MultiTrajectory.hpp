@@ -59,7 +59,7 @@ struct GrowableColumns {
   auto addCol(size_t n = 1) {
     size_t index = m_size + (n - 1);
     while (capacity() <= index) {
-      data.conservativeResize(Eigen::NoChange, data.cols() + kSizeIncrement);
+      data.conservativeResize(detail::Eagen::NoChange, data.cols() + kSizeIncrement);
     }
     m_size = index + 1;
 
