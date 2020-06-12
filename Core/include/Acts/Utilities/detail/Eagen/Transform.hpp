@@ -118,7 +118,7 @@ public:
     }
 
     // Access the rotation part of the transform
-    Matrix<Dim, Dim> rotation() const {
+    Matrix<Scalar, Dim, Dim> rotation() const {
         return m_inner.rotation();
     }
 
@@ -164,18 +164,18 @@ public:
     // Apply the transform to some Eigen object
     // NOTE: No Eagen-style Diagonal for now
     template <typename DiagonalDerived>
-    Matrix<Dim, Dim> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
-        return Matrix<Dim, Dim>(m_inner * b);
+    Matrix<Scalar, Dim+1, Dim+1> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
+        return Matrix<Scalar, Dim+1, Dim+1>(m_inner * b);
     }
     template <typename OtherDerived>
     OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
         return OtherDerived(m_inner * other.getInner());
     }
     // TODO: Support transforming Eigen::EigenBase too, requires figuring out
-    //       the right matrix type.
+    //       the right Eagen matrix type.
     template <int OtherMode, int OtherOptions>
     Transform operator*(
-        const Transform<Scalar, OtherMode, OtherOptions>& other
+        const Transform<Scalar, Dim, OtherMode, OtherOptions>& other
     ) const {
         return Transform(m_inner * other.m_inner);
     }
@@ -217,10 +217,12 @@ public:
         m_inner.preshear(sx, sy);
         return *this;
     }
+    template <typename OtherDerived>
     Transform& pretranslate(const MatrixBase<OtherDerived>& other) {
         m_inner.pretranslate(other.getInner());
         return *this;
     }
+    template <typename OtherDerived>
     Transform& pretranslate(const Eigen::MatrixBase<OtherDerived>& other) {
         m_inner.pretranslate(other);
         return *this;
@@ -251,10 +253,12 @@ public:
         m_inner.shear(sx, sy);
         return *this;
     }
+    template <typename OtherDerived>
     Transform& translate(const MatrixBase<OtherDerived>& other) {
         m_inner.translate(other.getInner());
         return *this;
     }
+    template <typename OtherDerived>
     Transform& translate(const Eigen::MatrixBase<OtherDerived>& other) {
         m_inner.translate(other);
         return *this;
