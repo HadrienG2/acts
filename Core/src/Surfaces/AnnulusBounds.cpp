@@ -254,7 +254,7 @@ bool Acts::AnnulusBounds::inside(const Vector2D& lposition,
 
     double B = cosDPhiPhiStrip;
     double C = -sinDPhiPhiStrip;
-    Eigen::Matrix<double, 2, 2> jacobianStripPCToModulePC;
+    ActsMatrixD<2, 2> jacobianStripPCToModulePC;
     jacobianStripPCToModulePC(0, 0) = (B * O_x + C * O_y + r_strip) / sqrtA;
     jacobianStripPCToModulePC(0, 1) =
         r_strip * (B * O_y + O_x * sinDPhiPhiStrip) / sqrtA;
@@ -331,7 +331,7 @@ Acts::Vector2D Acts::AnnulusBounds::stripXYToModulePC(
 
 Acts::Vector2D Acts::AnnulusBounds::closestOnSegment(
     const Vector2D& a, const Vector2D& b, const Vector2D& p,
-    const Eigen::Matrix<double, 2, 2>& weight) const {
+    const ActsMatrixD<2, 2>& weight) const {
   // connecting vector
   auto n = b - a;
   // squared norm of line
@@ -343,7 +343,7 @@ Acts::Vector2D Acts::AnnulusBounds::closestOnSegment(
 }
 
 double Acts::AnnulusBounds::squaredNorm(
-    const Vector2D& v, const Eigen::Matrix<double, 2, 2>& weight) const {
+    const Vector2D& v, const ActsMatrixD<2, 2>& weight) const {
   return (v.transpose() * weight * v).value();
 }
 

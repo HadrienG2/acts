@@ -9,6 +9,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Acts/Tests/CommonHelpers/FloatComparisons.hpp"
+#include "Acts/Utilities/Definitions.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 #include <bitset>
@@ -21,7 +22,7 @@ namespace Test {
 BOOST_AUTO_TEST_SUITE(Utilities)
 
 BOOST_AUTO_TEST_CASE(bitset_to_matrix_to_bitset) {
-  Eigen::Matrix<int, 4, 3> mat;
+  ActsMatrix<int, 4, 3> mat;
   mat << 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0;
 
   std::bitset<4 * 3> act = matrixToBitset(mat);
@@ -29,7 +30,7 @@ BOOST_AUTO_TEST_CASE(bitset_to_matrix_to_bitset) {
 
   BOOST_CHECK_EQUAL(exp, act);
 
-  Eigen::Matrix<int, 4, 3> cnv;
+  ActsMatrix<int, 4, 3> cnv;
   cnv = bitsetToMatrix<decltype(cnv)>(act);
 
   BOOST_CHECK_EQUAL(mat, cnv);

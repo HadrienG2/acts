@@ -648,10 +648,10 @@ BOOST_AUTO_TEST_CASE(frustum_intersect) {
     // os = std::ofstream("frust3D_angle.ply");
     // helper.clear();
     // n_vtx             = 1;
-    // Eigen::Affine3f rot;
+    // Transform3F rot;
     // for (size_t i = 0; i <= n; i++) {
     // ActsVectorF<3> origin(i * 4, 0, 0);
-    // rot = Eigen::AngleAxisf(M_PI / float(n) * i, ActsVectorF<3>::UnitY());
+    // rot = AngleAxis3F(M_PI / float(n) * i, ActsVectorF<3>::UnitY());
     // float          angle = (M_PI / 2.) / float(n) * (1 + i);
     // ActsVectorF<3> dir(1, 0, 0);
     // Frustum3       fr(origin, rot * dir, angle);
@@ -903,12 +903,12 @@ BOOST_AUTO_TEST_CASE(frustum_intersect) {
     // min + i * step, min + j * step, min + k * step);
     // ActsVectorF<3> dir(1, 0, 0);
 
-    // Eigen::Affine3f rot;
-    // rot = Eigen::AngleAxisf(M_PI / float(s) * i,
+    // Transform3F rot;
+    // rot = AngleAxis3F(M_PI / float(s) * i,
     // ActsVectorF<3>::UnitX())
-    //* Eigen::AngleAxisf(M_PI / float(s) * j,
+    //* AngleAxis3F(M_PI / float(s) * j,
     // ActsVectorF<3>::UnitY())
-    //* Eigen::AngleAxisf(M_PI / float(s) * k,
+    //* AngleAxis3F(M_PI / float(s) * k,
     // ActsVectorF<3>::UnitZ());
 
     // Frustum34 fr(origin, rot * dir, angle);
@@ -925,8 +925,8 @@ BOOST_AUTO_TEST_CASE(frustum_intersect) {
     // n_vtx    = 1;
     // for (size_t i = 0; i <= n; i++) {
     // ActsVectorF<3>  origin(i * 4, 0, 0);
-    // Eigen::Affine3f rot;
-    // rot   = Eigen::AngleAxisf(M_PI / float(n) * i,
+    // Transform3F rot;
+    // rot   = AngleAxis3F(M_PI / float(n) * i,
     // ActsVectorF<3>::UnitY());
     // angle = (M_PI / 2.) / float(n) * (1 + i);
     // ActsVectorF<3> dir(1, 0, 0);
