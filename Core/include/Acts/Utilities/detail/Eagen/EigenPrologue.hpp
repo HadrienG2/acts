@@ -22,6 +22,8 @@ namespace Eagen {
 // because it would conflict with a class-local typedef or constexpr with the
 // same name, put it in EigenEpilogue.hpp
 //
+constexpr int Dynamic = Eigen::Dynamic;
+//
 template<int OuterStride, int InnerStride>
 using Stride = Eigen::Stride<OuterStride, InnerStride>;
 //
@@ -39,7 +41,6 @@ constexpr NoChange_t NoChange = Eigen::NoChange;
 using StorageOptions = Eigen::StorageOptions;
 constexpr StorageOptions AutoAlign = Eigen::AutoAlign;
 constexpr StorageOptions ColMajor = Eigen::ColMajor;
-constexpr StorageOptions Dynamic = Eigen::Dynamic;
 constexpr StorageOptions RowMajor = Eigen::RowMajor;
 //
 using TransformTraits = Eigen::TransformTraits;
