@@ -170,10 +170,10 @@ using RotationMatrix4D = ActsMatrixD<4, 4>;
 // pure rotation transformations. only available in 2d and 3d
 using Rotation2F = Eigen::Rotation2D<float>;
 using Rotation3F = Eigen::Quaternion<float>;
-using AngleAxis3F = Eigen::AngleAxis<float>;
+using AngleAxis3F = detail::Eagen::AngleAxis<float>;
 using Rotation2D = Eigen::Rotation2D<double>;
 using Rotation3D = Eigen::Quaternion<double>;
-using AngleAxis3D = Eigen::AngleAxis<double>;
+using AngleAxis3D = detail::Eagen::AngleAxis<double>;
 // combined affine transformations. types are chosen for better data alignment:
 // - 2d affine compact stored as 2x3 matrix
 // - 3d affine stored as 4x4 matrix

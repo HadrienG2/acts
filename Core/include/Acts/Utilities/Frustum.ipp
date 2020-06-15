@@ -38,7 +38,7 @@ Acts::Frustum<value_t, DIM, SIDES>::Frustum(const VertexType& origin,
     : m_origin(origin) {
   static_assert(SIDES > 2, "3D frustum must have 3 or more sides");
   assert(opening_angle < M_PI);
-  using angle_axis_t = Eigen::AngleAxis<value_type>;
+  using angle_axis_t = detail::Eagen::AngleAxis<value_type>;
 
   const VertexType ldir = VertexType::UnitZ();
   const VertexType lup = VertexType::UnitX();
