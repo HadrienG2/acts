@@ -33,6 +33,16 @@ private:
     using Index = Eigen::Index;
 
 public:
+
+    // Access the inner Eigen map
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+
+    // Eigen-like foreign data map constructors
     Map(PointerArgType dataPtr, const StrideType& stride = StrideType())
         : m_inner(dataPtr, stride)
     {}
