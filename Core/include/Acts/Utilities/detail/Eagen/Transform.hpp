@@ -294,6 +294,23 @@ private:
     }
 };
 
+using Affine2f = Transform<float,2,Affine>;
+using Affine3f = Transform<float,3,Affine>;
+using Affine2d = Transform<double,2,Affine>;
+using Affine3d = Transform<double,3,Affine>;
+using AffineCompact2f = Transform<float,2,AffineCompact>;
+using AffineCompact3f = Transform<float,3,AffineCompact>;
+using AffineCompact2d = Transform<double,2,AffineCompact>;
+using AffineCompact3d = Transform<double,3,AffineCompact>;
+using Isometry2f = Transform<float,2,Isometry>;
+using Isometry3f = Transform<float,3,Isometry>;
+using Isometry2d = Transform<double,2,Isometry>;
+using Isometry3d = Transform<double,3,Isometry>;
+using Projective2f = Transform<float,2,Projective>;
+using Projective3f = Transform<float,3,Projective>;
+using Projective2d = Transform<double,2,Projective>;
+using Projective3d = Transform<double,3,Projective>;
+
 }  // namespace Eagen
 
 }  // namespace detail
