@@ -145,6 +145,9 @@ private:
     }
 };
 
+using AngleAxisd = AngleAxis<double>;
+using AngleAxisf = AngleAxis<float>;
+
 }  // namespace Eagen
 
 }  // namespace detail
