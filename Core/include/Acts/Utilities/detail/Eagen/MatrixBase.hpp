@@ -821,6 +821,11 @@ public:
         return derived();
     }
 
+    // Matrix negation
+    PlainBase operator-() const {
+        return PlainBase(-derivedInner());
+    }
+
     // TODO: Support selfadjointView()
     //       This is not currently used by Acts, so lower-priority.
 
