@@ -24,7 +24,10 @@ namespace Eagen {
 // NOTE: QTransform interoperability is currently not supported, probably never
 //       will be supported unless a need for it appears.
 //
-template <typename _Scalar, int _Dim, int _Mode, int _Options>
+template <typename _Scalar,
+          int _Dim,
+          int _Mode,
+          int _Options = AutoAlign>
 class Transform {
 public:
     // Expose template parameters
