@@ -195,6 +195,30 @@ public:
         return Transform(m_inner * other.m_inner);
     }
 
+    // Compose with a translation
+    Transform operator*(const Translation<Scalar, Dim>& t) const {
+        return Transform(m_inner * t.getInner());
+    }
+    Transform operator*(const Eigen::Translation<Scalar, Dim>& t) const {
+        return Transform(m_inner * t);
+    }
+    Transform& operator*=(const Translation<Scalar, Dim>& t) {
+        m_inner *= t.getInner();
+        return *this;
+    }
+    Transform& operator*=(const Eigen::Translation<Scalar, Dim>& t) {
+        m_inner *= t;
+        return *this;
+    }
+    Transform& operator=(const Translation<Scalar, Dim>& t) {
+        m_inner = t.getInner();
+        return *this;
+    }
+    Transform& operator=(const Eigen::Translation<Scalar, Dim>& t) {
+        m_inner = t;
+        return *this;
+    }
+
     // Assign an Eigen object (presumably a transform matrix)
     template <typename OtherDerived>
     Transform& operator=(const EigenBase<OtherDerived>& other) {

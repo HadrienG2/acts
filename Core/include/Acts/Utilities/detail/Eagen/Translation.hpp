@@ -65,15 +65,23 @@ public:
         : m_inner(other)
     {}
 
+    // /!\ UNDOCUMENTED /!\ constructors from scalars which Acts uses
+    Translation(const Scalar& sx, const Scalar& sy)
+        : m_inner(sx, sy)
+    {}
+    Translation(const Scalar& sx, const Scalar& sy, const Scalar& sz)
+        : m_inner(sx, sy, sz)
+    {}
+
     // Constructor from a translation vector
-    Translation(const VectorType& vector)
-        : m_inner(other.getInner())
+    explicit Translation(const VectorType& vector)
+        : m_inner(vector.getInner())
     {}
 private:
     using VectorTypeInner = typename VectorType::Inner;
 public:
-    Translation(const VectorTypeInner& vector)
-        : m_inner(other)
+    explicit Translation(const VectorTypeInner& vector)
+        : m_inner(vector)
     {}
 
     // Scalar cast
@@ -105,6 +113,7 @@ public:
     // FIXME: Can't currently be supported in Eagen because we don't
     //        separate the EigenBase and MatrixBase class hierarchy layers
     //
+    template <typename OtherDerived>
     AffineTransformType
     operator*(const Eigen::EigenBase<OtherDerived>& linear) const {
         return AffineTransformType(m_inner * linear);
@@ -154,7 +163,7 @@ public:
     Translation operator*(const Translation& other) const {
         return Translation(m_inner * other.getInner());
     }
-    Translation operator*(const Eigen::Translation& other) const {
+    Translation operator*(const Inner& other) const {
         return Translation(m_inner * other);
     }
 
@@ -187,13 +196,6 @@ private:
         return Eigen::NumTraits<Scalar>::dummy_precision();
     }
 };
-
-template <typename Derived, int _Dim>
-template <typename Scalar, Dim>
-Transform<Scalar, Dim, Isometry>
-RotationBase<Derived, _Dim>::operator*(const Translation<Scalar, Dim>& t) {
-    Transform<Scalar, Dim, Isometry>(derivedInner() * t.getInner());
-}
 
 }  // namespace Eagen
 

@@ -23,17 +23,19 @@ namespace detail {
 namespace Eagen {
 
 // Spiritual equivalent of Eigen::RotationBase
-template <typename Derived, int _Dim>
+template <typename _Derived, int _Dim>
 class RotationBase {
+public:
+    // Re-expose template parameters
+    using Derived = _Derived;
+    static constexpr int Dim = _Dim;
+
 protected:
     // Eigen type wrapped by the CRTP daughter class
     using DerivedTraits = TypeTraits<Derived>;
     using Inner = typename DerivedTraits::Inner;
 
 public:
-    // Re-expose template parameters
-    static constexpr int Dim = _Dim;
-
     // === Eigen::RotationBase API ===
 
     // Typedefs
@@ -92,10 +94,12 @@ public:
 
     // Compose with a translation
     Transform<Scalar, Dim, Isometry>
-    operator*(const Translation<Scalar, Dim>& t) const;
+    operator*(const Translation<Scalar, Dim>& t) const {
+        return Transform<Scalar, Dim, Isometry>(derivedInner() * t.getInner());
+    }
     Transform<Scalar, Dim, Isometry>
     operator*(const Eigen::Translation<Scalar, Dim>& t) const {
-        Transform<Scalar, Dim, Isometry>(derivedInner() * t);
+        return Transform<Scalar, Dim, Isometry>(derivedInner() * t);
     }
 
     // TODO: Figure out what Eigen::UniformScaling is and if we must support it
