@@ -14,12 +14,11 @@
 // Eagen is an eagerly evaluated Eigen wrapper, bypassing expression templates
 #include "AngleAxis.hpp"
 #include "Block.hpp"
+#include "CommaInitializer.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
 #include "Hyperplane.hpp"
-#include "TypeTraits.hpp"
-#include "CommaInitializer.hpp"
 #include "Map.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
@@ -28,6 +27,7 @@
 #include "QuaternionBase.hpp"
 #include "RotationBase.hpp"
 #include "Transform.hpp"
+#include "TypeTraits.hpp"
 #include "VectorBlock.hpp"
 
 // These declarations must occur after everything else has been declared
