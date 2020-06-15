@@ -26,19 +26,23 @@ template <typename Derived>
 class QuaternionBase : public RotationBase<Derived, 3> {
 private:
     // Bring some RotationBase typedefs into scope
-    using Inner = typename RotationBase<Derived>::Inner;
-    using DerivedTraits = typename RotationBase<Derived>::DerivedTraits;
+    using Super = RotationBase<Derived, 3>;
+    using Inner = typename Super::Inner;
+    using DerivedTraits = typename Super::DerivedTraits;
 
 public:
     // Derived class scalar type
-    using Scalar = typename RotationBase<Derived>::Scalar;
+    using Scalar = typename Super::Scalar;
 
     // Transform a vector
-    using Vector3 = Vector<Scalar, 3>
+    using Vector3 = Vector<Scalar, 3>;
     Vector3 _transformVector(const Vector3& v) const {
         return Vector3(derivedInner()._transformVector(v.getInner()));
     }
-    Vector3 _transformVector(const Eigen::Vector3& v) const {
+private:
+    using Vector3Inner = typename Vector3::Inner;
+public:
+    Vector3 _transformVector(const Vector3Inner& v) const {
         return Vector3(derivedInner()._transformVector(v));
     }
 
@@ -69,7 +73,7 @@ public:
     Coefficients coeffs() const {
         return Coefficients(derivedInner().coeffs());
     }
-    CoefficientsMap coeffs() const {
+    CoefficientsMap coeffs() {
         return CoefficientsMap(derivedInner().coeffs().data());
     }
 private:
@@ -165,6 +169,7 @@ public:
     operator*(const Eigen::QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(derivedInner() * other);
     }
+    using Super::operator*;
 
     // In-place quaternion product
     template <typename OtherDerived>
@@ -238,7 +243,7 @@ public:
     slerp(const Scalar& t,
           const QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(
-            derivedInner().slerp(t, other.derivedInner());
+            derivedInner().slerp(t, other.derivedInner())
         );
     }
     template <typename OtherDerived>
@@ -246,7 +251,7 @@ public:
     slerp(const Scalar& t,
           const Eigen::QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(
-            derivedInner().slerp(t, other);
+            derivedInner().slerp(t, other)
         );
     }
 
@@ -260,6 +265,11 @@ public:
     static Quaternion<Scalar> Identity() {
         return Quaternion<Scalar>(Inner::Identity());
     }
+
+protected:
+    // FIXME: I have zero idea why this is apparently needed...
+    using Super::derived;
+    using Super::derivedInner;
 
 private:
     static RealScalar dummy_precision() {

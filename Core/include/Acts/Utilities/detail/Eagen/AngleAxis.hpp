@@ -143,7 +143,7 @@ public:
     QuaternionType operator*(const AngleAxis& other) const {
         return QuaternionType(m_inner * other.m_inner);
     }
-    QuaternionType operator*(const Eigen::AngleAxis& other) const {
+    QuaternionType operator*(const Inner& other) const {
         return QuaternionType(m_inner * other);
     }
 

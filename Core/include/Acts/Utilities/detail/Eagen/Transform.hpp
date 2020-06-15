@@ -39,6 +39,14 @@ public:
     // Inner Eigen type
     using Inner = Eigen::Transform<Scalar, Dim, Mode, Options>;
 
+    // Access the inner Eigen type
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+
     // Eigen-style typedefs and consts
     using Index = Eigen::Index;
     using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
