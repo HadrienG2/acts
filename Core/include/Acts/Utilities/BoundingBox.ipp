@@ -13,7 +13,7 @@ Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::AxisAlignedBoundingBox(
       m_vmin(vmin),
       m_vmax(vmax),
       m_center((vmin + vmax) / 2.),
-      m_width(vmax - vmin),
+      m_width((vmax - vmin).array()),
       m_iwidth(1 / m_width) {}
 
 template <typename entity_t, typename value_t, size_t DIM>
@@ -23,7 +23,7 @@ Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::AxisAlignedBoundingBox(
       m_vmin(center - size.get() * 0.5),
       m_vmax(center + size.get() * 0.5),
       m_center(center),
-      m_width(size.get()),
+      m_width(size.get().array()),
       m_iwidth(1 / m_width) {}
 
 template <typename entity_t, typename value_t, size_t DIM>
@@ -50,7 +50,7 @@ Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::AxisAlignedBoundingBox(
   std::tie(m_vmin, m_vmax) = wrap(boxes, envelope);
 
   m_center = (m_vmin + m_vmax) / 2.;
-  m_width = m_vmax - m_vmin;
+  m_width = (m_vmax - m_vmin).array();
   m_iwidth = 1 / m_width;
 }
 
@@ -150,8 +150,8 @@ bool Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::intersect(
   const auto& normals = fr.normals();
   // Transform vmin and vmax into the coordinate system, at which the frustum is
   // located at the coordinate origin.
-  const vertex_array_type fr_vmin = m_vmin - fr.origin();
-  const vertex_array_type fr_vmax = m_vmax - fr.origin();
+  const vertex_array_type fr_vmin = (m_vmin - fr.origin()).array();
+  const vertex_array_type fr_vmax = (m_vmax - fr.origin()).array();
 
   // For each plane, find the p-vertex, which is the vertex that is at the
   // furthest distance from the plane *along* it's normal direction.

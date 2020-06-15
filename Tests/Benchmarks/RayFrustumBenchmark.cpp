@@ -54,7 +54,7 @@ int main(int /*argc*/, char** /*argv[]*/) {
                                          const Ray<float, 3>& ray) {
     const VertexType& origin = ray.origin();
 
-    const vertex_array_type& d = ray.dir();
+    const vertex_array_type& d = ray.dir().array();
 
     double tmin = -INFINITY, tmax = INFINITY;
     if (d.x() != 0.0) {
@@ -88,7 +88,7 @@ int main(int /*argc*/, char** /*argv[]*/) {
                                        const Ray<float, 3>& ray) {
     const VertexType& origin = ray.origin();
 
-    const vertex_array_type& d = ray.dir();
+    const vertex_array_type& d = ray.dir().array();
 
     double tmin = -INFINITY, tmax = INFINITY;
 
@@ -107,7 +107,7 @@ int main(int /*argc*/, char** /*argv[]*/) {
   rayVariants["Incl. div., min/max alt., unroll"] =
       [](const Box& box, const Ray<float, 3>& ray) {
         const VertexType& origin = ray.origin();
-        const vertex_array_type& d = ray.dir();
+        const vertex_array_type& d = ray.dir().array();
 
         double tx1 = (box.min().x() - origin.x()) / d.x();
         double tx2 = (box.max().x() - origin.x()) / d.x();
@@ -228,8 +228,8 @@ int main(int /*argc*/, char** /*argv[]*/) {
                                      // kind of match the other impl
 
         const auto& normals = fr.normals();
-        const vertex_array_type fr_vmin = box.min() - fr.origin();
-        const vertex_array_type fr_vmax = box.max() - fr.origin();
+        const vertex_array_type fr_vmin = (box.min() - fr.origin()).array();
+        const vertex_array_type fr_vmax = (box.max() - fr.origin()).array();
 
         auto calc = [&](const auto& normal) {
           return (normal.array() < 0).template cast<value_type>() * fr_vmin +
@@ -284,8 +284,8 @@ int main(int /*argc*/, char** /*argv[]*/) {
   frustumVariants["Nominal, no early ret."] = [](const Box& box,
                                                  const Frustum3& fr) {
     const auto& normals = fr.normals();
-    const vertex_array_type fr_vmin = box.min() - fr.origin();
-    const vertex_array_type fr_vmax = box.max() - fr.origin();
+    const vertex_array_type fr_vmin = (box.min() - fr.origin()).array();
+    const vertex_array_type fr_vmax = (box.max() - fr.origin()).array();
 
     VertexType p_vtx;
     bool result = true;
@@ -306,8 +306,8 @@ int main(int /*argc*/, char** /*argv[]*/) {
                                      // kind of match the other impl
 
         const auto& normals = fr.normals();
-        const vertex_array_type fr_vmin = box.min() - fr.origin();
-        const vertex_array_type fr_vmax = box.max() - fr.origin();
+        const vertex_array_type fr_vmin = (box.min() - fr.origin()).array();
+        const vertex_array_type fr_vmax = (box.max() - fr.origin()).array();
 
         auto calc = [&](const auto& normal) {
           return (normal.array() < 0).template cast<value_type>() * fr_vmin +
