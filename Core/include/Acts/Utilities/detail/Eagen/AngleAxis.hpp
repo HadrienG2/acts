@@ -1,0 +1,134 @@
+// This file is part of the Acts project.
+//
+// Copyright (C) 2020 CERN for the benefit of the Acts project
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#pragma once
+
+#include "EigenDense.hpp"
+#include "ForwardDeclarations.hpp"
+#include "Map.hpp"
+#include "MatrixBase.hpp"
+#include "Matrix.hpp"
+
+namespace Acts {
+
+namespace detail {
+
+namespace Eagen {
+
+// Wrapper of Eigen::AngleAxis
+template <typename _Scalar>
+class AngleAxis {
+public:
+    // Typedefs
+    using Scalar = _Scalar;
+private:
+    using Inner = Eigen::AngleAxis<Scalar>;
+public:
+
+    // Default constructor
+    AngleAxis() = default;
+
+    // Constructor from another AngleAxis transform
+    template <typename OtherScalar>
+    AngleAxis(const AngleAxis<OtherScalar>& other)
+        : m_inner(other.m_inner)
+    {}
+    template <typename OtherScalar>
+    AngleAxis(const Eigen::AngleAxis<OtherScalar>& other)
+        : m_inner(other)
+    {}
+
+    // Constructor from quaternion
+    // FIXME: No Eagen equivalent, for now
+    template <typename QuatDerived>
+    explicit AngleAxis(const Eigen::QuaternionBase<QuatDerived>& q)
+        : m_inner(q)
+    {}
+
+    // Constructor from angle and axis
+    template <typename Derived>
+    explicit AngleAxis(const Scalar& angle, const MatrixBase<Derived>& axis)
+        : m_inner(angle, axis.derivedInner())
+    {}
+    template <typename Derived>
+    explicit AngleAxis(const Scalar& angle,
+                       const Eigen::MatrixBase<Derived>& axis)
+        : m_inner(angle, axis)
+    {}
+
+    // Angle accessor
+    Scalar& angle() {
+        return m_inner.angle();
+    }
+    Scalar angle() const {
+        return m_inner.angle();
+    }
+
+    // Axis accessor
+private:
+    using AxisType = Vector<Scalar, 3>;
+    using AxisTypeMap = Map<AxisType>;
+public:
+    AxisType axis() const {
+        return AxisType(m_inner.axis());
+    }
+    AxisTypeMap axis() {
+        return AxisTypeMap(m_inner.axis().data());
+    }
+
+    // Scalar type casting
+    template <typename NewScalarType>
+    AngleAxis<NewScalarType> cast() const {
+        return AngleAxis<NewScalarType>(m_inner.template cast<NewScalarType>());
+    }
+
+    // Convert to and from rotation matrix
+    template <typename Derived>
+    AngleAxis& fromRotationMatrix(const MatrixBase<Derived>& mat) {
+        m_inner.fromRotationMatrix(mat.derivedInner());
+    }
+    template <typename Derived>
+    AngleAxis& fromRotationMatrix(const Eigen::MatrixBase<Derived>& mat) {
+        m_inner.fromRotationMatrix(mat);
+    }
+    Matrix<Scalar, 3, 3> toRotationMatrix() const {
+        return Matrix<Scalar, 3, 3>(m_inner.toRotationMatrix());
+    }
+
+    // Compute the inverse transform
+    AngleAxis inverse() const {
+        AngleAxis(m_inner.inverse());
+    }
+
+    // Approximate equality
+    bool isApprox(const AngleAxis& other,
+                  const RealScalar& prec = dummy_precision()) const {
+        return m_inner.isApprox(other.m_inner, prec);
+    }
+    bool isApprox(const Inner& other,
+                  const RealScalar& prec = dummy_precision()) const {
+        return m_inner.isApprox(other, prec);
+    }
+
+    // FIXME: Add multiplication (need quaternions)
+    // FIXME: Add assignment (need quaternions)
+
+
+private:
+    Inner m_inner;
+
+    static RealScalar dummy_precision() {
+        return Eigen::NumTraits<Scalar>::dummy_precision();
+    }
+};
+
+}  // namespace Eagen
+
+}  // namespace detail
+
+}  // namespace Acts
