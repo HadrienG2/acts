@@ -38,18 +38,18 @@ public:
 
     // Eigen-style typedefs and consts
     using Index = Eigen::Index;
-    using RealScalar = typename Inner::RealScalar;
+    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
 
     // Default constructor
     Transform() = default;
 
     // Constructor from a transformation matrix
     template <typename OtherDerived>
-    Transform(const EigenBase<OtherDerived>& other)
-        : m_inner(other.getInner())
+    explicit Transform(const EigenBase<OtherDerived>& other)
+        : m_inner(other.derivedInner())
     {}
     template <typename OtherDerived>
-    Transform(const Eigen::EigenBase<OtherDerived>& other)
+    explicit Transform(const Eigen::EigenBase<OtherDerived>& other)
         : m_inner(other)
     {}
 
@@ -111,7 +111,7 @@ private:
                               Stride<Dim+1, 1>>;
 public:
     LinearPart linear() const {
-        return ConstLinearPart(m_inner.linear());
+        return LinearPart(m_inner.linear());
     }
     LinearPartMap linear() {
         return LinearPartMap(m_inner.linear().data());
@@ -169,7 +169,7 @@ public:
     }
     template <typename OtherDerived>
     OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
-        return OtherDerived(m_inner * other.getInner());
+        return OtherDerived(m_inner * other.derivedInner());
     }
     // TODO: Support transforming Eigen::EigenBase too, requires figuring out
     //       the right Eagen matrix type.
@@ -201,7 +201,7 @@ public:
     }
     template <typename OtherDerived>
     Transform& prescale(const MatrixBase<OtherDerived>& other) {
-        m_inner.prescale(other.getInner());
+        m_inner.prescale(other.derivedInner());
         return *this;
     }
     template <typename OtherDerived>
@@ -219,7 +219,7 @@ public:
     }
     template <typename OtherDerived>
     Transform& pretranslate(const MatrixBase<OtherDerived>& other) {
-        m_inner.pretranslate(other.getInner());
+        m_inner.pretranslate(other.derivedInner());
         return *this;
     }
     template <typename OtherDerived>
@@ -237,7 +237,7 @@ public:
     }
     template <typename OtherDerived>
     Transform& scale(const MatrixBase<OtherDerived>& other) {
-        m_inner.scale(other.getInner());
+        m_inner.scale(other.derivedInner());
         return *this;
     }
     template <typename OtherDerived>
@@ -255,7 +255,7 @@ public:
     }
     template <typename OtherDerived>
     Transform& translate(const MatrixBase<OtherDerived>& other) {
-        m_inner.translate(other.getInner());
+        m_inner.translate(other.derivedInner());
         return *this;
     }
     template <typename OtherDerived>
