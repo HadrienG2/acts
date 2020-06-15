@@ -195,14 +195,24 @@ public:
         return Transform(m_inner * other.m_inner);
     }
 
-    // Compose with a translation
-    Transform operator*(const Translation<Scalar, Dim>& t) const {
+    // Translation interoperability
+    using TranslationType = Translation<Scalar, Dim>;
+private:
+    using TranslationTypeInner = typename TranslationType::Inner;
+public:
+    Transform(const TranslationType& t)
+        : m_inner(t.getInner())
+    {}
+    Transform(const TranslationTypeInner& t)
+        : m_inner(t)
+    {}
+    Transform operator*(const TranslationType& t) const {
         return Transform(m_inner * t.getInner());
     }
     Transform operator*(const Eigen::Translation<Scalar, Dim>& t) const {
         return Transform(m_inner * t);
     }
-    Transform& operator*=(const Translation<Scalar, Dim>& t) {
+    Transform& operator*=(const TranslationType& t) {
         m_inner *= t.getInner();
         return *this;
     }
