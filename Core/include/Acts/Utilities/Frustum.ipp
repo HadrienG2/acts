@@ -44,7 +44,8 @@ Acts::Frustum<value_t, DIM, SIDES>::Frustum(const VertexType& origin,
   const VertexType lup = VertexType::UnitX();
 
   transform_type transform;
-  transform = (Eigen::Quaternion<value_type>().setFromTwoVectors(ldir, dir));
+  transform =
+    (detail::Eagen::Quaternion<value_type>().setFromTwoVectors(ldir, dir));
 
   m_normals[0] = ldir;
 
