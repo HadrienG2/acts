@@ -26,6 +26,7 @@ class Map : public PlainMatrixBase<Map<Derived,
                                        MapOptions,
                                        StrideType>> {
 private:
+    using Super = PlainMatrixBase<Map<Derived, MapOptions, StrideType>>;
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
     using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
@@ -33,7 +34,6 @@ private:
     using Index = Eigen::Index;
 
 public:
-
     // Access the inner Eigen map
     Inner& getInner() {
         return m_inner;
@@ -57,6 +57,9 @@ public:
         const StrideType& stride = StrideType())
         : m_inner(dataPtr, size, stride)
     {}
+
+    // Inherit useful base class facilities
+    using Super::operator=;
 
 private:
     Inner m_inner;

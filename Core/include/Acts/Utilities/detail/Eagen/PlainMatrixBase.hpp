@@ -30,13 +30,14 @@ template <typename Derived>
 class PlainMatrixBase : public MatrixBase<Derived> {
 private:
     // Bring some MatrixBase typedefs into scope
-    using Inner = typename MatrixBase<Derived>::Inner;
-    using Index = typename MatrixBase<Derived>::Index;
-    using DerivedTraits = typename MatrixBase<Derived>::DerivedTraits;
+    using Super = MatrixBase<Derived>;
+    using Inner = typename Super::Inner;
+    using Index = typename Super::Index;
+    using DerivedTraits = typename Super::DerivedTraits;
 
 public:
     // Derived class scalar type
-    using Scalar = typename MatrixBase<Derived>::Scalar;
+    using Scalar = typename Super::Scalar;
 
     // === Eigen::PlainObjectBase interface ===
 
@@ -182,9 +183,12 @@ public:
                                                            stride);
     }
 
+    // Inherit useful base class facilities
+    using Super::operator=;
+
 protected:
     // FIXME: I have zero idea why this is apparently needed...
-    using MatrixBase<Derived>::derivedInner;
+    using Super::derivedInner;
 };
 
 }  // namespace Eagen

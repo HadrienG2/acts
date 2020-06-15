@@ -843,16 +843,16 @@ public:
     //       This is not currently used by Acts, so lower-priority.
 
     // Coefficient-wise operations
-    template <typename Other>
-    PlainBase cwiseMin(const Other& other) const {
+    template <typename OtherDerived>
+    PlainBase cwiseMin(const Eigen::MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseMin(other));
     }
     template <typename OtherDerived>
     PlainBase cwiseMin(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseMin(other.derivedInner()));
     }
-    template <typename Other>
-    PlainBase cwiseMax(const Other& other) const {
+    template <typename OtherDerived>
+    PlainBase cwiseMax(const Eigen::MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseMax(other));
     }
     template <typename OtherDerived>
@@ -887,8 +887,8 @@ public:
     PlainBase cwiseQuotient(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseQuotient(other.derivedInner()));
     }
-    template <typename Other>
-    PlainBase cwiseEqual(const Other& other) const {
+    template <typename OtherDerived>
+    PlainBase cwiseEqual(const Eigen::MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseEqual(other));
     }
     template <typename OtherDerived>
@@ -929,7 +929,8 @@ public:
     // --- Sub-matrices ---
     //
     // NOTE: Can make const accessors return block expressions too if the copies
-    //       turn out to be excessively costly.
+    //       turn out to be excessively costly, but that requires some dev work
+    //       for Block<const T> support.
 
     // Row and column accessors
     Block<Derived, 1, Cols, IsRowMajor || (Cols == 1)> row(Index i) {
@@ -973,18 +974,18 @@ public:
         return segment<n>(0);
     }
     SubVectorBlock<Dynamic> tail(int n) {
-        return segment(size()-1-n, n);
+        return segment(size()-n, n);
     }
     SubVector<Dynamic> tail(int n) const {
-        return segment(size()-1-n, n);
+        return segment(size()-n, n);
     }
     template <int n>
     SubVectorBlock<n> tail() {
-        return segment<n>(size()-1-n);
+        return segment<n>(size()-n);
     }
     template <int n>
     SubVector<n> tail() const {
-        return segment<n>(size()-1-n);
+        return segment<n>(size()-n);
     }
     SubVectorBlock<Dynamic> segment(Index pos, int n) {
         return SubVectorBlock<Dynamic>(derived(), pos, n);
@@ -1003,213 +1004,228 @@ public:
 
     // Sub-matrix accessors
 private:
-    template <int SubRows, int SubCols>
-    using SubMatrix = Matrix<Scalar, SubRows, SubCols>;
-    template <int SubRows, int SubCols>
+    template <int BlockRows, int BlockCols>
+    using SubMatrix = Matrix<Scalar, BlockRows, BlockCols>;
+    template <int BlockRows, int BlockCols>
     using SubMatrixBlock = Block<
         Derived,
-        SubRows,
-        SubCols,
-        IsRowMajor ? ((SubRows == 1) || ((SubCols != Dynamic) && (SubCols == Cols)))
-                   : ((SubCols == 1) || ((SubRows != Dynamic) && (SubRows == Rows)))
+        BlockRows,
+        BlockCols,
+        IsRowMajor ? ((BlockRows == 1)
+                      || ((BlockCols != Dynamic) && (BlockCols == Cols)))
+                   : ((BlockCols == 1)
+                      || ((BlockRows != Dynamic) && (BlockRows == Rows)))
     >;
 public:
-    SubMatrixBlock<Dynamic, Dynamic> block(Index i, Index j, int rows, int cols) {
-        return SubMatrixBlock<Dynamic, Dynamic>(
-            derivedInner().block(i, j, rows, cols)
-        );
+    SubMatrixBlock<Dynamic, Dynamic> block(Index startRow,
+                                           Index startCol,
+                                           int blockRows,
+                                           int blockCols) {
+        return SubMatrixBlock<Dynamic, Dynamic>(derived(),
+                                                startRow,
+                                                startCol,
+                                                blockRows,
+                                                blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> block(Index i, Index j, int rows, int cols) const {
+    SubMatrix<Dynamic, Dynamic> block(Index startRow,
+                                      Index startCol,
+                                      int blockRows,
+                                      int blockCols) const {
         return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().block(i, j, rows, cols)
+            derivedInner().block(startRow, startCol, blockRows, blockCols)
         );
     }
-    template <int SubRows, int SubCols>
-    SubMatrixBlock<SubRows, SubCols> block(Index i, Index j) {
-        return SubMatrixBlock<SubRows, SubCols>(
-            derivedInner().template block<SubRows, SubCols>(i, j)
+    template <int BlockRows, int BlockCols>
+    SubMatrixBlock<BlockRows, BlockCols> block(Index startRow,
+                                               Index startCol) {
+        return SubMatrixBlock<BlockRows, BlockCols>(derived(),
+                                                    startRow,
+                                                    startCol);
+    }
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> block(Index startRow,
+                                          Index startCol) const {
+        return SubMatrix<BlockRows, BlockCols>(
+            derivedInner().template block<BlockRows, BlockCols>(startRow,
+                                                                startCol)
         );
     }
-    template <int SubRows, int SubCols>
-    SubMatrix<SubRows, SubCols> block(Index i, Index j) const {
-        return SubMatrix<SubRows, SubCols>(
-            derivedInner().template block<SubRows, SubCols>(i, j)
-        );
+    SubMatrixBlock<Dynamic, Dynamic> topLeftCorner(int blockRows,
+                                                   int blockCols) {
+        return block(0, 0, blockRows, blockCols);
     }
-    SubMatrixBlock<Dynamic, Dynamic> topLeftCorner(int rows, int cols) {
-        return SubMatrixBlock<Dynamic, Dynamic>(
-            derivedInner().topLeftCorner(rows, cols)
-        );
+    SubMatrix<Dynamic, Dynamic> topLeftCorner(int blockRows,
+                                              int blockCols) const {
+        return block(0, 0, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> topLeftCorner(int rows, int cols) const {
-        return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().topLeftCorner(rows, cols)
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrixBlock<BlockRows, BlockCols> topLeftCorner() {
+        return block<BlockRows, BlockCols>(0, 0);
     }
-    template <int SubRows, int SubCols>
-    SubMatrixBlock<SubRows, SubCols> topLeftCorner() {
-        return SubMatrixBlock<SubRows, SubCols>(
-            derivedInner().template topLeftCorner<SubRows, SubCols>()
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> topLeftCorner() const {
+        return block<BlockRows, BlockCols>(0, 0);
     }
-    template <int SubRows, int SubCols>
-    SubMatrix<SubRows, SubCols> topLeftCorner() const {
-        return SubMatrix<SubRows, SubCols>(
-            derivedInner().template topLeftCorner<SubRows, SubCols>()
-        );
+    SubMatrixBlock<Dynamic, Dynamic> topRightCorner(int blockRows,
+                                                    int blockCols) {
+        return block(0, cols()-blockCols, blockRows, blockCols);
     }
-    SubMatrixBlock<Dynamic, Dynamic> topRightCorner(int rows, int cols) {
-        return SubMatrixBlock<Dynamic, Dynamic>(
-            derivedInner().topRightCorner(rows, cols)
-        );
+    SubMatrix<Dynamic, Dynamic> topRightCorner(int blockRows,
+                                               int blockCols) const {
+        return block(0, cols()-blockCols, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> topRightCorner(int rows, int cols) const {
-        return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().topRightCorner(rows, cols)
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrixBlock<BlockRows, BlockCols> topRightCorner() {
+        return block<BlockRows, BlockCols>(0, cols()-BlockCols);
     }
-    template <int SubRows, int SubCols>
-    SubMatrixBlock<SubRows, SubCols> topRightCorner() {
-        return SubMatrixBlock<SubRows, SubCols>(
-            derivedInner().template topRightCorner<SubRows, SubCols>()
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> topRightCorner() const {
+        return block<BlockRows, BlockCols>(0, cols()-BlockCols);
     }
-    template <int SubRows, int SubCols>
-    SubMatrix<SubRows, SubCols> topRightCorner() const {
-        return SubMatrix<SubRows, SubCols>(
-            derivedInner().template topRightCorner<SubRows, SubCols>()
-        );
+    SubMatrixBlock<Dynamic, Dynamic> bottomLeftCorner(int blockRows,
+                                                      int blockCols) {
+        return block(rows()-blockRows, 0, blockRows, blockCols);
     }
-    SubMatrixBlock<Dynamic, Dynamic> bottomLeftCorner(int rows, int cols) {
-        return SubMatrixBlock<Dynamic, Dynamic>(
-            derivedInner().bottomLeftCorner(rows, cols)
-        );
+    SubMatrix<Dynamic, Dynamic> bottomLeftCorner(int blockRows,
+                                                 int blockCols) const {
+        return block(rows()-blockRows, 0, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> bottomLeftCorner(int rows, int cols) const {
-        return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().bottomLeftCorner(rows, cols)
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrixBlock<BlockRows, BlockCols> bottomLeftCorner() {
+        return block<BlockRows, BlockCols>(rows()-BlockRows, 0);
     }
-    template <int SubRows, int SubCols>
-    SubMatrixBlock<SubRows, SubCols> bottomLeftCorner() {
-        return SubMatrixBlock<SubRows, SubCols>(
-            derivedInner().template bottomLeftCorner<SubRows, SubCols>()
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> bottomLeftCorner() const {
+        return block<BlockRows, BlockCols>(rows()-BlockRows, 0);
     }
-    template <int SubRows, int SubCols>
-    SubMatrix<SubRows, SubCols> bottomLeftCorner() const {
-        return SubMatrix<SubRows, SubCols>(
-            derivedInner().template bottomLeftCorner<SubRows, SubCols>()
-        );
+    SubMatrixBlock<Dynamic, Dynamic> bottomRightCorner(int blockRows,
+                                                       int blockCols) {
+        return block(rows()-blockRows,
+                     cols()-blockCols,
+                     blockRows,
+                     blockCols);
     }
-    SubMatrixBlock<Dynamic, Dynamic> bottomRightCorner(int rows, int cols) {
-        return SubMatrixBlock<Dynamic, Dynamic>(
-            derivedInner().bottomRightCorner(rows, cols)
-        );
+    SubMatrix<Dynamic, Dynamic> bottomRightCorner(int blockRows,
+                                                  int blockCols) const {
+        return block(rows()-blockRows,
+                     cols()-blockCols,
+                     blockRows,
+                     blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> bottomRightCorner(int rows, int cols) const {
-        return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().bottomRightCorner(rows, cols)
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrixBlock<BlockRows, BlockCols> bottomRightCorner() {
+        return block<BlockRows, BlockCols>(rows()-BlockRows,
+                                           cols()-BlockCols);
     }
-    template <int SubRows, int SubCols>
-    SubMatrixBlock<SubRows, SubCols> bottomRightCorner() {
-        return SubMatrixBlock<SubRows, SubCols>(
-            derivedInner().template bottomRightCorner<SubRows, SubCols>()
-        );
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> bottomRightCorner() const {
+        return block<BlockRows, BlockCols>(rows()-BlockRows,
+                                           cols()-BlockCols);
     }
-    template <int SubRows, int SubCols>
-    SubMatrix<SubRows, SubCols> bottomRightCorner() const {
-        return SubMatrix<SubRows, SubCols>(
-            derivedInner().template bottomRightCorner<SubRows, SubCols>()
-        );
+private:
+    SubMatrixBlock<Dynamic, Cols> anyRows(int startRow, int blockRows) {
+        return SubMatrixBlock<Dynamic, Cols>(derived(),
+                                             startRow,
+                                             0,
+                                             blockRows,
+                                             Cols);
     }
-    SubMatrixBlock<Dynamic, Cols> topRows(int rows) {
-        return SubMatrixBlock<Dynamic, Cols>(
-            derivedInner().topRows(rows)
-        );
+    template <int BlockRows>
+    SubMatrixBlock<BlockRows, Cols> anyRows(int startRow) {
+        return SubMatrixBlock<BlockRows, Cols>(derived(),
+                                               startRow,
+                                               0,
+                                               BlockRows,
+                                               Cols);
     }
-    SubMatrix<Dynamic, Cols> topRows(int rows) const {
+public:
+    SubMatrixBlock<Dynamic, Cols> topRows(int blockRows) {
+        return anyRows(0, blockRows);
+    }
+    SubMatrix<Dynamic, Cols> topRows(int blockRows) const {
         return SubMatrix<Dynamic, Cols>(
-            derivedInner().topRows(rows)
+            derivedInner().topRows(blockRows)
         );
     }
-    template <int SubRows>
-    SubMatrixBlock<SubRows, Cols> topRows() {
-        return SubMatrixBlock<SubRows, Cols>(
-            derivedInner().template topRows<SubRows>()
+    template <int BlockRows>
+    SubMatrixBlock<BlockRows, Cols> topRows() {
+        return anyRows<BlockRows>(0);
+    }
+    template <int BlockRows>
+    SubMatrix<BlockRows, Cols> topRows() const {
+        return SubMatrix<BlockRows, Cols>(
+            derivedInner().template topRows<BlockRows>()
         );
     }
-    template <int SubRows>
-    SubMatrix<SubRows, Cols> topRows() const {
-        return SubMatrix<SubRows, Cols>(
-            derivedInner().template topRows<SubRows>()
-        );
+    SubMatrixBlock<Dynamic, Cols> bottomRows(int blockRows) {
+        return anyRows(rows()-blockRows, blockRows);
     }
-    SubMatrixBlock<Dynamic, Cols> bottomRows(int rows) {
-        return SubMatrixBlock<Dynamic, Cols>(
-            derivedInner().bottomRows(rows)
-        );
-    }
-    SubMatrix<Dynamic, Cols> bottomRows(int rows) const {
+    SubMatrix<Dynamic, Cols> bottomRows(int blockRows) const {
         return SubMatrix<Dynamic, Cols>(
-            derivedInner().bottomRows(rows)
+            derivedInner().bottomRows(blockRows)
         );
     }
-    template <int SubRows>
-    SubMatrixBlock<SubRows, Cols> bottomRows() {
-        return SubMatrixBlock<SubRows, Cols>(
-            derivedInner().template bottomRows<SubRows>()
+    template <int BlockRows>
+    SubMatrixBlock<BlockRows, Cols> bottomRows() {
+        return anyRows<BlockRows>(rows()-BlockRows);
+    }
+    template <int BlockRows>
+    SubMatrix<BlockRows, Cols> bottomRows() const {
+        return SubMatrix<BlockRows, Cols>(
+            derivedInner().template bottomRows<BlockRows>()
         );
     }
-    template <int SubRows>
-    SubMatrix<SubRows, Cols> bottomRows() const {
-        return SubMatrix<SubRows, Cols>(
-            derivedInner().template bottomRows<SubRows>()
-        );
+private:
+    SubMatrixBlock<Rows, Dynamic> anyCols(int startCol, int blockCols) {
+        return SubMatrixBlock<Rows, Dynamic>(derived(),
+                                             0,
+                                             startCol,
+                                             Rows,
+                                             blockCols);
     }
-    SubMatrixBlock<Rows, Dynamic> leftCols(int cols) {
-        return SubMatrixBlock<Rows, Dynamic>(
-            derivedInner().leftCols(cols)
-        );
+    template <int BlockCols>
+    SubMatrixBlock<Rows, BlockCols> anyCols(int startCol) {
+        return SubMatrixBlock<Rows, BlockCols>(derived(),
+                                               0,
+                                               startCol,
+                                               Rows,
+                                               BlockCols);
     }
-    SubMatrix<Rows, Dynamic> leftCols(int cols) const {
+public:
+    SubMatrixBlock<Rows, Dynamic> leftCols(int blockCols) {
+        return anyCols(0, blockCols);
+    }
+    SubMatrix<Rows, Dynamic> leftCols(int blockCols) const {
         return SubMatrix<Rows, Dynamic>(
-            derivedInner().leftCols(cols)
+            derivedInner().leftCols(blockCols)
         );
     }
-    template <int SubCols>
-    SubMatrixBlock<Rows, SubCols> leftCols() {
-        return SubMatrixBlock<Rows, SubCols>(
-            derivedInner().template leftCols<SubCols>()
+    template <int BlockCols>
+    SubMatrixBlock<Rows, BlockCols> leftCols() {
+        return anyCols<BlockCols>(0);
+    }
+    template <int BlockCols>
+    SubMatrix<Rows, BlockCols> leftCols() const {
+        return SubMatrix<Rows, BlockCols>(
+            derivedInner().template leftCols<BlockCols>()
         );
     }
-    template <int SubCols>
-    SubMatrix<Rows, SubCols> leftCols() const {
-        return SubMatrix<Rows, SubCols>(
-            derivedInner().template leftCols<SubCols>()
-        );
+    SubMatrixBlock<Rows, Dynamic> rightCols(int blockCols) {
+        return anyCols(cols()-blockCols, blockCols);
     }
-    SubMatrixBlock<Rows, Dynamic> rightCols(int cols) {
-        return SubMatrixBlock<Rows, Dynamic>(
-            derivedInner().rightCols(cols)
-        );
-    }
-    SubMatrix<Rows, Dynamic> rightCols(int cols) const {
+    SubMatrix<Rows, Dynamic> rightCols(int blockCols) const {
         return SubMatrix<Rows, Dynamic>(
-            derivedInner().rightCols(cols)
+            derivedInner().rightCols(blockCols)
         );
     }
-    template <int SubCols>
-    SubMatrixBlock<Rows, SubCols> rightCols() {
-        return SubMatrixBlock<Rows, SubCols>(
-            derivedInner().template rightCols<SubCols>()
-        );
+    template <int BlockCols>
+    SubMatrixBlock<Rows, BlockCols> rightCols() {
+        return anyCols<BlockCols>(cols()-BlockCols);
     }
-    template <int SubCols>
-    SubMatrix<Rows, SubCols> rightCols() const {
-        return SubMatrix<Rows, SubCols>(
-            derivedInner().template rightCols<SubCols>()
+    template <int BlockCols>
+    SubMatrix<Rows, BlockCols> rightCols() const {
+        return SubMatrix<Rows, BlockCols>(
+            derivedInner().template rightCols<BlockCols>()
         );
     }
 
