@@ -30,6 +30,8 @@ template <typename _Scalar,
           int _Options = AutoAlign>
 class Transform {
 public:
+    // === Eagen wrapper API ===
+
     // Expose template parameters
     using Scalar = _Scalar;
     static constexpr int Dim = _Dim;
@@ -46,6 +48,8 @@ public:
     const Inner& getInner() const {
         return m_inner;
     }
+
+    // === Eigen::Transform API ===
 
     // Eigen-style typedefs and consts
     using Index = Eigen::Index;

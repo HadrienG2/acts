@@ -32,7 +32,8 @@ template <typename Scalar, int Rows, int Cols,
 class Matrix;
 template <typename Derived> class MatrixBase;
 template <typename Derived> class PlainMatrixBase;
-template <typename _Scalar, int _Options = AutoAlign> class Quaternion;
+template <typename Scalar, int Options = AutoAlign> class Quaternion;
+template <typename Scalar, int Dim> class Translation;
 template <typename Derived, int Size> class VectorBlock;
 
 // Equivalent of Eigen's vector typedefs

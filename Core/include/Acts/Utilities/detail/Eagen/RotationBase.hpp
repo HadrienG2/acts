@@ -91,7 +91,8 @@ public:
     }
 
     // Compose with a translation
-    // FIXME: No Eagen equivalent yet
+    Transform<Scalar, Dim, Isometry>
+    operator*(const Translation<Scalar, Dim>& t) const;
     Transform<Scalar, Dim, Isometry>
     operator*(const Eigen::Translation<Scalar, Dim>& t) const {
         Transform<Scalar, Dim, Isometry>(derivedInner() * t);

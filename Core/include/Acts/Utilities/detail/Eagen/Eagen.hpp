@@ -27,6 +27,7 @@
 #include "QuaternionBase.hpp"
 #include "RotationBase.hpp"
 #include "Transform.hpp"
+#include "Translation.hpp"
 #include "TypeTraits.hpp"
 #include "VectorBlock.hpp"
 
