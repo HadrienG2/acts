@@ -229,6 +229,44 @@ public:
         return *this;
     }
 
+    // Rotation interoperability
+    template <typename OtherDerived>
+    Transform(const RotationBase<OtherDerived, Dim>& r)
+        : m_inner(r.derivedInner())
+    {}
+    template <typename OtherDerived>
+    Transform(const Eigen::RotationBase<OtherDerived, Dim>& r)
+        : m_inner(r)
+    {}
+    template <typename OtherDerived>
+    Transform operator*(const RotationBase<OtherDerived, Dim>& r) const {
+        return Transform(m_inner * r.derivedInner());
+    }
+    template <typename OtherDerived>
+    Transform operator*(const Eigen::RotationBase<OtherDerived, Dim>& r) const {
+        return Transform(m_inner * r);
+    }
+    template <typename OtherDerived>
+    Transform& operator*=(const RotationBase<OtherDerived, Dim>& r) {
+        m_inner *= r.derivedInner();
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& operator*=(const Eigen::RotationBase<OtherDerived, Dim>& r) {
+        m_inner *= r;
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& operator=(const RotationBase<OtherDerived, Dim>& r) {
+        m_inner = r.derivedInner();
+        return *this;
+    }
+    template <typename OtherDerived>
+    Transform& operator=(const Eigen::RotationBase<OtherDerived, Dim>& r) {
+        m_inner = r;
+        return *this;
+    }
+
     // Assign an Eigen object (presumably a transform matrix)
     template <typename OtherDerived>
     Transform& operator=(const EigenBase<OtherDerived>& other) {

@@ -104,8 +104,9 @@ public:
 
     // TODO: Figure out what Eigen::UniformScaling is and if we must support it
 
-protected:
     // === Eagen-specific interface ===
+    //
+    // NOTE: Cannot be protected because Transform needs to access them.
 
     // CRTP daughter class access
     Derived& derived() {
