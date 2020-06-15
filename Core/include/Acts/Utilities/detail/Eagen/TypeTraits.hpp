@@ -22,23 +22,11 @@ namespace Eagen {
 template <typename EagenType>
 struct TypeTraits;
 
-// Matrix type traits
-template <typename _Scalar,
-          int _Rows,
-          int _Cols,
-          int _Options,
-          int _MaxRows,
-          int _MaxCols>
-struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
+// Angle-axis transform type traits
+template <typename _Scalar>
+struct TypeTraits<AngleAxis<_Scalar>> {
     using Scalar = _Scalar;
-    static constexpr int Rows = _Rows;
-    static constexpr int Cols = _Cols;
-    static constexpr int Options = _Options;
-    static constexpr int MaxRows = _MaxRows;
-    static constexpr int MaxCols = _MaxCols;
-    static constexpr int InnerStride = 1;
-    static constexpr int OuterStride = (Options & RowMajor) ? Cols : Rows;
-    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+    using Inner = Eigen::AngleAxis<Scalar>;
 };
 
 // Sub-matrix type traits
@@ -59,24 +47,6 @@ public:
     using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
 };
 
-// Sub-vector type traits
-template <typename Derived, int Size>
-struct TypeTraits<VectorBlock<Derived, Size>> {
-private:
-    using DerivedTraits = TypeTraits<Derived>;
-    using DerivedInner = typename DerivedTraits::Inner;
-public:
-    using Scalar = typename DerivedTraits::Scalar;
-    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
-    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
-    static constexpr int Options = DerivedTraits::Options;
-    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
-    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
-    static constexpr int InnerStride = DerivedTraits::InnerStride;
-    static constexpr int OuterStride = DerivedTraits::OuterStride;
-    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
-};
-
 // Mapped array type traits
 template <typename Derived, int MapOptions, typename StrideType>
 struct TypeTraits<Map<Derived, MapOptions, StrideType>> {
@@ -93,6 +63,43 @@ public:
     static constexpr int InnerStride = StrideType::InnerStrideAtCompileTime;
     static constexpr int OuterStride = StrideType::OuterStrideAtCompileTime;
     using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
+};
+
+// Matrix type traits
+template <typename _Scalar,
+          int _Rows,
+          int _Cols,
+          int _Options,
+          int _MaxRows,
+          int _MaxCols>
+struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
+    using Scalar = _Scalar;
+    static constexpr int Rows = _Rows;
+    static constexpr int Cols = _Cols;
+    static constexpr int Options = _Options;
+    static constexpr int MaxRows = _MaxRows;
+    static constexpr int MaxCols = _MaxCols;
+    static constexpr int InnerStride = 1;
+    static constexpr int OuterStride = (Options & RowMajor) ? Cols : Rows;
+    using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
+};
+
+// Sub-vector type traits
+template <typename Derived, int Size>
+struct TypeTraits<VectorBlock<Derived, Size>> {
+private:
+    using DerivedTraits = TypeTraits<Derived>;
+    using DerivedInner = typename DerivedTraits::Inner;
+public:
+    using Scalar = typename DerivedTraits::Scalar;
+    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
+    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
+    static constexpr int Options = DerivedTraits::Options;
+    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int InnerStride = DerivedTraits::InnerStride;
+    static constexpr int OuterStride = DerivedTraits::OuterStride;
+    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
 };
 
 }  // namespace Eagen

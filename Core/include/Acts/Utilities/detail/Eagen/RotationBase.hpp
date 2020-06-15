@@ -14,6 +14,7 @@
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
 #include "Transform.hpp"
+#include "TypeTraits.hpp"
 
 namespace Acts {
 
@@ -24,6 +25,11 @@ namespace Eagen {
 // Spiritual equivalent of Eigen::RotationBase
 template <typename Derived, int _Dim>
 class RotationBase {
+protected:
+    // Eigen type wrapped by the CRTP daughter class
+    using DerivedTraits = TypeTraits<Derived>;
+    using Inner = typename DerivedTraits::Inner;
+
 public:
     // Re-expose template parameters
     static constexpr int Dim = _Dim;
@@ -31,8 +37,7 @@ public:
     // === Eigen::RotationBase API ===
 
     // Typedefs
-    // NOTE: Will probably need type traits, but let's try without
-    using Scalar = typename Derived::Scalar;
+    using Scalar = typename DerivedTraits::Scalar;
     using RotationMatrixType = Matrix<Scalar, Dim, Dim>;
 
     // Invert the rotation
@@ -94,8 +99,6 @@ public:
 
     // TODO: Figure out what Eigen::UniformScaling is and if we must support it
 
-    // FIXME: Take inspiration from MatrixBase for CRTP trickery
-
 protected:
     // === Eagen-specific interface ===
 
@@ -108,7 +111,6 @@ protected:
     }
 
     // Access the inner Eigen object held by the CRTP daughter class
-    using Inner = typename Derived::inner;
     Inner& derivedInner() {
         return derived().getInner();
     }

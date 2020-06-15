@@ -18,6 +18,10 @@ namespace detail {
 namespace Eagen {
 
 // Forward declarations
+template <typename Scalar> class AngleAxis;
+template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
+class Block;
+template <typename Derived, int MapOptions, typename StrideType> class Map;
 template <typename Scalar, int Rows, int Cols,
           int Options = AutoAlign |
                         ( (Rows==1 && Cols!=1) ? RowMajor
@@ -26,12 +30,9 @@ template <typename Scalar, int Rows, int Cols,
           int MaxRows = Rows,
           int MaxCols = Cols>
 class Matrix;
-template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
-class Block;
-template <typename Derived, int Size> class VectorBlock;
-template <typename Derived, int MapOptions, typename StrideType> class Map;
-template <typename Derived> class PlainMatrixBase;
 template <typename Derived> class MatrixBase;
+template <typename Derived> class PlainMatrixBase;
+template <typename Derived, int Size> class VectorBlock;
 
 // Equivalent of Eigen's vector typedefs
 template <typename Type, int Size>
