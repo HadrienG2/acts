@@ -11,6 +11,7 @@
 #include "EigenDense.hpp"
 #include "ForwardDeclarations.hpp"
 #include "PlainMatrixBase.hpp"
+#include "RotationBase.hpp"
 
 namespace Acts {
 
@@ -108,11 +109,19 @@ public:
 #endif
 
     // Construction and assignment from Eigen rotation
-    // NOTE: No Eagen equivalent of this special matrix type yet
+    template <typename OtherDerived>
+    Matrix(const RotationBase<OtherDerived, Cols>& r)
+        : m_inner(r.derivedInner())
+    {}
     template <typename OtherDerived>
     Matrix(const Eigen::RotationBase<OtherDerived, Cols>& r)
         : m_inner(r)
     {}
+    template <typename OtherDerived>
+    Matrix& operator=(const RotationBase<OtherDerived, Cols>& r) {
+        m_inner = r.derivedInner();
+        return *this;
+    }
     template <typename OtherDerived>
     Matrix& operator=(const Eigen::RotationBase<OtherDerived, Cols>& r) {
         m_inner = r;

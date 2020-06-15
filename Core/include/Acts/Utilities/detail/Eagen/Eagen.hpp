@@ -24,6 +24,7 @@
 #include "MatrixBase.hpp"
 #include "PlainMatrixBase.hpp"
 #include "Matrix.hpp"
+#include "RotationBase.hpp"
 #include "Transform.hpp"
 #include "VectorBlock.hpp"
 

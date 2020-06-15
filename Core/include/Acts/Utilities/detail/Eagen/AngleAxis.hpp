@@ -13,6 +13,7 @@
 #include "Map.hpp"
 #include "MatrixBase.hpp"
 #include "Matrix.hpp"
+#include "RotationBase.hpp"
 
 namespace Acts {
 
@@ -22,13 +23,31 @@ namespace Eagen {
 
 // Wrapper of Eigen::AngleAxis
 template <typename _Scalar>
-class AngleAxis {
+class AngleAxis : public RotationBase<AngleAxis<_Scalar>, 3> {
 public:
-    // Typedefs
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
     using Scalar = _Scalar;
-private:
+
+    // Convenience typedef
+    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+
+    // Underlying Eigen type
     using Inner = Eigen::AngleAxis<Scalar>;
-public:
+
+    // Access the inner Eigen matrix (used for CRTP)
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // === Eigen::AngleAxis API ===
 
     // Default constructor
     AngleAxis() = default;
@@ -117,7 +136,6 @@ public:
 
     // FIXME: Add multiplication (need quaternions)
     // FIXME: Add assignment (need quaternions)
-
 
 private:
     Inner m_inner;
