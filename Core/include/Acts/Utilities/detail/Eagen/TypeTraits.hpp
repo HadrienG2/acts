@@ -84,6 +84,14 @@ struct TypeTraits<Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>> {
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 };
 
+// Quaternion type traits
+template <typename _Scalar, int _Options>
+struct TypeTraits<Quaternion<_Scalar, _Options>> {
+    using Scalar = _Scalar;
+    static constexpr int Options = _Options;
+    using Inner = Eigen::Quaternion<Scalar, Options>;
+};
+
 // Sub-vector type traits
 template <typename Derived, int Size>
 struct TypeTraits<VectorBlock<Derived, Size>> {

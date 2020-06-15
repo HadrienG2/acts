@@ -54,7 +54,7 @@ public:
     }
 
     // Multiply by a matrix or vector
-private:
+protected:
     template <typename OtherDerived>
     using MatProdResult =
         std::conditional_t<OtherDerived::IsVectorAtCompileTime,

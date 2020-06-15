@@ -13,6 +13,7 @@
 #include "Map.hpp"
 #include "MatrixBase.hpp"
 #include "Matrix.hpp"
+#include "QuaternionBase.hpp"
 #include "RotationBase.hpp"
 
 namespace Acts {
@@ -63,7 +64,10 @@ public:
     {}
 
     // Constructor from quaternion
-    // FIXME: No Eagen equivalent, for now
+    template <typename QuatDerived>
+    explicit AngleAxis(const QuaternionBase<QuatDerived>& q)
+        : m_inner(q.derivedInner())
+    {}
     template <typename QuatDerived>
     explicit AngleAxis(const Eigen::QuaternionBase<QuatDerived>& q)
         : m_inner(q)
@@ -134,8 +138,25 @@ public:
         return m_inner.isApprox(other, prec);
     }
 
-    // FIXME: Add multiplication (need quaternions)
-    // FIXME: Add assignment (need quaternions)
+    // Angle-axis rotation composition
+    using QuaternionType = Quaternion<Scalar>;
+    QuaternionType operator*(const AngleAxis& other) const {
+        return QuaternionType(m_inner * other.m_inner);
+    }
+    QuaternionType operator*(const Eigen::AngleAxis& other) const {
+        return QuaternionType(m_inner * other);
+    }
+
+    // Assignment from matrix
+    template <typename Derived>
+    AngleAxis& operator=(const MatrixBase<Derived>& mat) {
+        m_inner = mat.derivedInner();
+        return *this;
+    }
+    template <typename Derived>
+    AngleAxis& operator=(const Eigen::MatrixBase<Derived>& mat) {
+        return *this;
+    }
 
 private:
     Inner m_inner;
