@@ -154,12 +154,12 @@ enum CoordinateIndices : unsigned int {
 };
 
 // pure translation transformations
-using Translation2F = Eigen::Translation<float, 2>;
-using Translation3F = Eigen::Translation<float, 3>;
-using Translation4F = Eigen::Translation<float, 4>;
-using Translation2D = Eigen::Translation<double, 2>;
-using Translation3D = Eigen::Translation<double, 3>;
-using Translation4D = Eigen::Translation<double, 4>;
+using Translation2F = detail::Eagen::Translation<float, 2>;
+using Translation3F = detail::Eagen::Translation<float, 3>;
+using Translation4F = detail::Eagen::Translation<float, 4>;
+using Translation2D = detail::Eagen::Translation<double, 2>;
+using Translation3D = detail::Eagen::Translation<double, 3>;
+using Translation4D = detail::Eagen::Translation<double, 4>;
 // linear (rotation) matrices
 using RotationMatrix2F = ActsMatrixF<2, 2>;
 using RotationMatrix3F = ActsMatrixF<3, 3>;

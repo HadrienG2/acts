@@ -22,8 +22,8 @@ Acts::AnnulusBounds::AnnulusBounds(
   checkConsistency();
 
   m_rotationStripPC =
-      Eigen::Translation<double, 2>(Vector2D(0, -get(eAveragePhi)));
-  m_translation = Eigen::Translation<double, 2>(m_moduleOrigin);
+      detail::Eagen::Translation<double, 2>(Vector2D(0, -get(eAveragePhi)));
+  m_translation = detail::Eagen::Translation<double, 2>(m_moduleOrigin);
 
   m_shiftXY = m_moduleOrigin * -1;
   m_shiftPC =

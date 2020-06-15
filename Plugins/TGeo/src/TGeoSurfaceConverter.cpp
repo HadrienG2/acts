@@ -188,7 +188,7 @@ Acts::TGeoSurfaceConverter::discComponents(const TGeoShape& tgShape,
               Line2D::Through(boundLines[1].first, boundLines[1].second);
           Vector2D ix = lA.intersection(lB);
 
-          const Eigen::Translation3d originTranslation(ix.x(), ix.y(), 0.);
+          const Translation3D originTranslation(ix.x(), ix.y(), 0.);
           const Vector2D originShift = -ix;
 
           // Update transform by prepending the origin shift translation

@@ -26,7 +26,7 @@ namespace Acts {
 /// in 2D, minimum 3 in 3D)
 template <typename value_t, size_t DIM, size_t SIDES>
 class Frustum {
-  using translation_t = Eigen::Translation<value_t, DIM>;
+  using translation_t = detail::Eagen::Translation<value_t, DIM>;
 
   static constexpr size_t n_normals = SIDES + 1;
 
