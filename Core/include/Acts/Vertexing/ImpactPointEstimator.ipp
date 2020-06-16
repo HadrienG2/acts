@@ -295,7 +295,7 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
   ImpactParametersAndSigma newIPandSigma;
 
   newIPandSigma.IPd0 = d0;
-  double d0_PVcontrib = d0JacXY.transpose() * (vrtXYCov * d0JacXY);
+  double d0_PVcontrib = (d0JacXY.transpose() * (vrtXYCov * d0JacXY)).value();
   if (d0_PVcontrib >= 0) {
     newIPandSigma.sigmad0 = std::sqrt(
         d0_PVcontrib + perigeeCov(ParID_t::eLOC_D0, ParID_t::eLOC_D0));
@@ -331,7 +331,7 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
     // Remove contribution from PV
     newIPandSigma.IPz0SinTheta = z0 * sinTheta;
     double sigma2z0sinTheta =
-        (z0JacZ0Theta.transpose() * (covPerigeeZ0Theta * z0JacZ0Theta));
+        (z0JacZ0Theta.transpose() * (covPerigeeZ0Theta * z0JacZ0Theta)).value();
     newIPandSigma.sigmaz0SinTheta = std::sqrt(sigma2z0sinTheta);
     newIPandSigma.PVsigmaz0SinTheta = 0;
 

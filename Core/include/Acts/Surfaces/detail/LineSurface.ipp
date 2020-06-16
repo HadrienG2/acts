@@ -192,7 +192,7 @@ inline const BoundRowVector LineSurface::derivativeFactors(
   // the longitudinal component vector (alogn local z)
   ActsRowVectorD<3> locz = rft.block<1, 3>(1, 0);
   // build the norm vector comonent by subtracting the longitudinal one
-  double long_c = locz * direction;
+  double long_c = (locz * direction).value();
   ActsRowVectorD<3> norm_vec = direction.transpose() - long_c * locz;
   // calculate the s factors for the dependency on X
   const BoundRowVector s_vec =
@@ -224,7 +224,7 @@ inline const AlignmentRowVector LineSurface::alignmentToPathDerivative(
   // The local frame z axis
   const Vector3D localZAxis = rotation.col(2);
   // The local z coordinate
-  const double localZ = pcRowVec * localZAxis;
+  const double localZ = (pcRowVec * localZAxis).value();
 
   // Cosine of angle between momentum direction and local frame z axis
   const double dirZ = localZAxis.dot(direction);

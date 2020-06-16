@@ -108,7 +108,7 @@ double Acts::KalmanVertexUpdater::detail::vertexPositionChi2(
   Vector3D posDiff = matrixCache.newVertexPos - oldVtx.position();
 
   // Calculate and return corresponding chi2
-  return posDiff.transpose() * (matrixCache.oldVertexWeight * posDiff);
+  return (posDiff.transpose() * (matrixCache.oldVertexWeight * posDiff)).value();
 }
 
 template <typename input_track_t>
@@ -135,5 +135,5 @@ double Acts::KalmanVertexUpdater::detail::trackParametersChi2(
   ActsVectorD<5> paramDiff = trkParams - newTrkParams;
 
   // Return chi2
-  return paramDiff.transpose() * (trkParamWeight * paramDiff);
+  return (paramDiff.transpose() * (trkParamWeight * paramDiff)).value();
 }
