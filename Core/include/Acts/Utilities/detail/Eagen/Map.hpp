@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "PlainMatrixBase.hpp"
@@ -40,6 +42,9 @@ public:
     }
     const Inner& getInner() const {
         return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
     }
 
     // Eigen-like foreign data map constructors
