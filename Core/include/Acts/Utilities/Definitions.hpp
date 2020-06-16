@@ -168,10 +168,10 @@ using RotationMatrix2D = ActsMatrixD<2, 2>;
 using RotationMatrix3D = ActsMatrixD<3, 3>;
 using RotationMatrix4D = ActsMatrixD<4, 4>;
 // pure rotation transformations. only available in 2d and 3d
-using Rotation2F = Eigen::Rotation2D<float>;
+using Rotation2F = detail::Eagen::Rotation2D<float>;
 using Rotation3F = detail::Eagen::Quaternion<float>;
 using AngleAxis3F = detail::Eagen::AngleAxis<float>;
-using Rotation2D = Eigen::Rotation2D<double>;
+using Rotation2D = detail::Eagen::Rotation2D<double>;
 using Rotation3D = detail::Eagen::Quaternion<double>;
 using AngleAxis3D = detail::Eagen::AngleAxis<double>;
 // combined affine transformations. types are chosen for better data alignment:

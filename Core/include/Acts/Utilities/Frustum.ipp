@@ -14,14 +14,14 @@ Acts::Frustum<value_t, DIM, SIDES>::Frustum(const VertexType& origin,
                                             const VertexType& dir,
                                             value_type opening_angle)
     : m_origin(origin) {
-  using rotation_t = Eigen::Rotation2D<value_type>;
+  using rotation_t = detail::Eagen::Rotation2D<value_type>;
 
   static_assert(SIDES == 2, "2D frustum can only have 2 sides");
   assert(opening_angle < M_PI);
 
   translation_t translation(origin);
   value_type angle = VectorHelpers::phi(dir);
-  Eigen::Rotation2D<value_type> rot(angle);
+  detail::Eagen::Rotation2D<value_type> rot(angle);
 
   value_type normal_angle = 0.5 * M_PI - 0.5 * opening_angle;
   VertexType normal1 = rotation_t(normal_angle) * VertexType::UnitX();

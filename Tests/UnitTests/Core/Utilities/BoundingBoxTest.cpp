@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(box_construction) {
     Box bb(&o, {-1, -1}, {2, 2});
 
     typename Box::transform_type rot;
-    rot = Eigen::Rotation2D<float>(M_PI / 7.);
+    rot = detail::Eagen::Rotation2D<float>(M_PI / 7.);
     Box bb_rot = bb.transformed(rot);
 
     CHECK_CLOSE_ABS(bb_rot.min(), Vector2F(-1.76874, -1.33485), 1e-4);
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(frustum_intersect) {
     // ActsVectorF<2> dir    = {1, 0};
     // ActsVectorF<2> origin = {min + step * i, min + step * j};
     // origin.x() *= 1.10;  // visual
-    // Eigen::Rotation2D<float> rot(2 * M_PI / float(n) * i);
+    // detail::Eagen::Rotation2D<float> rot(2 * M_PI / float(n) * i);
     // float                    angle = 0.5 * M_PI / n * j;
     // Frustum2                 fr(origin, rot * dir, angle);
     // fr.svg(os, w, w, 2);
