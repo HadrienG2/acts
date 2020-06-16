@@ -551,8 +551,9 @@ public:
     RealScalar hypotNorm() const {
         return derivedInner().hypotNorm();
     }
+    template <int p>
     RealScalar lpNorm() const {
-        return derivedInner().lpNorm();
+        return derivedInner().template lpNorm<1>();
     }
     RealScalar norm() const {
         return derivedInner().norm();
