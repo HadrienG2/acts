@@ -36,15 +36,15 @@ private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
 public:
+    using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = BlockRows;
     static constexpr int Cols = BlockCols;
     static constexpr int Options = DerivedTraits::Options;
-    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
-    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int MaxRows = Inner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = Inner::MaxColsAtCompileTime;
     static constexpr int InnerStride = DerivedTraits::InnerStride;
     static constexpr int OuterStride = DerivedTraits::OuterStride;
-    using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
 };
 
 // Mapped array type traits
@@ -54,15 +54,15 @@ private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
 public:
+    using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
     using Scalar = typename DerivedTraits::Scalar;
-    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
-    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
+    static constexpr int Rows = Inner::RowsAtCompileTime;
+    static constexpr int Cols = Inner::ColsAtCompileTime;
     static constexpr int Options = DerivedTraits::Options;
-    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
-    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int MaxRows = Inner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = Inner::MaxColsAtCompileTime;
     static constexpr int InnerStride = StrideType::InnerStrideAtCompileTime;
     static constexpr int OuterStride = StrideType::OuterStrideAtCompileTime;
-    using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
 };
 
 // Matrix type traits
@@ -99,15 +99,15 @@ private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
 public:
+    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
     using Scalar = typename DerivedTraits::Scalar;
-    static constexpr int Rows = DerivedInner::RowsAtCompileTime;
-    static constexpr int Cols = DerivedInner::ColsAtCompileTime;
+    static constexpr int Rows = Inner::RowsAtCompileTime;
+    static constexpr int Cols = Inner::ColsAtCompileTime;
     static constexpr int Options = DerivedTraits::Options;
-    static constexpr int MaxRows = DerivedInner::MaxRowsAtCompileTime;
-    static constexpr int MaxCols = DerivedInner::MaxColsAtCompileTime;
+    static constexpr int MaxRows = Inner::MaxRowsAtCompileTime;
+    static constexpr int MaxCols = Inner::MaxColsAtCompileTime;
     static constexpr int InnerStride = DerivedTraits::InnerStride;
     static constexpr int OuterStride = DerivedTraits::OuterStride;
-    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
 };
 
 // 2D rotation type traits
