@@ -158,6 +158,9 @@ public:
         return derivedInner().squaredNorm();
     }
 
+    // Inherit rotation multiplication
+    using Super::operator*;
+
     // Quaternion product
     template <typename OtherDerived>
     Quaternion<Scalar>
@@ -169,7 +172,6 @@ public:
     operator*(const Eigen::QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(derivedInner() * other);
     }
-    using Super::operator*;
 
     // In-place quaternion product
     template <typename OtherDerived>
