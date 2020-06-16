@@ -205,7 +205,9 @@ inline const BoundRowVector LineSurface::derivativeFactors(
   // create a matrix representation
   ActsMatrixD<3, eBoundParametersSize> long_mat =
       ActsMatrixD<3, eBoundParametersSize>::Zero();
-  long_mat.colwise() += locz.transpose();
+  // FIXME: This is certainly ugly. But (col|row)wise() is quite a bit of
+  //        Eagen support work, and used exactly once in Acts...
+  long_mat.derivedInner().colwise() += locz.transpose().derivedInner();
   // build the combined normal & longitudinal components
   return (norm *
           (s_vec - pc * (long_mat * d_vec.asDiagonal() -
