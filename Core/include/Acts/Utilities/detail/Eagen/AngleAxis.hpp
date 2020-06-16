@@ -25,6 +25,9 @@ namespace Eagen {
 // Wrapper of Eigen::AngleAxis
 template <typename _Scalar>
 class AngleAxis : public RotationBase<AngleAxis<_Scalar>, 3> {
+private:
+    using Super = RotationBase<AngleAxis<_Scalar>, 3>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -146,6 +149,7 @@ public:
     QuaternionType operator*(const Inner& other) const {
         return QuaternionType(m_inner * other);
     }
+    using Super::operator*;
 
     // Assignment from matrix
     template <typename Derived>
