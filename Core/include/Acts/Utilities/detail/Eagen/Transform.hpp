@@ -280,10 +280,10 @@ public:
     }
 
     // Pre-apply various transforms
-    // FIXME: Figure out how to integrate Eagen rotations here, once available
+    // FIXME: Should support Eigen rotations here
     template <typename RotationType>
     Transform& prerotate(const RotationType& rotation) {
-        m_inner.prerotate(rotation);
+        m_inner.prerotate(rotation.derivedInner());
         return *this;
     }
     template <typename OtherDerived>
