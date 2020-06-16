@@ -129,15 +129,17 @@ public:
     }
 
     // Vector construction from a set of scalars
-    Matrix(const Scalar& x) : m_inner(x) {}
+    explicit Matrix(const Scalar& x) : m_inner(x) {}
     template <typename... Scalars>
-    Matrix(const Scalar& x, const Scalars&... other) : m_inner(x, other...) {}
+    Matrix(const Scalar& x, const Scalar& y,const Scalars&... other)
+        : m_inner(x, y, other...)
+    {}
 
     // Matrix construction from a C-style array of coefficients
-    Matrix(const Scalar* data) : m_inner(data) {}
+    explicit Matrix(const Scalar* data) : m_inner(data) {}
 
     // Uninitialized matrix or vector constructor
-    Matrix(Index dim) : m_inner(dim) {}
+    explicit Matrix(Index dim) : m_inner(dim) {}
     Matrix(Index rows, Index cols) : m_inner(rows, cols) {}
 
     // Emulate Eigen::Matrix's base class typedef
