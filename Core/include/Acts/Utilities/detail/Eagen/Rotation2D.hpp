@@ -127,12 +127,12 @@ public:
     }
 
     // Approximate equality
-    using RealScalar = typename Inner::RealScalar;
+    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
     bool isApprox(const Rotation2D& other,
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
     }
-    bool isApprox(const Rotation2D& other,
+    bool isApprox(const Inner& other,
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other, prec);
     }
