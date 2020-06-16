@@ -29,18 +29,18 @@ namespace Eagen {
 //
 template <typename Derived>
 class MatrixBase : public EigenBase<Derived> {
+private:
+    // Superclass
+    using Super = EigenBase<Derived>;
+
 protected:
     // Eigen type wrapped by the CRTP daughter class
-    using Super = EigenBase<Derived>;
     using DerivedTraits = typename Super::DerivedTraits;
-    using Inner = typename Super::Inner;
 
 public:
-    // Derived class scalar type
+    // Re-expose Matrix typedefs and constexprs
+    using Inner = typename Super::Inner;
     using Scalar = typename DerivedTraits::Scalar;
-
-private:
-    // Template parameters of derived class
     static constexpr int Rows = DerivedTraits::Rows;
     static constexpr int Cols = DerivedTraits::Cols;
     static constexpr int MaxRows = DerivedTraits::MaxRows;
@@ -49,6 +49,7 @@ private:
     // Eigen convenience
     using RealScalar = typename Inner::RealScalar;
 
+private:
     // Quick way to construct a matrix of the same size, but w/o the options
     using PlainBase = Matrix<Scalar, Rows, Cols>;
 
