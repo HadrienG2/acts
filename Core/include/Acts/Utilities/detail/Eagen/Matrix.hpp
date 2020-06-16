@@ -142,6 +142,11 @@ public:
     explicit Matrix(Index dim) : m_inner(dim) {}
     Matrix(Index rows, Index cols) : m_inner(rows, cols) {}
 
+    // NOTE: Resolves an ambiguous overload from Eigen's "official" matrix
+    //       constructor signature, without bringing the whole init1 machinery
+    //       from Eigen along the way.
+    explicit Matrix(unsigned int dim) : m_inner(dim) {}
+
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
