@@ -53,7 +53,6 @@ template <typename Derived>
 using DenseCoeffsBaseWrite = MatrixBase<Derived>;
 template <typename Derived>
 using DenseCoeffsBaseReadOnly = MatrixBase<Derived>;
-template <typename Derived> using EigenBase = MatrixBase<Derived>;
 
 }  // namespace Eagen
 

@@ -10,6 +10,7 @@
 
 #include <type_traits>
 
+#include "EigenBase.hpp"
 #include "EigenDense.hpp"
 #include "ForwardDeclarations.hpp"
 #include "Matrix.hpp"
@@ -109,10 +110,11 @@ public:
     }
 
     // Concatenate a translation and a linear transformation
-    //
-    // FIXME: Can't currently be supported in Eagen because we don't
-    //        separate the EigenBase and MatrixBase class hierarchy layers
-    //
+    template <typename OtherDerived>
+    AffineTransformType
+    operator*(const EigenBase<OtherDerived>& linear) const {
+        return AffineTransformType(m_inner * linear.derivedInner());
+    }
     template <typename OtherDerived>
     AffineTransformType
     operator*(const Eigen::EigenBase<OtherDerived>& linear) const {

@@ -15,6 +15,7 @@
 #include "AngleAxis.hpp"
 #include "Block.hpp"
 #include "CommaInitializer.hpp"
+#include "EigenBase.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "EigenBase.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
@@ -27,11 +28,12 @@ namespace Eagen {
 // If the need arises, that can be changed.
 //
 template <typename Derived>
-class MatrixBase {
+class MatrixBase : public EigenBase<Derived> {
 protected:
     // Eigen type wrapped by the CRTP daughter class
-    using DerivedTraits = TypeTraits<Derived>;
-    using Inner = typename DerivedTraits::Inner;
+    using Super = EigenBase<Derived>;
+    using DerivedTraits = typename Super::DerivedTraits;
+    using Inner = typename Super::Inner;
 
 public:
     // Derived class scalar type
@@ -51,29 +53,14 @@ private:
     using PlainBase = Matrix<Scalar, Rows, Cols>;
 
 public:
-    // === Eigen::EigenBase interface ===
-
-    // Index convenience typedef
-    using Index = Eigen::Index;
-
-    // Matrix dimensions
-    Index cols() const {
-        return derivedInner().cols();
-    }
-    Index rows() const {
-        return derivedInner().rows();
-    }
-    Index size() const {
-        return derivedInner().size();
-    }
-
-    // CRTP daughter class access
-    Derived& derived() {
-        return *static_cast<Derived*>(this);
-    }
-    const Derived& derived() const {
-        return *static_cast<const Derived*>(this);
-    }
+    // Re-expose EigenBase interface
+    // FIXME: Figure out why method inheritance is broken like that...
+    using Index = typename Super::Index;
+    using Super::cols;
+    using Super::derived;
+    using Super::derivedInner;
+    using Super::rows;
+    using Super::size;
 
     // === Eigen::DenseCoeffsBase interfaces ===
 
@@ -1248,25 +1235,6 @@ public:
     }
     PlainObject conjugate() const {
         return PlainObject(derivedInner().conjugate());
-    }
-
-    // === Eagen-specific interface ===
-
-    // Access the inner Eigen object held by the CRTP daughter class
-    //
-    // FIXME: I'd like this implementation detail to be protected, but it seems
-    //        that protected functions are not visible across different
-    //        instantiations of MatrixBase, which I need to access Matrix
-    //        contents from the Block implementation.
-    //
-    Inner& derivedInner() {
-        return derived().getInner();
-    }
-    const Inner& derivedInner() const {
-        return derived().getInner();
-    }
-    Inner&& moveDerivedInner() {
-        return derived().moveInner();
     }
 
 private:
