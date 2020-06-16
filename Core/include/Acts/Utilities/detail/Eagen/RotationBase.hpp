@@ -78,6 +78,20 @@ public:
         );
     }
 
+    // Left-hand-side multiplication by a matrix
+    template<typename OtherDerived> friend
+    RotationMatrixType operator*(const EigenBase<OtherDerived>& l,
+                                 const Derived& r)
+    {
+        return RotationMatrixType(l.derivedInner() * r.getInner());
+    }
+    template<typename OtherDerived> friend
+    RotationMatrixType operator*(const Eigen::EigenBase<OtherDerived>& l,
+                                 const Derived& r)
+    {
+        return RotationMatrixType(l * r.getInner());
+    }
+
     // Multiply by another transform
     template <int Mode, int Options>
     Transform<Scalar, Dim, Mode>

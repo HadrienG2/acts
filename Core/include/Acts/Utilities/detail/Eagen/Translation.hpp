@@ -121,6 +121,20 @@ public:
         return AffineTransformType(m_inner * linear);
     }
 
+    // Left-hand-side multiplication by a matrix
+    template<typename Derived> friend
+    AffineTransformType operator*(const EigenBase<Derived>& l,
+                                  const Translation& t)
+    {
+        return AffineTransformType(l.derivedInner() * t.getInner());
+    }
+    template<typename Derived> friend
+    AffineTransformType operator*(const Eigen::EigenBase<Derived>& l,
+                                  const Translation& t)
+    {
+        return AffineTransformType(l * t.getInner());
+    }
+
     // Translate a vector
     template <typename Derived>
     std::enable_if_t<Derived::IsVectorAtCompileTime, VectorType>
