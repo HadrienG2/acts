@@ -491,21 +491,35 @@ public:
     //       These are not currently used by Acts, so lower-priority.
 
     // In-place products
-    template <typename... Args>
-    void applyOnTheLeft(Args&&... args) {
-        derivedInner().applyOnTheLeft(std::forward<Args>(args)...);
-    }
     template <typename OtherDerived>
     void applyOnTheLeft(const EigenBase<OtherDerived>& other) {
         derivedInner().applyOnTheLeft(other.derivedInner());
     }
-    template <typename... Args>
-    void applyOnTheRight(Args&&... args) {
-        derivedInner().applyOnTheRight(std::forward<Args>(args)...);
+    template <typename OtherDerived>
+    void applyOnTheLeft(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner().applyOnTheLeft(other);
+    }
+    // FIXME: No Eagen equivalent here
+    template <typename OtherScalar>
+    void applyOnTheLeft(Index p,
+                        Index q,
+                        const Eigen::JacobiRotation<OtherScalar>& j) {
+        derivedInner().applyOnTheLeft(p, q, j);
     }
     template <typename OtherDerived>
     void applyOnTheRight(const EigenBase<OtherDerived>& other) {
         derivedInner().applyOnTheRight(other.derivedInner());
+    }
+    template <typename OtherDerived>
+    void applyOnTheRight(const Eigen::EigenBase<OtherDerived>& other) {
+        derivedInner().applyOnTheRight(other);
+    }
+    // FIXME: No Eagen equivalent here
+    template <typename OtherScalar>
+    void applyOnTheRight(Index p,
+                         Index q,
+                         const Eigen::JacobiRotation<OtherScalar>& j) {
+        derivedInner().applyOnTheRight(p, q, j);
     }
 
     // Switch to array view of this matrix
