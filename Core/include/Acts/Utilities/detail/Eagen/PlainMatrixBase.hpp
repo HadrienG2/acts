@@ -38,6 +38,7 @@ private:
 public:
     // Re-expose superclass interface
     using Scalar = typename Super::Scalar;
+    using Super::derived;
     using Super::derivedInner;
     using Super::operator=;
 
@@ -77,34 +78,34 @@ public:
     template <typename OtherDerived>
     Derived& lazyAssign(const DenseBase<OtherDerived>& other) {
         derivedInner().lazyAssign(other.derivedInner());
-        return *this;
+        return derived();
     }
     template <typename OtherDerived>
     Derived& lazyAssign(const Eigen::DenseBase<OtherDerived>& other) {
         derivedInner().lazyAssign(other);
-        return *this;
+        return derived();
     }
 
     // Set inner values from various scalar sources
     template <typename... Args>
     Derived& setConstant(Args&&... args) {
         derivedInner().setConstant(std::forward<Args>(args)...);
-        return *this;
+        return derived();
     }
     template <typename... Index>
     Derived& setZero(Index... indices) {
         derivedInner().setZero(indices...);
-        return *this;
+        return derived();
     }
     template <typename... Index>
     Derived& setOnes(Index... indices) {
         derivedInner().setOnes(indices...);
-        return *this;
+        return derived();
     }
     template <typename... Index>
     Derived& setRandom(Index... indices) {
         derivedInner().setRandom(indices...);
-        return *this;
+        return derived();
     }
 
     // Map foreign data
