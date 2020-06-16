@@ -33,6 +33,7 @@ class Matrix;
 template <typename Derived> class MatrixBase;
 template <typename Derived> class PlainMatrixBase;
 template <typename Scalar, int Options = AutoAlign> class Quaternion;
+template <typename Scalar> class Rotation2D;
 template <typename Derived, int Dim> class RotationBase;
 template <typename Scalar, int Dim> class Translation;
 template <typename Derived, int Size> class VectorBlock;

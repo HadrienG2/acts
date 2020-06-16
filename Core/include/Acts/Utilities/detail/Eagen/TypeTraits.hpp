@@ -110,6 +110,13 @@ public:
     using Inner = Eigen::VectorBlock<DerivedInner, Size>;
 };
 
+// 2D rotation type traits
+template <typename _Scalar>
+struct TypeTraits<Rotation2D<_Scalar>> {
+    using Scalar = _Scalar;
+    using Inner = Eigen::Rotation2D<Scalar>;
+};
+
 }  // namespace Eagen
 
 }  // namespace detail

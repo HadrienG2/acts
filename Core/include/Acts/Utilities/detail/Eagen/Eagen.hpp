@@ -26,6 +26,7 @@
 #include "PlainMatrixBase.hpp"
 #include "Quaternion.hpp"
 #include "QuaternionBase.hpp"
+#include "Rotation2D.hpp"
 #include "RotationBase.hpp"
 #include "Transform.hpp"
 #include "Translation.hpp"
