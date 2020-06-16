@@ -1222,6 +1222,14 @@ public:
         );
     }
 
+    // /!\ UNDOCUMENTED /!\ Scalar cast
+    template <typename NewScalarType>
+    Matrix<NewScalarType, Rows, Cols> cast() const {
+        return Matrix<NewScalarType, Rows, Cols>(
+            derivedInner().template cast<NewScalarType>()
+        );
+    }
+
     // === Coefficient-wise ops, unknown Eigen base class ===
     //
     // FIXME: I'm not sure which base class these methods should belong to, but
