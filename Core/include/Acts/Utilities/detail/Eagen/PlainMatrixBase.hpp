@@ -36,8 +36,10 @@ private:
     using DerivedTraits = typename Super::DerivedTraits;
 
 public:
-    // Derived class scalar type
+    // Re-expose superclass interface
     using Scalar = typename Super::Scalar;
+    using Super::derivedInner;
+    using Super::operator=;
 
     // === Eigen::PlainObjectBase interface ===
 
@@ -182,13 +184,6 @@ public:
                                                            cols,
                                                            stride);
     }
-
-    // Inherit useful base class facilities
-    using Super::operator=;
-
-protected:
-    // FIXME: I have zero idea why this is apparently needed...
-    using Super::derivedInner;
 };
 
 }  // namespace Eagen
