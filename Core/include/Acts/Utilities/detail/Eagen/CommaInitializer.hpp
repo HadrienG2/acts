@@ -35,7 +35,7 @@ public:
     // Constructor from (expression, expression) pair
     template<typename OtherDerived>
     CommaInitializer(Derived& derived, const DenseBase<OtherDerived>& other)
-        : CommaInitializer(derived, other.getInner())
+        : CommaInitializer(derived, other.derivedInner())
     {}
     template<typename OtherDerived>
     CommaInitializer(Derived& derived,
