@@ -31,6 +31,10 @@ private:
     using DerivedTraits = typename Super::DerivedTraits;
 
 public:
+    // Re-export base class interface
+    using Super::derived;
+    using Super::derivedInner;
+
     // Derived class scalar type
     using Scalar = typename Super::Scalar;
 
@@ -267,11 +271,6 @@ public:
     static Quaternion<Scalar> Identity() {
         return Quaternion<Scalar>(Inner::Identity());
     }
-
-protected:
-    // FIXME: I have zero idea why this is apparently needed...
-    using Super::derived;
-    using Super::derivedInner;
 
 private:
     static RealScalar dummy_precision() {

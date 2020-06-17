@@ -149,6 +149,10 @@ public:
     QuaternionType operator*(const Inner& other) const {
         return QuaternionType(m_inner * other);
     }
+    friend QuaternionType operator*(const QuaternionType& a,
+                                    const AngleAxis& b) {
+        return QuaternionType(a.derivedInner() * b.m_inner);
+    }
     using Super::operator*;
 
     // Assignment from matrix
