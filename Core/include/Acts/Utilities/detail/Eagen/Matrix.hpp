@@ -146,6 +146,7 @@ public:
     //       constructor signature, without bringing the whole init1 machinery
     //       from Eigen along the way.
     explicit Matrix(unsigned int dim) : m_inner(dim) {}
+    explicit Matrix(size_t dim) : m_inner(dim) {}
 
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
