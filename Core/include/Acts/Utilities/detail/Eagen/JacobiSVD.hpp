@@ -30,7 +30,10 @@ class JacobiSVD : public SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>> {
     static constexpr int QRPreconditioner = _QRPreconditioner;
 
     // Eigen type that is being wrapped
-    using Inner = Eigen::JacobiSVD<MatrixType, QRPreconditioner>;
+private:
+    using MatrixTypeInner = typename MatrixType::Inner;
+public:
+    using Inner = Eigen::JacobiSVD<MatrixTypeInner, QRPreconditioner>;
 
     // Access the inner Eigen matrix (used for CRTP)
     Inner& getInner() {
@@ -109,10 +112,6 @@ public:
     }
 
     // === Eigen::JacobiSVD API ===
-
-private:
-    using MatrixTypeInner = typename MatrixType::Inner;
-public:
 
     // Default constructor
     JacobiSVD() = default;
