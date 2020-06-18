@@ -252,22 +252,28 @@ public:
         derivedInner().fill(value);
     }
     Derived& setConstant(const Scalar& value) {
-        return derivedInner().setConstant(value);
+        derivedInner().setConstant(value);
+        return derived();
     }
     Derived& setLinSpaced(const Scalar& low, const Scalar& high) {
-        return derivedInner().setLinSpaced(low, high);
+        derivedInner().setLinSpaced(low, high);
+        return derived();
     }
     Derived& setLinSpaced(Index size, const Scalar& low, const Scalar& high) {
-        return derivedInner().setLinSpaced(size, low, high);
+        derivedInner().setLinSpaced(size, low, high);
+        return derived();
     }
     Derived& setOnes() {
-        return derivedInner().setOnes();
+        derivedInner().setOnes();
+        return derived();
     }
     Derived& setRandom() {
-        return derivedInner().setRandom();
+        derivedInner().setRandom();
+        return derived();
     }
     Derived& setZero() {
-        return derivedInner().setZero();
+        derivedInner().setZero();
+        return derived();
     }
 
     // NOTE: flagged() is deprecated and unused by Acts, thus unsupported
