@@ -560,9 +560,9 @@ public:
     }
 
     // Perform SVD decomposition
-    JacobiSvd<PlainMatrix>
+    JacobiSVD<PlainMatrix>
     jacobiSvd(unsigned int computationOptions = 0) const {
-        return JacobiSvd<PlainMatrix>(derivedInner(), computationOptions);
+        return JacobiSVD<PlainMatrix>(derivedInner(), computationOptions);
     }
     // TODO: Support bdcSvd() style SVD decomposition
     //       This is not currently used by Acts, so lower-priority.
