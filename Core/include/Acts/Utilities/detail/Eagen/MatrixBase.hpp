@@ -558,8 +558,14 @@ public:
             derivedInner().asDiagonal()
         );
     }
-    // TODO: Support SVD-related methods bdcSvd() and jacobiSvd()
-    //       These are not currently used by Acts, so lower-priority.
+
+    // Perform SVD decomposition
+    JacobiSvd<PlainMatrix>
+    jacobiSvd(unsigned int computationOptions = 0) const {
+        return JacobiSvd<PlainMatrix>(derivedInner(), computationOptions);
+    }
+    // TODO: Support bdcSvd() style SVD decomposition
+    //       This is not currently used by Acts, so lower-priority.
 
     // Norms and normalization
     RealScalar blueNorm() const {

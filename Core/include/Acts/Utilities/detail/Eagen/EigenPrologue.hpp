@@ -22,11 +22,6 @@ namespace Eagen {
 // because it would conflict with a class-local typedef or constexpr with the
 // same name, put it in EigenEpilogue.hpp
 //
-constexpr int Dynamic = Eigen::Dynamic;
-//
-template<int OuterStride, int InnerStride>
-using Stride = Eigen::Stride<OuterStride, InnerStride>;
-//
 using AlignmentType = Eigen::AlignmentType;
 constexpr AlignmentType Unaligned = Eigen::Unaligned;
 constexpr AlignmentType Aligned8 = Eigen::Aligned8;
@@ -35,13 +30,36 @@ constexpr AlignmentType Aligned32 = Eigen::Aligned32;
 constexpr AlignmentType Aligned64 = Eigen::Aligned64;
 constexpr AlignmentType Aligned128 = Eigen::Aligned128;
 //
+using DecompositionOptions = Eigen::DecompositionOptions;
+constexpr DecompositionOptions ComputeFullU = Eigen::ComputeFullU;
+constexpr DecompositionOptions ComputeFullV = Eigen::ComputeFullV;
+constexpr DecompositionOptions ComputeThinU = Eigen::ComputeThinU;
+constexpr DecompositionOptions ComputeThinV = Eigen::ComputeThinV;
+//
+using Default_t = Eigen::Default_t;
+constexpr Default_t Default = Eigen::Default;
+//
+constexpr int Dynamic = Eigen::Dynamic;
+//
 using NoChange_t = Eigen::NoChange_t;
 constexpr NoChange_t NoChange = Eigen::NoChange;
+//
+using QRPreconditioners = Eigen::QRPreconditioners;
+constexpr QRPreconditioners NoQRPreconditioner = Eigen::NoQRPreconditioner;
+constexpr QRPreconditioners HouseholderQRPreconditioner =
+    Eigen::HouseholderQRPreconditioner;
+constexpr QRPreconditioners ColPivHouseholderQRPreconditioner =
+    Eigen::ColPivHouseholderQRPreconditioner;
+constexpr QRPreconditioners FullPivHouseholderQRPreconditioner =
+    Eigen::FullPivHouseholderQRPreconditioner;
 //
 using StorageOptions = Eigen::StorageOptions;
 constexpr StorageOptions AutoAlign = Eigen::AutoAlign;
 constexpr StorageOptions ColMajor = Eigen::ColMajor;
 constexpr StorageOptions RowMajor = Eigen::RowMajor;
+//
+template<int OuterStride, int InnerStride>
+using Stride = Eigen::Stride<OuterStride, InnerStride>;
 //
 using TransformTraits = Eigen::TransformTraits;
 constexpr TransformTraits Isometry = Eigen::Isometry;
