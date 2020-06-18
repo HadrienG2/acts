@@ -241,10 +241,9 @@ public:
 
     // FIXME: Support colwise() and rowwise(), which are used by Acts
 
-    // eval() is only provided for Eigen API compatibility reasons, it is
-    // perfectly useless here since eager evaluation is the default already
-    Derived eval() const {
-        return derivedInner();
+    // Materialize this expression into its own plain object
+    PlainObject eval() const {
+        return PlainObject(derivedInner());
     }
 
     // Filling various patterns into the inner data
