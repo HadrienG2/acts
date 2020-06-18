@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
@@ -21,6 +23,10 @@ namespace Eagen {
 // Some type traits to ease manipulating incomplete types
 template <typename EagenType>
 struct TypeTraits;
+
+// Handle const types
+template <typename EagenType>
+struct TypeTraits<const EagenType> : public TypeTraits<EagenType> {};
 
 // Angle-axis transform type traits
 template <typename _Scalar>
@@ -53,8 +59,12 @@ struct TypeTraits<Map<Derived, MapOptions, StrideType>> {
 private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
+    template <typename _DerivedInner>
+    using InnerTemplate = Eigen::Map<_DerivedInner, MapOptions, StrideType>;
 public:
-    using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
+    using Inner = std::conditional_t<std::is_const_v<Derived>,
+                                     InnerTemplate<const DerivedInner>,
+                                     InnerTemplate<DerivedInner>>;
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = Inner::RowsAtCompileTime;
     static constexpr int Cols = Inner::ColsAtCompileTime;

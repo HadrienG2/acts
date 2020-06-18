@@ -13,6 +13,7 @@
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "PlainMatrixBase.hpp"
+#include "TypeTraits.hpp"
 
 namespace Acts {
 
@@ -28,10 +29,11 @@ class Map : public PlainMatrixBase<Map<Derived,
                                        MapOptions,
                                        StrideType>> {
 private:
-    using Super = PlainMatrixBase<Map<Derived, MapOptions, StrideType>>;
+    using Super = PlainMatrixBase<Map>;
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
-    using Inner = Eigen::Map<DerivedInner, MapOptions, StrideType>;
+    using SelfTraits = TypeTraits<Map>;
+    using Inner = typename SelfTraits::Inner;
     using PointerArgType = typename Inner::PointerArgType;
     using Index = Eigen::Index;
 
