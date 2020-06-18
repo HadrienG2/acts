@@ -478,7 +478,7 @@ BOOST_AUTO_TEST_CASE(trackstate_proxy_cross_talk) {
   ts.calibrated() = newMeasPar;
   BOOST_CHECK_EQUAL(cts.calibrated(), newMeasPar);
 
-  size_t measdim = ts.effectiveCalibrated().rows();
+  auto measdim = ts.effectiveCalibrated().rows();
 
   ActsMatrixXd eff{measdim, measdim};
   eff.setRandom();
