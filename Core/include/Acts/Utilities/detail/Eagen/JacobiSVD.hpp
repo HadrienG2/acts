@@ -12,6 +12,7 @@
 #include "EigenPrologue.hpp"
 #include "MatrixBase.hpp"
 #include "Matrix.hpp"
+#include "SolverBase.hpp"
 
 namespace Acts {
 
@@ -20,22 +21,35 @@ namespace detail {
 namespace Eagen {
 
 // Eigen::JacobiSVD wrapper
-template <typename _MatrixType,
-          int _QRPreconditioner = ColPivHouseholderQRPreconditioner>
-class JacobiSVD {
+template <typename _MatrixType, int _QRPreconditioner>
+class JacobiSVD : public SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>> {
     // === Eagen wrapper API ===
 
     // Re-expose template parameters
     using MatrixType = _MatrixType;
     static constexpr int QRPreconditioner = _QRPreconditioner;
 
-    // Matrix parameters
-    using Scalar = typename MatrixType::Scalar;
-    static constexpr int Rows = MatrixType::Rows;
-    static constexpr int Cols = MatrixType::Cols;
-
     // Eigen type that is being wrapped
     using Inner = Eigen::JacobiSVD<MatrixType, QRPreconditioner>;
+
+    // Access the inner Eigen matrix (used for CRTP)
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // Bring back useful superclass API
+private:
+    using Super = SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>>;
+public:
+    using Scalar = typename Super::Scalar;
+    static constexpr int Rows = Super::Rows;
+    static constexpr int Cols = Super::Cols;
 
     // === Eigen::SVDBase API ===
 
@@ -92,20 +106,6 @@ class JacobiSVD {
     using SingularValuesType = Vector<Scalar, std::min(Rows, Cols)>;
     SingularValuesType singularValues() const {
         return SingularValuesType(m_inner.singularValues());
-    }
-
-    // Resolve linear equation Ax = b using this SVD decomposition of A
-    template <typename Rhs>
-    Vector<Scalar, Cols> solve(const MatrixBase<Rhs>& b) const {
-        return Vector<Scalar, Cols>(
-            m_inner.solve(b.derivedInner())
-        );
-    }
-    template <typename Rhs>
-    Vector<Scalar, Cols> solve(const Eigen::MatrixBase<Rhs>& b) const {
-        return Vector<Scalar, Cols>(
-            m_inner.solve(b)
-        );
     }
 
     // === Eigen::JacobiSVD API ===

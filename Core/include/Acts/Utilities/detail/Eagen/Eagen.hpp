@@ -29,6 +29,7 @@
 #include "QuaternionBase.hpp"
 #include "Rotation2D.hpp"
 #include "RotationBase.hpp"
+#include "SolverBase.hpp"
 #include "Transform.hpp"
 #include "Translation.hpp"
 #include "TypeTraits.hpp"

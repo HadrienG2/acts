@@ -21,6 +21,9 @@ namespace Eagen {
 template <typename Scalar> class AngleAxis;
 template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
 class Block;
+template <typename _MatrixType,
+          int _QRPreconditioner = ColPivHouseholderQRPreconditioner>
+class JacobiSVD;
 template <typename Derived, int MapOptions, typename StrideType> class Map;
 template <typename Scalar, int Rows, int Cols,
           int Options = AutoAlign |

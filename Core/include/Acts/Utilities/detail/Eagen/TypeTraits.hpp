@@ -53,6 +53,15 @@ public:
     static constexpr int OuterStride = DerivedTraits::OuterStride;
 };
 
+// Jacobi SVD decomposition type traits
+template <typename _MatrixType, int _QRPreconditioner>
+struct TypeTraits<JacobiSVD<_MatrixType, _QRPreconditioner>> {
+public:
+    using MatrixType = _MatrixType;
+    static constexpr int QRPreconditioner = _QRPreconditioner;
+    using Inner = Eigen::JacobiSVD<MatrixType, QRPreconditioner>;
+};
+
 // Mapped array type traits
 template <typename Derived, int MapOptions, typename StrideType>
 struct TypeTraits<Map<Derived, MapOptions, StrideType>> {
