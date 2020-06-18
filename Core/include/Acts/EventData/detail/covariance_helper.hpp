@@ -38,8 +38,9 @@ struct covariance_helper {
       if (isSemiPositive(covariance)) {
         return true;
       } else {
-        Eigen::JacobiSVD<CovMatrix_t> svdCov(
-            covariance, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        detail::Eagen::JacobiSVD<CovMatrix_t> svdCov(
+            covariance,
+            detail::Eagen::ComputeFullU | detail::Eagen::ComputeFullV);
         CovMatrix_t S = svdCov.singularValues().asDiagonal();
         CovMatrix_t V = svdCov.matrixV();
         CovMatrix_t H = V * S * V.transpose();
