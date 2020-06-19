@@ -23,6 +23,7 @@ namespace Eagen {
 // Eigen::JacobiSVD wrapper
 template <typename _MatrixType, int _QRPreconditioner>
 class JacobiSVD : public SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>> {
+public:
     // === Eagen wrapper API ===
 
     // Re-expose template parameters
@@ -48,7 +49,7 @@ public:
 
     // Bring back useful superclass API
 private:
-    using Super = SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>>;
+    using Super = SolverBase<JacobiSVD<MatrixType, QRPreconditioner>>;
 public:
     using Scalar = typename Super::Scalar;
     static constexpr int Rows = Super::Rows;

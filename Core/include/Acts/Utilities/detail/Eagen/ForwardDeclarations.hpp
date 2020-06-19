@@ -24,6 +24,8 @@ class Block;
 template <typename _MatrixType,
           int _QRPreconditioner = ColPivHouseholderQRPreconditioner>
 class JacobiSVD;
+template <typename MatrixType, int UpLo = Lower> class LLT;
+template <typename MatrixType, int UpLo = Lower> class LDLT;
 template <typename Derived, int MapOptions, typename StrideType> class Map;
 template <typename Scalar, int Rows, int Cols,
           int Options = AutoAlign |

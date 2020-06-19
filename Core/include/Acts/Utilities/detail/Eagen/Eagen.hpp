@@ -21,6 +21,8 @@
 #include "ForwardDeclarations.hpp"
 #include "Hyperplane.hpp"
 #include "JacobiSVD.hpp"
+#include "LDLT.hpp"
+#include "LLT.hpp"
 #include "Map.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"

@@ -30,6 +30,12 @@ constexpr AlignmentType Aligned32 = Eigen::Aligned32;
 constexpr AlignmentType Aligned64 = Eigen::Aligned64;
 constexpr AlignmentType Aligned128 = Eigen::Aligned128;
 //
+using ComputationInfo = Eigen::ComputationInfo;
+constexpr ComputationInfo Success = Eigen::Success;
+constexpr ComputationInfo NumericalIssue = Eigen::NumericalIssue;
+constexpr ComputationInfo NoConvergence = Eigen::NoConvergence;
+constexpr ComputationInfo InvalidInput = Eigen::InvalidInput;
+//
 using DecompositionOptions = Eigen::DecompositionOptions;
 constexpr DecompositionOptions ComputeFullU = Eigen::ComputeFullU;
 constexpr DecompositionOptions ComputeFullV = Eigen::ComputeFullV;
@@ -66,6 +72,18 @@ constexpr TransformTraits Isometry = Eigen::Isometry;
 constexpr TransformTraits Affine = Eigen::Affine;
 constexpr TransformTraits AffineCompact = Eigen::AffineCompact;
 constexpr TransformTraits Projective = Eigen::Projective;
+//
+using UpLoType = Eigen::UpLoType;
+constexpr UpLoType Lower = Eigen::Lower;
+constexpr UpLoType Upper = Eigen::Upper;
+constexpr UpLoType UnitDiag = Eigen::UnitDiag;
+constexpr UpLoType ZeroDiag = Eigen::ZeroDiag;
+constexpr UpLoType UnitLower = Eigen::UnitLower;
+constexpr UpLoType UnitUpper = Eigen::UnitUpper;
+constexpr UpLoType StrictlyLower = Eigen::StrictlyLower;
+constexpr UpLoType StrictlyUpper = Eigen::StrictlyUpper;
+constexpr UpLoType SelfAdjoint = Eigen::SelfAdjoint;
+constexpr UpLoType Symmetric = Eigen::Symmetric;
 
 }  // namespace Eagen
 

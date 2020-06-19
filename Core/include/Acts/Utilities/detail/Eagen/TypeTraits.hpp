@@ -59,7 +59,32 @@ struct TypeTraits<JacobiSVD<_MatrixType, _QRPreconditioner>> {
 public:
     using MatrixType = _MatrixType;
     static constexpr int QRPreconditioner = _QRPreconditioner;
-    using Inner = Eigen::JacobiSVD<MatrixType, QRPreconditioner>;
+private:
+    using MatrixTypeInner = typename TypeTraits<MatrixType>::Inner;
+public:
+    using Inner = Eigen::JacobiSVD<MatrixTypeInner, QRPreconditioner>;
+};
+
+// Standard Cholesky decomposition type traits
+template <typename _MatrixType, int _UpLo>
+struct TypeTraits<LLT<_MatrixType, _UpLo>> {
+    using MatrixType = _MatrixType;
+    static constexpr int UpLo = _UpLo;
+private:
+    using MatrixTypeInner = typename TypeTraits<MatrixType>::Inner;
+public:
+    using Inner = Eigen::LLT<MatrixTypeInner, UpLo>;
+};
+
+// Robust Cholesky decomposition type traits
+template <typename _MatrixType, int _UpLo>
+struct TypeTraits<LDLT<_MatrixType, _UpLo>> {
+    using MatrixType = _MatrixType;
+    static constexpr int UpLo = _UpLo;
+private:
+    using MatrixTypeInner = typename TypeTraits<MatrixType>::Inner;
+public:
+    using Inner = Eigen::LDLT<MatrixTypeInner, UpLo>;
 };
 
 // Mapped array type traits
