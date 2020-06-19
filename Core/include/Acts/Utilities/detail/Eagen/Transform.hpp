@@ -182,7 +182,7 @@ public:
         return m_inner(row, col);
     }
 
-    // Apply the transform to some Eigen object
+    // Apply the transform to a matrix
     // NOTE: No Eagen-style Diagonal for now
     template <typename DiagonalDerived>
     Matrix<Scalar, Dim+1, Dim+1> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
@@ -194,11 +194,34 @@ public:
     }
     // TODO: Support transforming Eigen::EigenBase too, requires figuring out
     //       the right Eagen matrix type.
+
+    // Multiply two transforms with each other
+private:
+    static constexpr int TransformProductResultMode(int OtherMode) {
+        return (Mode == (int)Projective
+                || OtherMode == (int)Projective) ? Projective :
+               (Mode == (int)Affine
+                || OtherMode == (int)Affine) ? Affine :
+               (Mode == (int)AffineCompact
+                || OtherMode == (int)AffineCompact) ? AffineCompact :
+               (Mode == (int)Isometry
+                || OtherMode == (int)Isometry) ? Isometry :
+               Projective;
+    }
+    template <int OtherMode>
+    using TransformProductResult =
+        Transform<Scalar,
+                  Dim,
+                  TransformProductResultMode(OtherMode),
+                  Options>;
+public:
     template <int OtherMode, int OtherOptions>
-    Transform operator*(
+    TransformProductResult<OtherMode> operator*(
         const Transform<Scalar, Dim, OtherMode, OtherOptions>& other
     ) const {
-        return Transform(m_inner * other.getInner());
+        return TransformProductResult<OtherMode>(
+            m_inner * other.getInner()
+        );
     }
 
     // Translation interoperability
