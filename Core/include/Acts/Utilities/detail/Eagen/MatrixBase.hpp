@@ -386,18 +386,11 @@ public:
 
     // Assignment operator
     template <typename OtherDerived = Derived>
-    Derived& operator=(const DenseBase<OtherDerived>& other) {
+    Derived& operator=(const EigenBase<OtherDerived>& other) {
         derivedInner() = other.derivedInner();
         return derived();
     }
     template <typename OtherDerived = Inner>
-    Derived& operator=(const Eigen::DenseBase<OtherDerived>& other) {
-        derivedInner() = other;
-        return derived();
-    }
-    // NOTE: No need for an Eagen::EigenBase overload yet as we don't replicate
-    //       that layer of the Eigen class hierarchy yet.
-    template <typename OtherDerived>
     Derived& operator=(const Eigen::EigenBase<OtherDerived>& other) {
         derivedInner() = other;
         return derived();
@@ -967,7 +960,8 @@ public:
 
     // Sub-vector accessors
 private:
-    // FIXME: Not perfect row vector detection, but should be good enough
+    // FIXME: This wouldn't work when Rows == Dynamic, but I don't think we ever
+    //        use that in Acts...
     static constexpr bool IsRowVector = IsVectorAtCompileTime && (Rows == 1);
     template <int Length>
     using SubVector = Matrix<

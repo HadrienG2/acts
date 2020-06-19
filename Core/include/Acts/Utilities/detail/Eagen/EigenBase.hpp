@@ -53,12 +53,6 @@ public:
     // === Eagen-specific interface ===
 
     // Access the inner Eigen object held by the CRTP daughter class
-    //
-    // FIXME: I'd like this implementation detail to be protected, but it seems
-    //        that protected functions are not visible across different
-    //        instantiations of MatrixBase, which I need to access Matrix
-    //        contents from the Block implementation.
-    //
     Inner& derivedInner() {
         return derived().getInner();
     }

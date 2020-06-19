@@ -13,6 +13,7 @@
 #include "ForwardDeclarations.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
+#include "Transform.hpp"
 
 namespace Acts {
 
@@ -174,7 +175,15 @@ public:
         m_inner.transform(mat, traits);
         return *this;
     }
-    // NOTE: Eigen::Transform doesn't have an Eagen equivalent yet
+    template <int TrOptions>
+    Hyperplane& transform(const Transform<Scalar,
+                                          AmbientDim,
+                                          TransformTraits::Affine,
+                                          TrOptions>& t,
+                          TransformTraits traits = TransformTraits::Affine) {
+        m_inner.transform(t.getInner(), traits);
+        return *this;
+    }
     template <int TrOptions>
     Hyperplane& transform(const Eigen::Transform<Scalar,
                                                  AmbientDim,
