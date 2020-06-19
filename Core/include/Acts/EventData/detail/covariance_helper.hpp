@@ -57,7 +57,7 @@ struct covariance_helper {
     if (covariance.hasNaN()) {
       return false;
     }
-    Eigen::LDLT<CovMatrix_t> ldltCov(covariance);
+    detail::Eagen::LDLT<CovMatrix_t> ldltCov(covariance);
     return ldltCov.isPositive();
   }
 
@@ -66,8 +66,8 @@ struct covariance_helper {
     if (covariance.hasNaN()) {
       return false;
     }
-    Eigen::LLT<CovMatrix_t> lltCov(covariance);
-    return lltCov.info() == Eigen::Success ? true : false;
+    detail::Eagen::LLT<CovMatrix_t> lltCov(covariance);
+    return lltCov.info() == detail::Eagen::Success ? true : false;
   }
 };
 
