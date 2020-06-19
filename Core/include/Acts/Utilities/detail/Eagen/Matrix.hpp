@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include "EigenDense.hpp"
 #include "ForwardDeclarations.hpp"
 #include "PlainMatrixBase.hpp"
@@ -128,25 +130,42 @@ public:
         return *this;
     }
 
-    // Vector construction from a set of scalars
-    explicit Matrix(const Scalar& x) : m_inner(x) {}
+    // Construct a 1-dimensional vector from a scalar, or an uninitialized
+    // dynamic-sized vector from a size (let Eigen resolve the ambiguity...)
+    template <typename T>
+    explicit Matrix(
+        const T& t,
+        std::enable_if_t<std::is_convertible_v<T, Index>
+                         || std::is_convertible_v<T, Scalar>,
+                         T>* = nullptr
+
+    ) : m_inner(t) {}
+
+    // Constuct a 2-dimensional vector from two scalars, or an uninitialized
+    // dynamic-sized matrix from rows/cols (let Eigen resolve the ambiguity...)
+    template <typename T, typename U>
+    Matrix(
+        const T& t,
+        const U& u,
+        std::enable_if_t<(std::is_convertible_v<T, Index>
+                          && std::is_convertible_v<U, Index>)
+                         || (std::is_convertible_v<T, Scalar>
+                             && std::is_convertible_v<U, Scalar>),
+                         T>* = nullptr
+
+    ) : m_inner(t, u) {}
+
+    // Construct a 3D+ vector from a set of scalars
     template <typename... Scalars>
-    Matrix(const Scalar& x, const Scalar& y,const Scalars&... other)
-        : m_inner(x, y, other...)
+    Matrix(const Scalar& x,
+           const Scalar& y,
+           const Scalar& z,
+           const Scalars&... other)
+        : m_inner(x, y, z, other...)
     {}
 
     // Matrix construction from a C-style array of coefficients
     explicit Matrix(const Scalar* data) : m_inner(data) {}
-
-    // Uninitialized matrix or vector constructor
-    explicit Matrix(Index dim) : m_inner(dim) {}
-    Matrix(Index rows, Index cols) : m_inner(rows, cols) {}
-
-    // NOTE: Resolves an ambiguous overload from Eigen's "official" matrix
-    //       constructor signature, without bringing the whole init1 machinery
-    //       from Eigen along the way.
-    explicit Matrix(unsigned int dim) : m_inner(dim) {}
-    explicit Matrix(size_t dim) : m_inner(dim) {}
 
     // Emulate Eigen::Matrix's base class typedef
     using Base = Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
