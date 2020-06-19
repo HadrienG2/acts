@@ -35,6 +35,7 @@
 #include "Transform.hpp"
 #include "Translation.hpp"
 #include "TypeTraits.hpp"
+#include "UniformScaling.hpp"
 #include "VectorBlock.hpp"
 
 // These declarations must occur after everything else has been declared

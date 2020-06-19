@@ -15,6 +15,7 @@
 #include "ForwardDeclarations.hpp"
 #include "Transform.hpp"
 #include "TypeTraits.hpp"
+#include "UniformScaling.hpp"
 
 namespace Acts {
 
@@ -116,11 +117,14 @@ public:
         return Transform<Scalar, Dim, Isometry>(derivedInner() * t);
     }
 
-    // TODO: Figure out what Eigen::UniformScaling is and if we must support it
+    // Compose with a uniform scaling
+    RotationMatrixType operator*(const UniformScaling<Scalar>& s) const {
+        return RotationMatrixType(
+            derivedInner() * s.getInner()
+        );
+    }
 
     // === Eagen-specific interface ===
-    //
-    // NOTE: Cannot be protected because Transform needs to access them.
 
     // CRTP daughter class access
     Derived& derived() {

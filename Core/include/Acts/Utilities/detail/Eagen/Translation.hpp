@@ -17,6 +17,7 @@
 #include "MatrixBase.hpp"
 #include "RotationBase.hpp"
 #include "Transform.hpp"
+#include "UniformScaling.hpp"
 
 namespace Acts {
 
@@ -183,7 +184,12 @@ public:
         return Translation(m_inner * other);
     }
 
-    // TODO: Figure out if we need UniformScaling, if so support it
+    // Concatenate a translation and a uniform scaling
+    AffineTransformType operator*(const UniformScaling<Scalar>& other) const {
+        return AffineTransformType(
+            m_inner * other.getInner()
+        );
+    }
 
     // Coefficient access
     Scalar& x() {
