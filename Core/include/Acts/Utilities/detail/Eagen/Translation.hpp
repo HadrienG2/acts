@@ -164,7 +164,7 @@ public:
     Transform<Scalar, Dim, Mode>
     operator*(const Transform<Scalar, Dim, Mode, Options>& t) const {
         return Transform<Scalar, Dim, Mode>(
-            m_inner * t.derivedInner()
+            m_inner * t.getInner()
         );
     }
     template <int Mode, int Options>

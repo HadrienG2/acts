@@ -117,7 +117,7 @@ public:
     // Approximate equality
     bool isApprox(const Transform& other,
                   const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other.m_inner, prec);
+        return m_inner.isApprox(other.getInner(), prec);
     }
     bool isApprox(const Inner& other,
                   const RealScalar& prec = dummy_precision()) const {
@@ -198,7 +198,7 @@ public:
     Transform operator*(
         const Transform<Scalar, Dim, OtherMode, OtherOptions>& other
     ) const {
-        return Transform(m_inner * other.m_inner);
+        return Transform(m_inner * other.getInner());
     }
 
     // Translation interoperability
@@ -276,7 +276,7 @@ public:
     // Assign an Eigen object (presumably a transform matrix)
     template <typename OtherDerived>
     Transform& operator=(const EigenBase<OtherDerived>& other) {
-        m_inner = other.m_inner;
+        m_inner = other.derivedInner();
         return *this;
     }
     template <typename OtherDerived>
@@ -372,7 +372,7 @@ public:
     template <typename DiagonalDerived>
     friend Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& a,
                                const Transform& b) {
-        return Transform(a * b.m_inner);
+        return Transform(a * b.getInner());
     }
     // TODO: Support left-side transform multiplication
 
