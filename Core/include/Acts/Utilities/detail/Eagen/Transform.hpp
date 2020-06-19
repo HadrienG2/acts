@@ -69,12 +69,18 @@ public:
     {}
 
     // Constructor from another transform
-    template <typename OtherScalarType>
-    Transform(const Transform<OtherScalarType, Dim, Mode, Options>& other)
-        : m_inner(other.m_inner)
+    template <typename OtherScalarType, int OtherMode, int OtherOptions>
+    Transform(const Transform<OtherScalarType,
+                              Dim,
+                              OtherMode,
+                              OtherOptions>& other)
+        : m_inner(other.getInner())
     {}
-    template <typename OtherScalarType>
-    Transform(const Eigen::Transform<OtherScalarType, Dim, Mode, Options>& other)
+    template <typename OtherScalarType, int OtherMode, int OtherOptions>
+    Transform(const Eigen::Transform<OtherScalarType,
+                                     Dim,
+                                     OtherMode,
+                                     OtherOptions>& other)
         : m_inner(other)
     {}
 
