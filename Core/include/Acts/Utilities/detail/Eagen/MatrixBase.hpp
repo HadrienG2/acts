@@ -696,7 +696,13 @@ public:
     // TODO: Support lazyProduct()
     //       This is not currently used by Acts, so lower-priority.
 
-    // FIXME: Support Cholesky decompositions (LLT, LDLT), used by Acts
+    // Cholesky decompositions
+    LDLT<PlainMatrix> ldlt() const {
+        return LDLT(derivedInner());
+    }
+    LLT<PlainMatrix> llt() const {
+        return LLT(derivedInner());
+    }
 
     // NOTE: noalias() will probably never be supported, as it should almost
     //       never be needed in an eagerly evaluated world, where AFAIK its only
