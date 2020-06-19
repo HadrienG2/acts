@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(ray_construction) {
   BOOST_CHECK_EQUAL(ray2.origin(), Vector2F(1, 1));
   CHECK_CLOSE_ABS(ray2.dir(), dir2, 1e-6);
   Vector2F idir2 = 1. / dir2.array();
-  CHECK_CLOSE_ABS(ray2.idir().matrix(), idir2, 1e-6);
+  CHECK_CLOSE_ABS(Vector2F(ray2.idir()), idir2, 1e-6);
 
   ray2.toStream(output);
   BOOST_CHECK(!output.is_empty(true));
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(ray_construction) {
 
   BOOST_CHECK_EQUAL(ray3.origin(), Vector3F(1, 2, 3));
   CHECK_CLOSE_ABS(ray3.dir(), dir3, 1e-6);
-  CHECK_CLOSE_ABS(ray3.idir().matrix(), (1. / dir3.array()).matrix(), 1e-6);
+  CHECK_CLOSE_ABS(Vector3F(ray3.idir()), Vector3F(1. / dir3.array()), 1e-6);
 
   ray3.toStream(output);
   BOOST_CHECK(!output.is_empty(true));
