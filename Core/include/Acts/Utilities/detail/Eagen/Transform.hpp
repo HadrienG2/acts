@@ -185,12 +185,12 @@ public:
 
     // Apply the transform to a matrix
     template <typename DiagonalDerived>
-    Matrix<Scalar, Dim+1, Dim+1> operator*(const DiagonalBase<DiagonalDerived>& b) const {
-        return Matrix<Scalar, Dim+1, Dim+1>(m_inner * b.derivedInner());
+    Transform operator*(const DiagonalBase<DiagonalDerived>& b) const {
+        return Transform(m_inner * b.derivedInner());
     }
     template <typename DiagonalDerived>
-    Matrix<Scalar, Dim+1, Dim+1> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
-        return Matrix<Scalar, Dim+1, Dim+1>(m_inner * b);
+    Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
+        return Transform(m_inner * b);
     }
     template <typename OtherDerived>
     OtherDerived operator*(const EigenBase<OtherDerived>& other) const {

@@ -548,7 +548,7 @@ public:
     asDiagonal() const {
         assert(std::min(Rows, Cols) == 1);
         return DiagonalMatrix<Scalar, std::max(Rows, Cols)>(
-            derivedInner().asDiagonal()
+            derivedInner().asDiagonal().diagonal()
         );
     }
 

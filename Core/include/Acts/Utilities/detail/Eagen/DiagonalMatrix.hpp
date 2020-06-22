@@ -65,11 +65,19 @@ public:
     explicit DiagonalMatrix(const DiagonalBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
     {}
+    template <typename OtherDerived>
+    explicit DiagonalMatrix(const Eigen::DiagonalBase<OtherDerived>& other)
+        : m_inner(other)
+    {}
 
     // Constructor from vector
     template <typename OtherDerived>
     explicit DiagonalMatrix(const MatrixBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
+    {}
+    template <typename OtherDerived>
+    explicit DiagonalMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+        : m_inner(other)
     {}
 
     // Constructor from a set of scalars
@@ -86,6 +94,11 @@ public:
     // Assignment from other diagonal matrix
     template <typename OtherDerived>
     DiagonalMatrix& operator=(const DiagonalBase<OtherDerived>& other) {
+        m_inner = other.derivedInner();
+        return *this;
+    }
+    template <typename OtherDerived>
+    DiagonalMatrix& operator=(const Eigen::DiagonalBase<OtherDerived>& other) {
         m_inner = other.derivedInner();
         return *this;
     }
