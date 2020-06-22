@@ -143,17 +143,18 @@ public:
 
     // Constuct a 2-dimensional vector from two scalars, or an uninitialized
     // dynamic-sized matrix from rows/cols (let Eigen resolve the ambiguity...)
-    template <typename T, typename U>
-    Matrix(
-        const T& t,
-        const U& u,
-        std::enable_if_t<(std::is_convertible_v<T, Index>
-                          && std::is_convertible_v<U, Index>)
-                         || (std::is_convertible_v<T, Scalar>
-                             && std::is_convertible_v<U, Scalar>),
-                         T>* = nullptr
-
-    ) : m_inner(t, u) {}
+    template <typename T,
+              typename U,
+              typename = std::enable_if_t<
+                             (
+                                 std::is_convertible_v<T, Index>
+                                 && std::is_convertible_v<U, Index>
+                             ) || (
+                                 std::is_convertible_v<T, Scalar>
+                                 && std::is_convertible_v<U, Scalar>
+                             ),
+                             void>>
+    Matrix(const T& t, const U& u) : m_inner(t, u) {}
 
     // Construct a 3D+ vector from a set of scalars
     template <typename... Scalars>
