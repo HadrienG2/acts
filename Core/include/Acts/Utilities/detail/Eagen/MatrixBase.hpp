@@ -819,6 +819,15 @@ public:
         return derived();
     }
 
+    // Edge case of summing a 1x1 matrix with a scalar
+    Scalar operator+(const Scalar& s) const {
+        return derivedInner().value() + s;
+    }
+    Derived& operator+=(const Scalar& s) {
+        derivedInner() += Eigen::Matrix<Scalar, 1, 1>(s);
+        return derived();
+    }
+
     // Matrix subtraction
     template <typename OtherDerived>
     PlainBase operator-(const Eigen::MatrixBase<OtherDerived>& other) const {
