@@ -141,7 +141,7 @@ std::ostream& Acts::Frustum<value_t, DIM, SIDES>::svg(std::ostream& os,
   // We flip the y axis, and scale up by `unit`.
   transform_type trf = transform_type::Identity();
   trf.translate(mid);
-  trf = trf * Eigen::Scaling(VertexType(1, -1));
+  trf = trf * detail::Eagen::Scaling(VertexType(1, -1));
   trf.scale(unit);
 
   std::array<std::string, 3> colors({"orange", "blue", "red"});

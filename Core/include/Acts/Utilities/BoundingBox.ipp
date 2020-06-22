@@ -399,7 +399,7 @@ std::ostream& Acts::AxisAlignedBoundingBox<entity_t, value_t, DIM>::svg(
 
   transform_t trf = transform_t::Identity();
   trf.translate(mid);
-  trf = trf * Eigen::Scaling(VertexType(1, -1));
+  trf = trf * detail::Eagen::Scaling(VertexType(1, -1));
   trf.scale(unit);
 
   auto draw_point = [&](const VertexType& p_, std::string color, size_t r) {
