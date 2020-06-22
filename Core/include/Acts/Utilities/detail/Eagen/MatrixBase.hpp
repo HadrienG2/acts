@@ -334,10 +334,12 @@ public:
     Scalar maxCoeff() const {
         return derivedInner().maxCoeff();
     }
-    Scalar maxCoeff(Index* index) const {
+    template<typename IndexType>
+    Scalar maxCoeff(IndexType* index) const {
         return derivedInner().maxCoeff(index);
     }
-    Scalar maxCoeff(Index* row, Index* col) const {
+    template<typename IndexType>
+    Scalar maxCoeff(IndexType* row, IndexType* col) const {
         return derivedInner().maxCoeff(row, col);
     }
     Scalar mean() const {
@@ -346,10 +348,12 @@ public:
     Scalar minCoeff() const {
         return derivedInner().minCoeff();
     }
-    Scalar minCoeff(Index* index) const {
+    template<typename IndexType>
+    Scalar minCoeff(IndexType* index) const {
         return derivedInner().minCoeff(index);
     }
-    Scalar minCoeff(Index* row, Index* col) const {
+    template<typename IndexType>
+    Scalar minCoeff(IndexType* row, IndexType* col) const {
         return derivedInner().minCoeff(row, col);
     }
     Index nonZeros() {
