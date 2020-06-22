@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "DiagonalBase.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "Map.hpp"
@@ -183,7 +184,10 @@ public:
     }
 
     // Apply the transform to a matrix
-    // NOTE: No Eagen-style Diagonal for now
+    template <typename DiagonalDerived>
+    Matrix<Scalar, Dim+1, Dim+1> operator*(const DiagonalBase<DiagonalDerived>& b) const {
+        return Matrix<Scalar, Dim+1, Dim+1>(m_inner * b.derivedInner());
+    }
     template <typename DiagonalDerived>
     Matrix<Scalar, Dim+1, Dim+1> operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
         return Matrix<Scalar, Dim+1, Dim+1>(m_inner * b);
@@ -391,7 +395,11 @@ public:
     }
 
     // Left-side multiplication
-    // NOTE: No diagonal support in Eagen yet
+    template <typename DiagonalDerived>
+    friend Transform operator*(const DiagonalBase<DiagonalDerived>& a,
+                               const Transform& b) {
+        return Transform(a.derivedInner() * b.getInner());
+    }
     template <typename DiagonalDerived>
     friend Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& a,
                                const Transform& b) {

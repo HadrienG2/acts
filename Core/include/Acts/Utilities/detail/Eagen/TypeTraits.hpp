@@ -20,10 +20,6 @@ namespace detail {
 
 namespace Eagen {
 
-// Some type traits to ease manipulating incomplete types
-template <typename EagenType>
-struct TypeTraits;
-
 // Handle const types
 template <typename EagenType>
 struct TypeTraits<const EagenType> : public TypeTraits<EagenType> {};
@@ -51,6 +47,15 @@ public:
     static constexpr int MaxCols = Inner::MaxColsAtCompileTime;
     static constexpr int InnerStride = DerivedTraits::InnerStride;
     static constexpr int OuterStride = DerivedTraits::OuterStride;
+};
+
+// Diagonal matrix type traits
+template <typename _Scalar, int _Size, int _MaxSize>
+struct TypeTraits<DiagonalMatrix<_Scalar, _Size, _MaxSize>> {
+    using Scalar = _Scalar;
+    static constexpr int Size = _Size;
+    static constexpr int MaxSize = _MaxSize;
+    using Inner = Eigen::DiagonalMatrix<Scalar, Size, MaxSize>;
 };
 
 // Jacobi SVD decomposition type traits

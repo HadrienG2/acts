@@ -17,16 +17,27 @@ namespace detail {
 
 namespace Eagen {
 
-// Forward declarations
+// Forward declaration of type traits (used by some other forward declarations)
+template <typename EagenType>
+struct TypeTraits;
+
+// Forward declarations of concrete types
 template <typename Scalar> class AngleAxis;
 template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
 class Block;
+template <typename Derived> class DiagonalBase;
+template <typename Scalar, int Size, int MaxSize = Size>
+class DiagonalMatrix;
 template <typename _MatrixType,
           int _QRPreconditioner = ColPivHouseholderQRPreconditioner>
 class JacobiSVD;
 template <typename MatrixType, int UpLo = Lower> class LLT;
 template <typename MatrixType, int UpLo = Lower> class LDLT;
-template <typename Derived, int MapOptions, typename StrideType> class Map;
+template <typename Derived,
+          int MapOptions = Unaligned,
+          typename StrideType = Stride<TypeTraits<Derived>::OuterStride,
+                                       TypeTraits<Derived>::InnerStride>>
+class Map;
 template <typename Scalar, int Rows, int Cols,
           int Options = AutoAlign |
                         ( (Rows==1 && Cols!=1) ? RowMajor

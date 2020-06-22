@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "DiagonalBase.hpp"
+#include "DiagonalMatrix.hpp"
 #include "EigenBase.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
@@ -542,12 +544,10 @@ public:
     }
 
     // Reinterpret a vector as a diagonal matrix
-    // TODO: Consider providing a dedicated diagonal wrapper type to avoid
-    //       copies and extra run-time storage and computation overhead
-    Matrix<Scalar, std::max(Rows, Cols), std::max(Rows, Cols)>
+    DiagonalMatrix<Scalar, std::max(Rows, Cols)>
     asDiagonal() const {
         assert(std::min(Rows, Cols) == 1);
-        return Matrix<Scalar, std::max(Rows, Cols), std::max(Rows, Cols)>(
+        return DiagonalMatrix<Scalar, std::max(Rows, Cols)>(
             derivedInner().asDiagonal()
         );
     }
@@ -766,21 +766,26 @@ public:
     // Matrix-matrix multiplication
     template <typename DiagonalDerived>
     PlainBase
+    operator*(const DiagonalBase<DiagonalDerived>& other) const {
+        return PlainBase(derivedInner() * other.derivedInner());
+    }
+    template <typename DiagonalDerived>
+    PlainBase
     operator*(const Eigen::DiagonalBase<DiagonalDerived>& other) const {
         return PlainBase(derivedInner() * other);
-    }
-    template <typename OtherDerived>
-    Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>
-    operator*(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>(
-            derivedInner() * other
-        );
     }
     template <typename OtherDerived>
     Matrix<Scalar, Rows, OtherDerived::Cols>
     operator*(const MatrixBase<OtherDerived>& other) const {
         return Matrix<Scalar, Rows, OtherDerived::Cols>(
             derivedInner() * other.derivedInner()
+        );
+    }
+    template <typename OtherDerived>
+    Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>
+    operator*(const Eigen::MatrixBase<OtherDerived>& other) const {
+        return Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>(
+            derivedInner() * other
         );
     }
     template <typename OtherDerived>
