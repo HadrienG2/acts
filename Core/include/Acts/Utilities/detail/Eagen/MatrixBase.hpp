@@ -799,7 +799,7 @@ public:
     // Matrix subtraction
     template <typename OtherDerived>
     PlainBase operator-(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() + other.derivedInner());
+        return PlainBase(derivedInner() - other.derivedInner());
     }
     template <typename OtherDerived>
     Derived& operator-=(const MatrixBase<OtherDerived>& other) {
