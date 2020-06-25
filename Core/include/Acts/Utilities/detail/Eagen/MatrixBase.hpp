@@ -82,27 +82,34 @@ public:
     }
 
     // Access elements for writing (WriteAccessors specific)
+    //
+    // NOTE: To simplify the implementation, Eagen does not strictly replicate
+    //       the DenseCoeffsBase base class stack, but instead lets Eigen do the
+    //       hard work of figuring out the right return type for each operation.
+    //       So e.g. for Map<const T>, these "non-const" accessors will actually
+    //       call the Eigen const accessor and return a const value/reference.
+    //
     template <typename... Index>
-    Scalar& coeffRef(Index... indices) {
+    decltype(auto) coeffRef(Index... indices) {
         return derivedInner().coeffRef(indices...);
     }
     template <typename... Index>
-    Scalar& operator()(Index... indices) {
+    decltype(auto) operator()(Index... indices) {
         return derivedInner()(indices...);
     }
-    Scalar& operator[](Index index) {
+    decltype(auto) operator[](Index index) {
         return derivedInner()[index];
     }
-    Scalar& w() {
+    decltype(auto) w() {
         return derivedInner().w();
     }
-    Scalar& x() {
+    decltype(auto) x() {
         return derivedInner().x();
     }
-    Scalar& y() {
+    decltype(auto) y() {
         return derivedInner().y();
     }
-    Scalar& z() {
+    decltype(auto) z() {
         return derivedInner().z();
     }
 
