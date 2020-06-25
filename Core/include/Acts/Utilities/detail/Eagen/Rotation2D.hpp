@@ -100,18 +100,8 @@ public:
         return *this;
     }
     template <typename Derived>
-    Rotation2D& fromRotationMatrix(const Eigen::MatrixBase<Derived>& mat) {
-        m_inner.fromRotationMatrix(mat);
-        return *this;
-    }
-    template <typename Derived>
     Rotation2D& operator=(const MatrixBase<Derived>& mat) {
         m_inner = mat.derivedInner();
-        return *this;
-    }
-    template <typename Derived>
-    Rotation2D& operator=(const Eigen::MatrixBase<Derived>& mat) {
-        m_inner = mat;
         return *this;
     }
 
@@ -132,10 +122,6 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
     }
-    bool isApprox(const Inner& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other, prec);
-    }
 
     // Inherit multiplications from base class
     using Super::operator*;
@@ -144,36 +130,20 @@ public:
     Rotation2D operator*(const Rotation2D& other) const {
         return Rotation2D(m_inner * other.m_inner);
     }
-    Rotation2D operator*(const Inner& other) const {
-        return Rotation2D(m_inner * other.m_inner);
-    }
     Rotation2D& operator*=(const Rotation2D& other) {
         m_inner *= other.m_inner;
-        return *this;
-    }
-    Rotation2D operator*=(const Inner& other) {
-        m_inner *= other;
         return *this;
     }
 
     // Rotate a 2D vector
     using Vector2 = Vector<Scalar, 2>;
-private:
-    using Vector2Inner = typename Inner::Vector2;
-public:
     Vector2 operator*(const Vector2& vec) {
         return Vector2(m_inner * vec.derivedInner());
-    }
-    Vector2 operator*(const Vector2Inner& vec) {
-        return Vector2(m_inner * vec);
     }
 
     // Rotation interpolation
     Rotation2D<Scalar> slerp(const Scalar& t, const Rotation2D& other) const {
         return Rotation2D(m_inner.slerp(t, other.m_inner));
-    }
-    Rotation2D<Scalar> slerp(const Scalar& t, const Inner& other) const {
-        return Rotation2D(m_inner.slerp(t, other));
     }
 
     // Inner angle wraparound

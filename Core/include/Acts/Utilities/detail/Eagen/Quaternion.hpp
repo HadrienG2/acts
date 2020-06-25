@@ -106,27 +106,6 @@ public:
             Inner::FromTwoVectors(a.derivedInner(), b.derivedInner())
         );
     }
-    template <typename Derived1, typename Derived2> 
-    static Quaternion FromTwoVectors(const Eigen::MatrixBase<Derived1>& a,
-                                     const MatrixBase<Derived1>& b) {
-        return Quaternion(
-            Inner::FromTwoVectors(a, b.derivedInner())
-        );
-    }
-    template <typename Derived1, typename Derived2> 
-    static Quaternion FromTwoVectors(const MatrixBase<Derived1>& a,
-                                     const Eigen::MatrixBase<Derived1>& b) {
-        return Quaternion(
-            Inner::FromTwoVectors(a.derivedInner(), b)
-        );
-    }
-    template <typename Derived1, typename Derived2> 
-    static Quaternion FromTwoVectors(const Eigen::MatrixBase<Derived1>& a,
-                                     const Eigen::MatrixBase<Derived1>& b) {
-        return Quaternion(
-            Inner::FromTwoVectors(a, b)
-        );
-    }
 
 private:
     Inner m_inner;

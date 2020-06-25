@@ -55,11 +55,6 @@ public:
     Scalar angularDistance(const QuaternionBase<OtherDerived>& other) const {
         return derivedInner().angularDistance(other.derivedInner());
     }
-    template <typename OtherDerived>
-    Scalar
-    angularDistance(const Eigen::QuaternionBase<OtherDerived>& other) const {
-        return derivedInner().angularDistance(other);
-    }
 
     // Scalar cast
     template <typename NewScalarType>
@@ -125,10 +120,6 @@ public:
     Scalar dot(const QuaternionBase<OtherDerived>& other) const {
         return derivedInner().dot(other.derivedInner());
     }
-    template <typename OtherDerived>
-    Scalar dot(const Eigen::QuaternionBase<OtherDerived>& other) const {
-        return derivedInner().dot(other);
-    }
 
     // Inversion
     Quaternion<Scalar> inverse() const {
@@ -141,11 +132,6 @@ public:
     bool isApprox(const QuaternionBase<OtherDerived>& other,
                   const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApprox(other.derivedInner(), prec);
-    }
-    template <typename OtherDerived>
-    bool isApprox(const Eigen::QuaternionBase<OtherDerived>& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return derivedInner().isApprox(other, prec);
     }
 
     // Norm and normalization
@@ -171,11 +157,6 @@ public:
     operator*(const QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(derivedInner() * other.derivedInner());
     }
-    template <typename OtherDerived>
-    Quaternion<Scalar>
-    operator*(const Eigen::QuaternionBase<OtherDerived>& other) const {
-        return Quaternion<Scalar>(derivedInner() * other);
-    }
 
     // In-place quaternion product
     template <typename OtherDerived>
@@ -183,19 +164,10 @@ public:
         derivedInner() *= q.derivedInner();
         return derived();
     }
-    template <typename OtherDerived>
-    Derived& operator*=(const Eigen::QuaternionBase<OtherDerived>& q) {
-        derivedInner() *= q;
-        return derived();
-    }
 
     // Assignment from angle-axis transform
     Derived& operator=(const AngleAxis<Scalar>& aa) {
         derivedInner() = aa.getInner();
-        return derived();
-    }
-    Derived& operator=(const Eigen::AngleAxis<Scalar>& aa) {
-        derivedInner() = aa;
         return derived();
     }
 
@@ -205,35 +177,12 @@ public:
         derivedInner() = mat.derivedInner();
         return derived();
     }
-    template <typename MatrixDerived>
-    Derived& operator=(const Eigen::MatrixBase<MatrixDerived>& mat) {
-        derivedInner() = mat;
-        return derived();
-    }
 
     // Set from two vectors
     template <typename Derived1, typename Derived2>
     Derived& setFromTwoVectors(const MatrixBase<Derived1>& a,
                                const MatrixBase<Derived2>& b) {
         derivedInner().setFromTwoVectors(a.derivedInner(), b.derivedInner());
-        return derived();
-    }
-    template <typename Derived1, typename Derived2>
-    Derived& setFromTwoVectors(const Eigen::MatrixBase<Derived1>& a,
-                               const MatrixBase<Derived2>& b) {
-        derivedInner().setFromTwoVectors(a, b.derivedInner());
-        return derived();
-    }
-    template <typename Derived1, typename Derived2>
-    Derived& setFromTwoVectors(const MatrixBase<Derived1>& a,
-                               const Eigen::MatrixBase<Derived2>& b) {
-        derivedInner().setFromTwoVectors(a.derivedInner(), b);
-        return derived();
-    }
-    template <typename Derived1, typename Derived2>
-    Derived& setFromTwoVectors(const Eigen::MatrixBase<Derived1>& a,
-                               const Eigen::MatrixBase<Derived2>& b) {
-        derivedInner().setFromTwoVectors(a, b);
         return derived();
     }
 
@@ -250,14 +199,6 @@ public:
           const QuaternionBase<OtherDerived>& other) const {
         return Quaternion<Scalar>(
             derivedInner().slerp(t, other.derivedInner())
-        );
-    }
-    template <typename OtherDerived>
-    Quaternion<Scalar>
-    slerp(const Scalar& t,
-          const Eigen::QuaternionBase<OtherDerived>& other) const {
-        return Quaternion<Scalar>(
-            derivedInner().slerp(t, other)
         );
     }
 

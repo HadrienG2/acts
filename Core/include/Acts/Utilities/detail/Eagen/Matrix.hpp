@@ -124,11 +124,6 @@ public:
         m_inner = r.derivedInner();
         return *this;
     }
-    template <typename OtherDerived>
-    Matrix& operator=(const Eigen::RotationBase<OtherDerived, Cols>& r) {
-        m_inner = r;
-        return *this;
-    }
 
     // Construct a 1-dimensional vector from a scalar, or an uninitialized
     // dynamic-sized vector from a size (let Eigen resolve the ambiguity...)

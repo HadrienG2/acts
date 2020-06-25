@@ -118,10 +118,6 @@ public:
     AngleAxis& fromRotationMatrix(const MatrixBase<Derived>& mat) {
         m_inner.fromRotationMatrix(mat.derivedInner());
     }
-    template <typename Derived>
-    AngleAxis& fromRotationMatrix(const Eigen::MatrixBase<Derived>& mat) {
-        m_inner.fromRotationMatrix(mat);
-    }
     Matrix<Scalar, 3, 3> toRotationMatrix() const {
         return Matrix<Scalar, 3, 3>(m_inner.toRotationMatrix());
     }
@@ -136,18 +132,11 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
     }
-    bool isApprox(const Inner& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other, prec);
-    }
 
     // Angle-axis rotation composition
     using QuaternionType = Quaternion<Scalar>;
     QuaternionType operator*(const AngleAxis& other) const {
         return QuaternionType(m_inner * other.m_inner);
-    }
-    QuaternionType operator*(const Inner& other) const {
-        return QuaternionType(m_inner * other);
     }
     friend QuaternionType operator*(const QuaternionType& a,
                                     const AngleAxis& b) {
@@ -159,10 +148,6 @@ public:
     template <typename Derived>
     AngleAxis& operator=(const MatrixBase<Derived>& mat) {
         m_inner = mat.derivedInner();
-        return *this;
-    }
-    template <typename Derived>
-    AngleAxis& operator=(const Eigen::MatrixBase<Derived>& mat) {
         return *this;
     }
 

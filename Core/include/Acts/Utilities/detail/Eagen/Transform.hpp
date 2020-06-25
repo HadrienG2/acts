@@ -120,10 +120,6 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.getInner(), prec);
     }
-    bool isApprox(const Inner& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other, prec);
-    }
 
     // Access the linear part of the transform
 private:
@@ -188,10 +184,6 @@ public:
     Transform operator*(const DiagonalBase<DiagonalDerived>& b) const {
         return Transform(m_inner * b.derivedInner());
     }
-    template <typename DiagonalDerived>
-    Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& b) const {
-        return Transform(m_inner * b);
-    }
     template <typename OtherDerived>
     OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
         return OtherDerived(m_inner * other.derivedInner());
@@ -242,23 +234,12 @@ public:
     Transform operator*(const TranslationType& t) const {
         return Transform(m_inner * t.getInner());
     }
-    Transform operator*(const Eigen::Translation<Scalar, Dim>& t) const {
-        return Transform(m_inner * t);
-    }
     Transform& operator*=(const TranslationType& t) {
         m_inner *= t.getInner();
         return *this;
     }
-    Transform& operator*=(const Eigen::Translation<Scalar, Dim>& t) {
-        m_inner *= t;
-        return *this;
-    }
     Transform& operator=(const Translation<Scalar, Dim>& t) {
         m_inner = t.getInner();
-        return *this;
-    }
-    Transform& operator=(const Eigen::Translation<Scalar, Dim>& t) {
-        m_inner = t;
         return *this;
     }
 
@@ -268,16 +249,8 @@ public:
         : m_inner(r.derivedInner())
     {}
     template <typename OtherDerived>
-    Transform(const Eigen::RotationBase<OtherDerived, Dim>& r)
-        : m_inner(r)
-    {}
-    template <typename OtherDerived>
     Transform operator*(const RotationBase<OtherDerived, Dim>& r) const {
         return Transform(m_inner * r.derivedInner());
-    }
-    template <typename OtherDerived>
-    Transform operator*(const Eigen::RotationBase<OtherDerived, Dim>& r) const {
-        return Transform(m_inner * r);
     }
     template <typename OtherDerived>
     Transform& operator*=(const RotationBase<OtherDerived, Dim>& r) {
@@ -285,18 +258,8 @@ public:
         return *this;
     }
     template <typename OtherDerived>
-    Transform& operator*=(const Eigen::RotationBase<OtherDerived, Dim>& r) {
-        m_inner *= r;
-        return *this;
-    }
-    template <typename OtherDerived>
     Transform& operator=(const RotationBase<OtherDerived, Dim>& r) {
         m_inner = r.derivedInner();
-        return *this;
-    }
-    template <typename OtherDerived>
-    Transform& operator=(const Eigen::RotationBase<OtherDerived, Dim>& r) {
-        m_inner = r;
         return *this;
     }
 
@@ -324,11 +287,6 @@ public:
         m_inner.prescale(other.derivedInner());
         return *this;
     }
-    template <typename OtherDerived>
-    Transform& prescale(const Eigen::MatrixBase<OtherDerived>& other) {
-        m_inner.prescale(other);
-        return *this;
-    }
     Transform& prescale(const Scalar& s) {
         m_inner.prescale(s);
         return *this;
@@ -340,11 +298,6 @@ public:
     template <typename OtherDerived>
     Transform& pretranslate(const MatrixBase<OtherDerived>& other) {
         m_inner.pretranslate(other.derivedInner());
-        return *this;
-    }
-    template <typename OtherDerived>
-    Transform& pretranslate(const Eigen::MatrixBase<OtherDerived>& other) {
-        m_inner.pretranslate(other);
         return *this;
     }
 
@@ -360,11 +313,6 @@ public:
         m_inner.scale(other.derivedInner());
         return *this;
     }
-    template <typename OtherDerived>
-    Transform& scale(const Eigen::MatrixBase<OtherDerived>& other) {
-        m_inner.scale(other);
-        return *this;
-    }
     Transform& scale(const Scalar& s) {
         m_inner.scale(s);
         return *this;
@@ -376,11 +324,6 @@ public:
     template <typename OtherDerived>
     Transform& translate(const MatrixBase<OtherDerived>& other) {
         m_inner.translate(other.derivedInner());
-        return *this;
-    }
-    template <typename OtherDerived>
-    Transform& translate(const Eigen::MatrixBase<OtherDerived>& other) {
-        m_inner.translate(other);
         return *this;
     }
 
@@ -399,11 +342,6 @@ public:
     friend Transform operator*(const DiagonalBase<DiagonalDerived>& a,
                                const Transform& b) {
         return Transform(a.derivedInner() * b.getInner());
-    }
-    template <typename DiagonalDerived>
-    friend Transform operator*(const Eigen::DiagonalBase<DiagonalDerived>& a,
-                               const Transform& b) {
-        return Transform(a * b.getInner());
     }
     // TODO: Support left-side transform multiplication
 

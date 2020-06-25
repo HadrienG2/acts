@@ -97,11 +97,6 @@ public:
         m_inner = other.derivedInner();
         return *this;
     }
-    template <typename OtherDerived>
-    DiagonalMatrix& operator=(const Eigen::DiagonalBase<OtherDerived>& other) {
-        m_inner = other.derivedInner();
-        return *this;
-    }
 
     // Resize a dynamic diagonal matrix
     void resize(Index size) {

@@ -105,10 +105,6 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
     }
-    bool isApprox(const Inner& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other, prec);
-    }
 
     // Concatenate a translation and a linear transformation
     template <typename OtherDerived>
@@ -142,22 +138,12 @@ public:
     operator*(const MatrixBase<Derived>& vec) const {
         return m_inner * vec.derivedInner();
     }
-    template <typename Derived>
-    std::enable_if_t<Derived::IsVectorAtCompileTime, VectorType>
-    operator*(const Eigen::MatrixBase<Derived>& vec) const {
-        return m_inner * vec;
-    }
 
     // Concatenate a translation and a rotation
     template <typename Derived>
     IsometryTransformType
     operator*(const RotationBase<Derived, Dim>& r) const {
         return IsometryTransformType(m_inner * r.derivedInner());
-    }
-    template <typename Derived>
-    IsometryTransformType
-    operator*(const Eigen::RotationBase<Derived, Dim>& r) const {
-        return IsometryTransformType(m_inner * r);
     }
 
     // Concatenate a translation and another transform
@@ -168,20 +154,10 @@ public:
             m_inner * t.getInner()
         );
     }
-    template <int Mode, int Options>
-    Transform<Scalar, Dim, Mode>
-    operator*(const Eigen::Transform<Scalar, Dim, Mode, Options>& t) const {
-        return Transform<Scalar, Dim, Mode>(
-            m_inner * t
-        );
-    }
 
     // Concatenate two translations
     Translation operator*(const Translation& other) const {
         return Translation(m_inner * other.getInner());
-    }
-    Translation operator*(const Inner& other) const {
-        return Translation(m_inner * other);
     }
 
     // Concatenate a translation and a uniform scaling

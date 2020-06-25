@@ -101,20 +101,11 @@ public:
             derivedInner() * t.getInner()
         );
     }
-    template <int Mode, int Options>
-    Transform<Scalar, Dim, Mode>
-    operator*(const Eigen::Transform<Scalar, Dim, Mode, Options>& t) const {
-        return Transform<Scalar, Dim, Mode>(derivedInner() * t);
-    }
 
     // Compose with a translation
     Transform<Scalar, Dim, Isometry>
     operator*(const Translation<Scalar, Dim>& t) const {
         return Transform<Scalar, Dim, Isometry>(derivedInner() * t.getInner());
-    }
-    Transform<Scalar, Dim, Isometry>
-    operator*(const Eigen::Translation<Scalar, Dim>& t) const {
-        return Transform<Scalar, Dim, Isometry>(derivedInner() * t);
     }
 
     // Compose with a uniform scaling

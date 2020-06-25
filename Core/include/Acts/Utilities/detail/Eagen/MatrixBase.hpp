@@ -619,18 +619,8 @@ public:
     // Cross products
     template <typename OtherDerived>
     PlainBase
-    cross(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cross(other));
-    }
-    template <typename OtherDerived>
-    PlainBase
     cross(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cross(other.derivedInner()));
-    }
-    template <typename OtherDerived>
-    PlainBase
-    cross3(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cross3(other));
     }
     template <typename OtherDerived>
     PlainBase
@@ -656,10 +646,6 @@ public:
     }
 
     // Dot product
-    template <typename OtherDerived>
-    Scalar dot(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return derivedInner().dot(other);
-    }
     template <typename OtherDerived>
     Scalar dot(const MatrixBase<OtherDerived>& other) const {
         return derivedInner().dot(other.derivedInner());
@@ -721,10 +707,6 @@ public:
 
     // Equality and inequality
     template <typename OtherDerived>
-    bool operator==(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return (derivedInner() == other);
-    }
-    template <typename OtherDerived>
     bool operator==(const MatrixBase<OtherDerived>& other) const {
         return (derivedInner() == other.derivedInner());
     }
@@ -756,10 +738,6 @@ public:
 
     // Edge case of handling a 1x1 matrix as a scalar
     template <typename OtherDerived>
-    PlainBase operator/(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() / other.value());
-    }
-    template <typename OtherDerived>
     PlainBase operator/(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner() / other.derivedInner().value());
     }
@@ -780,23 +758,11 @@ public:
     operator*(const DiagonalBase<DiagonalDerived>& other) const {
         return PlainBase(derivedInner() * other.derivedInner());
     }
-    template <typename DiagonalDerived>
-    PlainBase
-    operator*(const Eigen::DiagonalBase<DiagonalDerived>& other) const {
-        return PlainBase(derivedInner() * other);
-    }
     template <typename OtherDerived>
     Matrix<Scalar, Rows, OtherDerived::Cols>
     operator*(const MatrixBase<OtherDerived>& other) const {
         return Matrix<Scalar, Rows, OtherDerived::Cols>(
             derivedInner() * other.derivedInner()
-        );
-    }
-    template <typename OtherDerived>
-    Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>
-    operator*(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return Matrix<Scalar, Rows, OtherDerived::ColsAtCompileTime>(
-            derivedInner() * other
         );
     }
     template <typename OtherDerived>
@@ -812,17 +778,8 @@ public:
 
     // Matrix addition
     template <typename OtherDerived>
-    PlainBase operator+(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() + other);
-    }
-    template <typename OtherDerived>
     PlainBase operator+(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner() + other.derivedInner());
-    }
-    template <typename OtherDerived>
-    Derived& operator+=(const Eigen::MatrixBase<OtherDerived>& other) {
-        derivedInner() += other;
-        return derived();
     }
     template <typename OtherDerived>
     Derived& operator+=(const MatrixBase<OtherDerived>& other) {
@@ -841,17 +798,8 @@ public:
 
     // Matrix subtraction
     template <typename OtherDerived>
-    PlainBase operator-(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() + other);
-    }
-    template <typename OtherDerived>
     PlainBase operator-(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner() + other.derivedInner());
-    }
-    template <typename OtherDerived>
-    Derived& operator-=(const Eigen::MatrixBase<OtherDerived>& other) {
-        derivedInner() -= other;
-        return derived();
     }
     template <typename OtherDerived>
     Derived& operator-=(const MatrixBase<OtherDerived>& other) {
@@ -887,16 +835,8 @@ public:
 
     // Coefficient-wise operations
     template <typename OtherDerived>
-    PlainBase cwiseMin(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseMin(other));
-    }
-    template <typename OtherDerived>
     PlainBase cwiseMin(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseMin(other.derivedInner()));
-    }
-    template <typename OtherDerived>
-    PlainBase cwiseMax(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseMax(other));
     }
     template <typename OtherDerived>
     PlainBase cwiseMax(const MatrixBase<OtherDerived>& other) const {
@@ -915,32 +855,16 @@ public:
         return PlainBase(derivedInner().cwiseInverse());
     }
     template <typename OtherDerived>
-    PlainBase cwiseProduct(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseProduct(other));
-    }
-    template <typename OtherDerived>
     PlainBase cwiseProduct(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseProduct(other.derivedInner()));
-    }
-    template <typename OtherDerived>
-    PlainBase cwiseQuotient(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseQuotient(other));
     }
     template <typename OtherDerived>
     PlainBase cwiseQuotient(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseQuotient(other.derivedInner()));
     }
     template <typename OtherDerived>
-    PlainBase cwiseEqual(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseEqual(other));
-    }
-    template <typename OtherDerived>
     PlainBase cwiseEqual(const MatrixBase<OtherDerived>& other) const {
         return PlainBase(derivedInner().cwiseEqual(other.derivedInner()));
-    }
-    template <typename OtherDerived>
-    PlainBase cwiseNotEqual(const Eigen::MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseNotEqual(other));
     }
     template <typename OtherDerived>
     PlainBase cwiseNotEqual(const MatrixBase<OtherDerived>& other) const {

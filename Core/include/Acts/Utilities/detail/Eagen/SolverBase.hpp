@@ -47,12 +47,6 @@ public:
             derivedInner().solve(b.derivedInner())
         );
     }
-    template <typename Rhs>
-    Vector<Scalar, Cols> solve(const Eigen::MatrixBase<Rhs>& b) const {
-        return Vector<Scalar, Cols>(
-            derivedInner().solve(b)
-        );
-    }
 };
 
 }  // namespace Eagen

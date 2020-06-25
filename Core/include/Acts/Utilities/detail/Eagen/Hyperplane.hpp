@@ -92,14 +92,8 @@ public:
     Scalar absDistance(const VectorType& p) const {
         return m_inner.absDistance(p.getInner());
     }
-    Scalar absDistance(const InnerVectorType& p) const {
-        return m_inner.absDistance(p);
-    }
     Scalar signedDistance(const VectorType& p) const {
         return m_inner.signedDistance(p.getInner());
-    }
-    Scalar signedDistance(const InnerVectorType& p) const {
-        return m_inner.signedDistance(p);
     }
 
     // Cast to a different scalar type
@@ -122,20 +116,12 @@ public:
     VectorType intersection(const Hyperplane& other) const {
         return VectorType(m_inner.intersection(other.m_inner));
     }
-    VectorType intersection(const Inner& other) const {
-        return VectorType(m_inner.intersection(other));
-    }
 
     // Approximate hyperplane equality
     template <int OtherOptions>
     bool isApprox(const Hyperplane<Scalar, AmbientDim, OtherOptions>& other,
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
-    }
-    template <int OtherOptions>
-    bool isApprox(const Eigen::Hyperplane<Scalar, AmbientDim, OtherOptions>& other,
-                  const RealScalar& prec = dummy_precision()) const {
-        return m_inner.isApprox(other, prec);
     }
 
     // TODO: Support normal() accessor
@@ -158,21 +144,12 @@ public:
     VectorType projection(const VectorType& p) const {
         return VectorType(m_inner.projection(p.getInner()));
     }
-    VectorType projection(const InnerVectorType& p) const {
-        return VectorType(m_inner.projection(p));
-    }
 
     // Apply a transform to the hyperplane
     template <typename XprType>
     Hyperplane& transform(const MatrixBase<XprType>& mat,
                           TransformTraits traits = TransformTraits::Affine) {
         m_inner.transform(mat.derivedInner(), traits);
-        return *this;
-    }
-    template <typename XprType>
-    Hyperplane& transform(const Eigen::MatrixBase<XprType>& mat,
-                          TransformTraits traits = TransformTraits::Affine) {
-        m_inner.transform(mat, traits);
         return *this;
     }
     template <int TrOptions>
@@ -184,29 +161,10 @@ public:
         m_inner.transform(t.getInner(), traits);
         return *this;
     }
-    template <int TrOptions>
-    Hyperplane& transform(const Eigen::Transform<Scalar,
-                                                 AmbientDim,
-                                                 TransformTraits::Affine,
-                                                 TrOptions>& t,
-                          TransformTraits traits = TransformTraits::Affine) {
-        m_inner.transform(t, traits);
-        return *this;
-    }
 
     // Construct a hyperplane passing through two points
     static Hyperplane Through(const VectorType& p0, const VectorType& p1) {
         return Hyperplane(Inner::Through(p0.getInner(), p1.getInner()));
-    }
-    static Hyperplane Through(const InnerVectorType& p0, const VectorType& p1) {
-        return Hyperplane(Inner::Through(p0, p1.getInner()));
-    }
-    static Hyperplane Through(const VectorType& p0, const InnerVectorType& p1) {
-        return Hyperplane(Inner::Through(p0.getInner(), p1));
-    }
-    static Hyperplane Through(const InnerVectorType& p0,
-                              const InnerVectorType& p1) {
-        return Hyperplane(Inner::Through(p0, p1));
     }
 
     // Construct a hyperplane passing through three points
@@ -216,43 +174,6 @@ public:
         return Hyperplane(
             Inner::Through(p0.getInner(), p1.getInner(), p2.getInner())
         );
-    }
-    static Hyperplane Through(const InnerVectorType& p0,
-                              const VectorType& p1,
-                              const VectorType& p2) {
-        return Hyperplane(Inner::Through(p0, p1.getInner(), p2.getInner()));
-    }
-    static Hyperplane Through(const VectorType& p0,
-                              const InnerVectorType& p1,
-                              const VectorType& p2) {
-        return Hyperplane(Inner::Through(p0.getInner(), p1, p2.getInner()));
-    }
-    static Hyperplane Through(const InnerVectorType& p0,
-                              const InnerVectorType& p1,
-                              const VectorType& p2) {
-        return Hyperplane(Inner::Through(p0, p1, p2.getInner()));
-    }
-    static Hyperplane Through(const VectorType& p0,
-                              const VectorType& p1,
-                              const InnerVectorType& p2) {
-        return Hyperplane(
-            Inner::Through(p0.getInner(), p1.getInner(), p2)
-        );
-    }
-    static Hyperplane Through(const InnerVectorType& p0,
-                              const VectorType& p1,
-                              const InnerVectorType& p2) {
-        return Hyperplane(Inner::Through(p0, p1.getInner(), p2));
-    }
-    static Hyperplane Through(const VectorType& p0,
-                              const InnerVectorType& p1,
-                              const InnerVectorType& p2) {
-        return Hyperplane(Inner::Through(p0.getInner(), p1, p2));
-    }
-    static Hyperplane Through(const InnerVectorType& p0,
-                              const InnerVectorType& p1,
-                              const InnerVectorType& p2) {
-        return Hyperplane(Inner::Through(p0, p1, p2));
     }
 
 private:
