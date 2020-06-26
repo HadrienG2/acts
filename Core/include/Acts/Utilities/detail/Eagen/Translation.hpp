@@ -171,19 +171,19 @@ public:
     Scalar& x() {
         return m_inner.x();
     }
-    const Scalar& x() const {
+    Scalar x() const {
         return m_inner.x();
     }
     Scalar& y() {
         return m_inner.y();
     }
-    const Scalar& y() const {
+    Scalar y() const {
         return m_inner.y();
     }
     Scalar& z() {
         return m_inner.z();
     }
-    const Scalar& z() const {
+    Scalar z() const {
         return m_inner.z();
     }
 
