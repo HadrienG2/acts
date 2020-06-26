@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "AngleAxis.hpp"
 #include "EigenDense.hpp"
 #include "MatrixBase.hpp"
@@ -22,6 +24,8 @@ namespace Eagen {
 // Wrapper of Eigen::Quaternion
 template <typename _Scalar, int _Options>
 class Quaternion : public QuaternionBase<Quaternion<_Scalar, _Options>> {
+    using Super = QuaternionBase<Quaternion>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -29,10 +33,10 @@ public:
     using Scalar = _Scalar;
     static constexpr int Options = _Options;
 
-    // Underlying Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::Quaternion<Scalar, Options>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -48,18 +52,18 @@ public:
     // Default constructor
     Quaternion() = default;
 
+    // Constructor from inner type
+    Quaternion(const Inner& inner)
+        : m_inner(inner)
+    {}
+
     // Constructor from an angle-axis rotation
     explicit Quaternion(const AngleAxis<Scalar>& aa) : m_inner(aa.getInner()) {}
-    explicit Quaternion(const Eigen::AngleAxis<Scalar>& aa) : m_inner(aa) {}
 
     // Constructor from a vector
     template <typename Derived>
     explicit Quaternion(const MatrixBase<Derived>& other)
         : m_inner(other.derivedInner())
-    {}
-    template <typename Derived>
-    explicit Quaternion(const Eigen::MatrixBase<Derived>& other)
-        : m_inner(other)
     {}
 
     // Constructor from another quaternion
@@ -67,19 +71,11 @@ public:
     Quaternion(const Quaternion<OtherScalar, OtherOptions>& other)
         : m_inner(other.m_inner)
     {}
-    template <typename OtherScalar, int OtherOptions>
-    Quaternion(const Eigen::Quaternion<OtherScalar, OtherOptions>& other)
-        : m_inner(other)
-    {}
 
     // Constructor from QuaternionBase
     template <typename Derived>
     Quaternion(const QuaternionBase<Derived>& other)
         : m_inner(other.derivedInner())
-    {}
-    template <typename Derived>
-    Quaternion(const Eigen::QuaternionBase<Derived>& other)
-        : m_inner(other)
     {}
 
     // Constructor from four scalars

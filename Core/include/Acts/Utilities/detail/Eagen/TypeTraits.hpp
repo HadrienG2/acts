@@ -37,8 +37,15 @@ struct TypeTraits<Block<Derived, BlockRows, BlockCols, InnerPanel>> {
 private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
+    template <typename _DerivedInner>
+    using GenericInner = Eigen::Block<_DerivedInner,
+                                      BlockRows,
+                                      BlockCols,
+                                      InnerPanel>;
 public:
-    using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
+    using Inner = std::conditional_t<std::is_const_v<Derived>,
+                                     GenericInner<const DerivedInner>,
+                                     GenericInner<DerivedInner>>;
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = BlockRows;
     static constexpr int Cols = BlockCols;
@@ -55,6 +62,7 @@ struct TypeTraits<DiagonalMatrix<_Scalar, _Size, _MaxSize>> {
     using Scalar = _Scalar;
     static constexpr int Size = _Size;
     static constexpr int MaxSize = _MaxSize;
+    using DiagonalVectorType = Matrix<Scalar, Size, 1, 0, MaxSize, 1>;
     using Inner = Eigen::DiagonalMatrix<Scalar, Size, MaxSize>;
 };
 
@@ -99,11 +107,11 @@ private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
     template <typename _DerivedInner>
-    using InnerTemplate = Eigen::Map<_DerivedInner, MapOptions, StrideType>;
+    using GenericInner = Eigen::Map<_DerivedInner, MapOptions, StrideType>;
 public:
     using Inner = std::conditional_t<std::is_const_v<Derived>,
-                                     InnerTemplate<const DerivedInner>,
-                                     InnerTemplate<DerivedInner>>;
+                                     GenericInner<const DerivedInner>,
+                                     GenericInner<DerivedInner>>;
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = Inner::RowsAtCompileTime;
     static constexpr int Cols = Inner::ColsAtCompileTime;
@@ -147,8 +155,12 @@ struct TypeTraits<VectorBlock<Derived, Size>> {
 private:
     using DerivedTraits = TypeTraits<Derived>;
     using DerivedInner = typename DerivedTraits::Inner;
+    template <typename _DerivedInner>
+    using GenericInner = Eigen::VectorBlock<_DerivedInner, Size>;
 public:
-    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
+    using Inner = std::conditional_t<std::is_const_v<Derived>,
+                                     GenericInner<const DerivedInner>,
+                                     GenericInner<DerivedInner>>;
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = Inner::RowsAtCompileTime;
     static constexpr int Cols = Inner::ColsAtCompileTime;

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <utility>
 #include <type_traits>
 
 #include "EigenDense.hpp"
@@ -34,6 +35,8 @@ class Matrix : public PlainMatrixBase<Matrix<_Scalar,
                                              _Options,
                                              _MaxRows,
                                              _MaxCols>> {
+    using Super = PlainMatrixBase<Matrix>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -45,10 +48,10 @@ public:
     static constexpr int MaxRows = _MaxRows;
     static constexpr int MaxCols = _MaxCols;
 
-    // Underlying Eigen matrix type
+    // Wrapped Eigen type
     using Inner = Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -59,9 +62,11 @@ public:
         return std::move(m_inner);
     }
 
-    // Re-expose typedefs from Eigen
-    using Index = Eigen::Index;
-    using RealScalar = typename Inner::RealScalar;
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
+    using RealScalar = typename Super::RealScalar;
 
     // === Eigen::Matrix interface ===
 
@@ -69,6 +74,9 @@ public:
     Matrix() = default;
 
     // Copy constructor and assignment from an expression
+    //
+    // TODO: Simplify if we add Array support to Eagen
+    //
     template <typename OtherDerived>
     Matrix(const EigenBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
@@ -89,6 +97,9 @@ public:
     }
 
     // Move construction and assignment, if supported by Eigen
+    //
+    // TODO: Simplify if we add Array support to Eagen
+    //
 #if EIGEN_HAS_RVALUE_REFERENCES
     template <typename OtherDerived>
     Matrix(EigenBase<OtherDerived>&& other)
@@ -114,10 +125,6 @@ public:
     template <typename OtherDerived>
     Matrix(const RotationBase<OtherDerived, Cols>& r)
         : m_inner(r.derivedInner())
-    {}
-    template <typename OtherDerived>
-    Matrix(const Eigen::RotationBase<OtherDerived, Cols>& r)
-        : m_inner(r)
     {}
     template <typename OtherDerived>
     Matrix& operator=(const RotationBase<OtherDerived, Cols>& r) {

@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
@@ -23,9 +26,7 @@ namespace Eagen {
 // Wrapper of Eigen::Rotation2D
 template <typename _Scalar>
 class Rotation2D : public RotationBase<Rotation2D<_Scalar>, 2> {
-private:
-    // RotationBase superclass
-    using Super = RotationBase<Rotation2D<_Scalar>, 2>;
+    using Super = RotationBase<Rotation2D, 2>;
 
 public:
     // === Eagen wrapper API ===
@@ -33,10 +34,10 @@ public:
     // Re-expose template parameters
     using Scalar = _Scalar;
 
-    // Underlying Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::Rotation2D<Scalar>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -52,24 +53,21 @@ public:
     // Default constructor
     Rotation2D() = default;
 
+    // Constructor from inner type
+    Rotation2D(const Inner& inner)
+        : m_inner(inner)
+    {}
+
     // Constructor from 2D rotation matrix
     template <typename Derived>
     explicit Rotation2D(const MatrixBase<Derived>& m)
         : m_inner(m.derivedInner())
-    {}
-    template <typename Derived>
-    explicit Rotation2D(const Eigen::MatrixBase<Derived>& m)
-        : m_inner(m)
     {}
 
     // Constructor from other 2D rotation
     template <typename OtherScalarType>
     Rotation2D(const Rotation2D<OtherScalarType>& other)
         : m_inner(other.m_inner)
-    {}
-    template <typename OtherScalarType>
-    Rotation2D(const Eigen::Rotation2D<OtherScalarType>& other)
-        : m_inner(other)
     {}
 
     // Constructor from scalar angle
@@ -117,7 +115,10 @@ public:
     }
 
     // Approximate equality
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
     bool isApprox(const Rotation2D& other,
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
@@ -159,7 +160,7 @@ private:
 
 private:
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

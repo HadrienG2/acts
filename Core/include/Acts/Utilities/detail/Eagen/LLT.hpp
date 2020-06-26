@@ -8,8 +8,13 @@
 
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
 #include "EigenBase.hpp"
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
+#include "Matrix.hpp"
 #include "SolverBase.hpp"
 
 namespace Acts {
@@ -21,6 +26,8 @@ namespace Eagen {
 // Eigen::LLT wrapper
 template <typename _MatrixType, int _UpLo>
 class LLT : public SolverBase<LLT<_MatrixType, _UpLo>> {
+    using Super = SolverBase<LLT>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -28,13 +35,13 @@ public:
     using MatrixType = _MatrixType;
     static constexpr int UpLo = _UpLo;
 
-    // Eigen type that is being wrapped
+    // Wrapped Eigen type
 private:
     using MatrixTypeInner = typename MatrixType::Inner;
 public:
     using Inner = Eigen::LLT<MatrixTypeInner, UpLo>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -45,34 +52,33 @@ public:
         return std::move(m_inner);
     }
 
-    // Bring back useful superclass API
-private:
-    using Super = SolverBase<LLT<MatrixType, UpLo>>;
-public:
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
     using Scalar = typename Super::Scalar;
     static constexpr int Size = Super::Rows;
     static_assert(Super::Cols == Super::Rows, "Matrix type is not square");
 
     // === Eigen::LLT API ===
 
-    // Traditional Index typedef
-    using Index = Eigen::Index;
-
     // Default constructor
     LLT() = default;
 
     // Construct factorization of a given matrix
     template <typename InputType>
-    LLT(const EigenBase<InputType>& matrix)
+    explicit LLT(const EigenBase<InputType>& matrix)
         : m_inner(matrix.derivedInner())
     {}
+
+    // Perform in-place decomposition, if possible
     template <typename InputType>
-    LLT(const Eigen::EigenBase<InputType>& matrix)
-        : m_inner(matrix)
+    explicit LLT(EigenBase<InputType>& matrix)
+        : m_inner(matrix.derivedInner())
     {}
 
     // Preallocating constructor
-    LLT(Index size)
+    explicit LLT(Index size)
         : m_inner(size)
     {}
 
@@ -82,26 +88,34 @@ public:
         m_inner.compute(a.derivedInner());
         return *this;
     }
-    template <typename InputType>
-    LLT& compute(const Eigen::EigenBase<InputType>& a) {
-        m_inner.compute(a);
-        return *this;
-    }
 
     // Report whether the previous computation was successful
     ComputationInfo info() const {
         return m_inner.info();
     }
 
-    // Access inner matrices
-    // FIXME: Consider providing triangular views as a possible optimization
+    // Access the internal LDLT decomposition matrix
+    const MatrixType& matrixLLT() const {
+        const auto& resultInner = m_inner.matrixLLT();
+        static_assert(
+            std::is_same_v<decltype(resultInner),
+                           const MatrixTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const MatrixType&>(resultInner);
+    }
+
+    // Access views of the lower and upper triangular matrices L and U
+    //
+    // FIXME: Should provide true triangular views, not just as an optimization
+    //        but also because the difference between owned values and const
+    //        references is observable if the user takes a dangling reference
+    //        using something like
+    //        `const auto& bad = ldlt.matrixL().topLeftCorner<2, 2>()`.
+    //
     using MatrixL = Matrix<Scalar, Size, Size>;
     using MatrixU = Matrix<Scalar, Size, Size>;
     MatrixL matrixL() const {
         return MatrixL(m_inner.matrixL());
-    }
-    MatrixType matrixLLT() const {
-        return MatrixType(m_inner.matrixLLT());
     }
     MatrixU matrixU() const {
         return MatrixU(m_inner.matrixU());
@@ -111,7 +125,10 @@ public:
     //       This requires a bit of work, and isn't used by Acts yet
 
     // Estimate of the reciprocal condition number
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
     RealScalar rcond() const {
         return m_inner.rcond();
     }

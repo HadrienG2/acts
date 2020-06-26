@@ -8,7 +8,11 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
+#include "MatrixBase.hpp"
 #include "RotationBase.hpp"
 #include "Transform.hpp"
 #include "Translation.hpp"
@@ -28,10 +32,10 @@ public:
     // Re-expose template parameters
     using Scalar = _Scalar;
 
-    // Underlying Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::UniformScaling<Scalar>;
 
-    // Access the inner Eigen type
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -45,10 +49,18 @@ public:
     // === Eigen::UniformScaling API ===
 
     // Eigen-style typedefs and consts
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
 
     // Default constructor
     UniformScaling() = default;
+
+    // Construct from inner Eigen type
+    UniformScaling(const Inner& inner)
+        : m_inner(inner)
+    {}
 
     // Construct from a scalar
     explicit UniformScaling(const Scalar& s) : m_inner(s) {}
@@ -68,7 +80,7 @@ public:
     }
 
     // Access scale factor
-    const Scalar& factor() const {
+    Scalar factor() const {
         return m_inner.factor();
     }
     Scalar& factor() {
@@ -139,7 +151,7 @@ private:
     Inner m_inner;
 
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

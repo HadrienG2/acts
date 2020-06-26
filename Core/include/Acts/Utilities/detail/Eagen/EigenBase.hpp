@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "EigenPrologue.hpp"
+#include "EigenDense.hpp"
 #include "TypeTraits.hpp"
 
 namespace Acts {
@@ -18,14 +18,31 @@ namespace detail {
 namespace Eagen {
 
 // Spiritual equivalent of Eigen::EigenBase
-template <typename Derived>
+template <typename _Derived>
 class EigenBase {
+public:
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // Wrapped Eigen type
 protected:
-    // Eigen type wrapped by the CRTP daughter class
     using DerivedTraits = TypeTraits<Derived>;
+public:
     using Inner = typename DerivedTraits::Inner;
 
-public:
+    // Access the wrapped Eigen object
+    Inner& derivedInner() {
+        return derived().getInner();
+    }
+    const Inner& derivedInner() const {
+        return derived().getInner();
+    }
+    Inner&& moveDerivedInner() {
+        return derived().moveInner();
+    }
+
     // === Eigen::EigenBase interface ===
 
     // Index convenience typedef
@@ -48,19 +65,6 @@ public:
     }
     const Derived& derived() const {
         return *static_cast<const Derived*>(this);
-    }
-
-    // === Eagen-specific interface ===
-
-    // Access the inner Eigen object held by the CRTP daughter class
-    Inner& derivedInner() {
-        return derived().getInner();
-    }
-    const Inner& derivedInner() const {
-        return derived().getInner();
-    }
-    Inner&& moveDerivedInner() {
-        return derived().moveInner();
     }
 };
 

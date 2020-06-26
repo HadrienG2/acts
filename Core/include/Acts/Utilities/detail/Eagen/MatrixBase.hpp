@@ -29,35 +29,32 @@ namespace Eagen {
 // particular it always exposes the full direct write DenseCoeffsBase interface.
 // If the need arises, that can be changed.
 //
-template <typename Derived>
-class MatrixBase : public EigenBase<Derived> {
-private:
-    // Superclass
-    using Super = EigenBase<Derived>;
-
-protected:
-    // Eigen type wrapped by the CRTP daughter class
-    using DerivedTraits = typename Super::DerivedTraits;
+template <typename _Derived>
+class MatrixBase : public EigenBase<_Derived> {
+    using Super = EigenBase<_Derived>;
 
 public:
-    // Re-expose Matrix typedefs and constexprs
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // Wrapped Eigen type
     using Inner = typename Super::Inner;
+
+    // Re-expose Matrix typedefs and constexprs
+protected:
+    using DerivedTraits = typename Super::DerivedTraits;
+public:
     using Scalar = typename DerivedTraits::Scalar;
     static constexpr int Rows = DerivedTraits::Rows;
     static constexpr int Cols = DerivedTraits::Cols;
     static constexpr int MaxRows = DerivedTraits::MaxRows;
     static constexpr int MaxCols = DerivedTraits::MaxCols;
 
-    // Eigen convenience
-    using RealScalar = typename Inner::RealScalar;
+    // === Base class API ===
 
-private:
-    // Quick way to construct a matrix of the same size, but w/o the options
-    using PlainBase = Matrix<Scalar, Rows, Cols>;
-
-public:
-    // Re-expose EigenBase interface
-    // FIXME: Figure out why method inheritance is broken like that...
+    // Re-export useful base class interface
     using Index = typename Super::Index;
     using Super::cols;
     using Super::derived;
@@ -66,6 +63,12 @@ public:
     using Super::size;
 
     // === Eigen::DenseCoeffsBase interfaces ===
+
+    // Real version of the Scalar type
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
 
     // Storage layout (DirectWriteAccessors specific)
     Index colStride() const {
@@ -151,21 +154,20 @@ public:
     static constexpr unsigned int Flags = Inner::Flags;
     static constexpr bool IsRowMajor = Inner::IsRowMajor;
 
+    // Eigen-style typedefs
+    // NOTE: Scalar was defined above
 private:
     static constexpr int PlainMatrixOptions =
         AutoAlign | (Flags & (IsRowMajor ? RowMajor : ColMajor));
-
 public:
-    // Eigen-style typedefs
-    // NOTE: Scalar was defined above
-    // TODO: Add PlainArray support if Array support is added
     using PlainMatrix = Matrix<Scalar,
                                Rows,
                                Cols,
                                PlainMatrixOptions,
                                MaxRows,
                                MaxCols>;
-    // TODO: Adapt if PlainArray support is added
+    // TODO: Add PlainArray support and adjust PlainObject typedef if Array
+    //       support is added to Eagen.
     using PlainObject = PlainMatrix;
     using StorageIndex = typename Inner::StorageIndex;
     using value_type = Scalar;
@@ -180,7 +182,10 @@ public:
     Index count() const {
         return derivedInner().count();
     }
-    template <typename ThenDerived, typename ElseDerived>
+    // NOTE: select() has quite a large API footprint and is not currently used
+    //       by Acts, so I'm disabling it in an attempt to reduce build costs.
+    // TODO: Roll out a simpler select() if Array support is added to Eagen.
+    /* template <typename ThenDerived, typename ElseDerived>
     PlainObject select(const DenseBase<ThenDerived>& thenMatrix,
                        const DenseBase<ElseDerived>& elseMatrix) const {
         return PlainObject(derivedInner().select(thenMatrix.derivedInner(),
@@ -238,7 +243,7 @@ public:
         const Eigen::DenseBase<ElseDerived>& elseMatrix
     ) const {
         return PlainObject(derivedInner().select(thenScalar, elseMatrix));
-    }
+    } */
 
     // IEEE 754 error handling stupidity
     bool allFinite() const {
@@ -308,7 +313,9 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApprox(other, prec);
     }
-    bool isApproxToConstant(const Scalar& value,
+    // NOTE: Many comparison functions aren't used by Acts, so I'm disabling
+    //       them for now in an attempt to improve build performance
+    /* bool isApproxToConstant(const Scalar& value,
                             const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApproxToConstant(value, prec);
     }
@@ -335,7 +342,7 @@ public:
     }
     bool isZero(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isZero(prec);
-    }
+    } */
 
     // Data reduction
     Scalar maxCoeff() const {
@@ -555,11 +562,19 @@ public:
     }
 
     // Reinterpret a vector as a diagonal matrix
+    //
+    // FIXME: Need to replicate Eigen's `DiagonalWrapper`, because the
+    //        difference between an owned value and a const-reference is
+    //        actually observable if the caller tries to take a reference to the
+    //        the returned data, using something like
+    //        `const auto& bad = m.asDiagonal().head<2>()`, as the reference
+    //        will end up dangling...
+    //
     DiagonalMatrix<Scalar, std::max(Rows, Cols)>
     asDiagonal() const {
         assert(std::min(Rows, Cols) == 1);
         return DiagonalMatrix<Scalar, std::max(Rows, Cols)>(
-            derivedInner().asDiagonal().diagonal()
+            Vector<Scalar, std::max(Rows, Cols)>(derivedInner())
         );
     }
 
@@ -590,7 +605,7 @@ public:
     void normalize() {
         derivedInner().normalize();
     }
-    PlainBase normalized() const {
+    PlainMatrix normalized() const {
         return derivedInner().normalized();
     }
     RealScalar operatorNorm() const {
@@ -605,7 +620,7 @@ public:
     void stableNormalize() {
         derivedInner().stableNormalize();
     }
-    PlainBase stableNormalized() const {
+    PlainMatrix stableNormalized() const {
         return derivedInner().stableNormalized();
     }
 
@@ -618,14 +633,14 @@ public:
 
     // Cross products
     template <typename OtherDerived>
-    PlainBase
+    PlainMatrix
     cross(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cross(other.derivedInner()));
+        return PlainMatrix(derivedInner().cross(other.derivedInner()));
     }
     template <typename OtherDerived>
-    PlainBase
+    PlainMatrix
     cross3(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cross3(other.derivedInner()));
+        return PlainMatrix(derivedInner().cross3(other.derivedInner()));
     }
 
     // Determinant
@@ -634,13 +649,21 @@ public:
     }
 
     // Diagonal and associated properties
-    // FIXME: Support non-const diagonal access, which is used by Acts for
-    //        comma initialization based diagonal assignment.
-    //        Use that to make the diagonal access method below more efficient.
+    //
+    // FIXME: Need to replicate Eigen's `Diagonal` wrapper, because...
+    //        - Non-const diagonal access is needed and used by Acts
+    //        - The difference between an owned value and a const-reference is
+    //          actually observable if the caller tries to take a reference to
+    //          the returned data, using something like
+    //          `const auto& bad = m.diagonal().head<2>()`, as the reference
+    //          will end up dangling...
+    //
     template <typename... Index>
     Vector<Scalar, Rows> diagonal(Index... indices) const {
         return Vector<Scalar, Rows>(derivedInner().diagonal(indices...));
     }
+
+    // Size of the matrix' diagonal
     Index diagonalSize() const {
         return derivedInner().diagonalSize();
     }
@@ -658,7 +681,7 @@ public:
 
     // Euler angles
     Vector<Scalar, 3> eulerAngles(Index a0, Index a1, Index a2) const {
-        return Vector<Scalar, 3>(derivedInner().eulerAngles());
+        return Vector<Scalar, 3>(derivedInner().eulerAngles(a0, a1, a2));
     }
 
     // TODO: Support aligned access enforcement
@@ -669,12 +692,15 @@ public:
     //       This is not currently used by Acts, so lower-priority.
 
     // Matrix inversion
-    PlainBase inverse() const {
-        return PlainBase(derivedInner().inverse());
+    PlainMatrix inverse() const {
+        return PlainMatrix(derivedInner().inverse());
     }
 
     // Approximate comparisons
-    bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
+    //
+    // NOTE: Not used by Acts, and therefore disabled for now
+    //
+    /* bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isDiagonal(prec);
     }
     bool isIdentity(const RealScalar& prec = dummy_precision()) const {
@@ -688,7 +714,7 @@ public:
     }
     bool isUpperTriangular(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isUpperTriangular(prec);
-    }
+    } */
 
     // TODO: Support lazyProduct()
     //       This is not currently used by Acts, so lower-priority.
@@ -716,10 +742,10 @@ public:
     }
 
     // Matrix-scalar multiplication
-    PlainBase operator*(const Scalar& scalar) const {
-        return PlainBase(derivedInner() * scalar);
+    PlainMatrix operator*(const Scalar& scalar) const {
+        return PlainMatrix(derivedInner() * scalar);
     }
-    friend PlainBase operator*(const Scalar& scalar, const Derived& matrix) {
+    friend PlainMatrix operator*(const Scalar& scalar, const Derived& matrix) {
         return matrix * scalar;
     }
     Derived& operator*=(const Scalar& scalar) {
@@ -728,8 +754,8 @@ public:
     }
 
     // Matrix-scalar division
-    PlainBase operator/(const Scalar& scalar) const {
-        return PlainBase(derivedInner() / scalar);
+    PlainMatrix operator/(const Scalar& scalar) const {
+        return PlainMatrix(derivedInner() / scalar);
     }
     Derived& operator/=(const Scalar& scalar) {
         derivedInner() /= scalar;
@@ -738,8 +764,8 @@ public:
 
     // Edge case of handling a 1x1 matrix as a scalar
     template <typename OtherDerived>
-    PlainBase operator/(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() / other.derivedInner().value());
+    PlainMatrix operator/(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner() / other.derivedInner().value());
     }
     template <typename OtherDerived>
     Derived& operator/=(const Eigen::EigenBase<OtherDerived>& other) {
@@ -754,9 +780,9 @@ public:
 
     // Matrix-matrix multiplication
     template <typename DiagonalDerived>
-    PlainBase
+    PlainMatrix
     operator*(const DiagonalBase<DiagonalDerived>& other) const {
-        return PlainBase(derivedInner() * other.derivedInner());
+        return PlainMatrix(derivedInner() * other.derivedInner());
     }
     template <typename OtherDerived>
     Matrix<Scalar, Rows, OtherDerived::Cols>
@@ -778,8 +804,8 @@ public:
 
     // Matrix addition
     template <typename OtherDerived>
-    PlainBase operator+(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() + other.derivedInner());
+    PlainMatrix operator+(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner() + other.derivedInner());
     }
     template <typename OtherDerived>
     Derived& operator+=(const MatrixBase<OtherDerived>& other) {
@@ -798,8 +824,8 @@ public:
 
     // Matrix subtraction
     template <typename OtherDerived>
-    PlainBase operator-(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner() - other.derivedInner());
+    PlainMatrix operator-(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner() - other.derivedInner());
     }
     template <typename OtherDerived>
     Derived& operator-=(const MatrixBase<OtherDerived>& other) {
@@ -808,8 +834,8 @@ public:
     }
 
     // Matrix negation
-    PlainBase operator-() const {
-        return PlainBase(-derivedInner());
+    PlainMatrix operator-() const {
+        return PlainMatrix(-derivedInner());
     }
 
     // TODO: Support selfadjointView()
@@ -835,12 +861,12 @@ public:
 
     // Coefficient-wise operations
     template <typename OtherDerived>
-    PlainBase cwiseMin(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseMin(other.derivedInner()));
+    PlainMatrix cwiseMin(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseMin(other.derivedInner()));
     }
     template <typename OtherDerived>
-    PlainBase cwiseMax(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseMax(other.derivedInner()));
+    PlainMatrix cwiseMax(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseMax(other.derivedInner()));
     }
     Matrix<RealScalar, Rows, Cols> cwiseAbs2() const {
         return Matrix<RealScalar, Rows, Cols>(derivedInner().cwiseAbs2());
@@ -848,89 +874,64 @@ public:
     Matrix<RealScalar, Rows, Cols> cwiseAbs() const {
         return Matrix<RealScalar, Rows, Cols>(derivedInner().cwiseAbs());
     }
-    PlainBase cwiseSqrt() const {
-        return PlainBase(derivedInner().cwiseSqrt());
+    PlainMatrix cwiseSqrt() const {
+        return PlainMatrix(derivedInner().cwiseSqrt());
     }
-    PlainBase cwiseInverse() const {
-        return PlainBase(derivedInner().cwiseInverse());
-    }
-    template <typename OtherDerived>
-    PlainBase cwiseProduct(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseProduct(other.derivedInner()));
+    PlainMatrix cwiseInverse() const {
+        return PlainMatrix(derivedInner().cwiseInverse());
     }
     template <typename OtherDerived>
-    PlainBase cwiseQuotient(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseQuotient(other.derivedInner()));
+    PlainMatrix cwiseProduct(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseProduct(other.derivedInner()));
     }
     template <typename OtherDerived>
-    PlainBase cwiseEqual(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseEqual(other.derivedInner()));
+    PlainMatrix cwiseQuotient(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseQuotient(other.derivedInner()));
     }
     template <typename OtherDerived>
-    PlainBase cwiseNotEqual(const MatrixBase<OtherDerived>& other) const {
-        return PlainBase(derivedInner().cwiseNotEqual(other.derivedInner()));
+    PlainMatrix cwiseEqual(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseEqual(other.derivedInner()));
+    }
+    template <typename OtherDerived>
+    PlainMatrix cwiseNotEqual(const MatrixBase<OtherDerived>& other) const {
+        return PlainMatrix(derivedInner().cwiseNotEqual(other.derivedInner()));
     }
 
     // Special matrix generators
     template <typename... Index>
-    static Derived Identity(Index... indices) {
-        return Derived(Inner::Identity(indices...));
+    static PlainMatrix Identity(Index... indices) {
+        return PlainMatrix(Inner::Identity(indices...));
     }
     template <typename... Index>
-    static Derived Unit(Index... indices) {
-        return Derived(Inner::Unit(indices...));
+    static PlainMatrix Unit(Index... indices) {
+        return PlainMatrix(Inner::Unit(indices...));
     }
-    static Derived UnitW() {
-        return Derived(Inner::UnitW());
+    static PlainMatrix UnitW() {
+        return PlainMatrix(Inner::UnitW());
     }
-    static Derived UnitX() {
-        return Derived(Inner::UnitX());
+    static PlainMatrix UnitX() {
+        return PlainMatrix(Inner::UnitX());
     }
-    static Derived UnitY() {
-        return Derived(Inner::UnitY());
+    static PlainMatrix UnitY() {
+        return PlainMatrix(Inner::UnitY());
     }
-    static Derived UnitZ() {
-        return Derived(Inner::UnitZ());
+    static PlainMatrix UnitZ() {
+        return PlainMatrix(Inner::UnitZ());
     }
 
     // --- Sub-matrices ---
     //
-    // NOTE: Can make const accessors return block expressions too if the copies
-    //       turn out to be excessively costly, but that requires some dev work
-    //       for Block<const T> support.
-
-    // Row and column accessors
-    Block<Derived, 1, Cols, IsRowMajor || (Cols == 1)> row(Index i) {
-        return Block<Derived, 1, Cols, IsRowMajor>(derivedInner().row(i));
-    }
-    RowVector<Scalar, Cols> row(Index i) const {
-        return RowVector<Scalar, Cols>(derivedInner().row(i));
-    }
-    Block<Derived, Rows, 1, (!IsRowMajor) || (Rows == 1)> col(Index j) {
-        return Block<Derived, Rows, 1, !IsRowMajor>(derivedInner().col(j));
-    }
-    Vector<Scalar, Rows> col(Index j) const {
-        return Vector<Scalar, Rows>(derivedInner().col(j));
-    }
+    // TODO: Comment out the subset of this interface which isn't used by Acts
 
     // Sub-vector accessors
-private:
-    // FIXME: This wouldn't work when Rows == Dynamic, but I don't think we ever
-    //        use that in Acts...
-    static constexpr bool IsRowVector = IsVectorAtCompileTime && (Rows == 1);
-    template <int Length>
-    using SubVector = Matrix<
-        Scalar,
-        IsRowVector ? 1 : Length,
-        IsRowVector ? Length : 1
-    >;
     template <int Length>
     using SubVectorBlock = VectorBlock<Derived, Length>;
-public:
+    template <int Length>
+    using ConstSubVectorBlock = VectorBlock<const Derived, Length>;
     SubVectorBlock<Dynamic> head(int n) {
         return segment(0, n);
     }
-    SubVector<Dynamic> head(int n) const {
+    ConstSubVectorBlock<Dynamic> head(int n) const {
         return segment(0, n);
     }
     template <int n>
@@ -938,13 +939,13 @@ public:
         return segment<n>(0);
     }
     template <int n>
-    SubVector<n> head() const {
+    ConstSubVectorBlock<n> head() const {
         return segment<n>(0);
     }
     SubVectorBlock<Dynamic> tail(int n) {
         return segment(size()-n, n);
     }
-    SubVector<Dynamic> tail(int n) const {
+    ConstSubVectorBlock<Dynamic> tail(int n) const {
         return segment(size()-n, n);
     }
     template <int n>
@@ -952,31 +953,29 @@ public:
         return segment<n>(size()-n);
     }
     template <int n>
-    SubVector<n> tail() const {
+    ConstSubVectorBlock<n> tail() const {
         return segment<n>(size()-n);
     }
     SubVectorBlock<Dynamic> segment(Index pos, int n) {
         return SubVectorBlock<Dynamic>(derived(), pos, n);
     }
-    SubVector<Dynamic> segment(Index pos, int n) const {
-        return SubVector<Dynamic>(derivedInner().segment(pos, n));
+    ConstSubVectorBlock<Dynamic> segment(Index pos, int n) const {
+        return ConstSubVectorBlock<Dynamic>(derived(), pos, n);
     }
     template <int n>
     SubVectorBlock<n> segment(Index pos) {
         return SubVectorBlock<n>(derived(), pos);
     }
     template <int n>
-    SubVector<n> segment(Index pos) const {
-        return SubVector<n>(derivedInner().template segment<n>(pos));
+    ConstSubVectorBlock<n> segment(Index pos) const {
+        return ConstSubVectorBlock<n>(derived(), pos);
     }
 
     // Sub-matrix accessors
 private:
-    template <int BlockRows, int BlockCols>
-    using SubMatrix = Matrix<Scalar, BlockRows, BlockCols>;
-    template <int BlockRows, int BlockCols>
-    using SubMatrixBlock = Block<
-        Derived,
+    template <typename DerivedType, int BlockRows, int BlockCols>
+    using GenericSubMatrixBlock = Block<
+        DerivedType,
         BlockRows,
         BlockCols,
         IsRowMajor ? ((BlockRows == 1)
@@ -984,6 +983,12 @@ private:
                    : ((BlockCols == 1)
                       || ((BlockRows != Dynamic) && (BlockRows == Rows)))
     >;
+    template <int BlockRows, int BlockCols>
+    using SubMatrixBlock = GenericSubMatrixBlock<Derived, BlockRows, BlockCols>;
+    template <int BlockRows, int BlockCols>
+    using ConstSubMatrixBlock = GenericSubMatrixBlock<const Derived,
+                                                      BlockRows,
+                                                      BlockCols>;
 public:
     SubMatrixBlock<Dynamic, Dynamic> block(Index startRow,
                                            Index startCol,
@@ -995,13 +1000,15 @@ public:
                                                 blockRows,
                                                 blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> block(Index startRow,
-                                      Index startCol,
-                                      int blockRows,
-                                      int blockCols) const {
-        return SubMatrix<Dynamic, Dynamic>(
-            derivedInner().block(startRow, startCol, blockRows, blockCols)
-        );
+    ConstSubMatrixBlock<Dynamic, Dynamic> block(Index startRow,
+                                                Index startCol,
+                                                int blockRows,
+                                                int blockCols) const {
+        return ConstSubMatrixBlock<Dynamic, Dynamic>(derived(),
+                                                     startRow,
+                                                     startCol,
+                                                     blockRows,
+                                                     blockCols);
     }
     template <int BlockRows, int BlockCols>
     SubMatrixBlock<BlockRows, BlockCols> block(Index startRow,
@@ -1011,19 +1018,18 @@ public:
                                                     startCol);
     }
     template <int BlockRows, int BlockCols>
-    SubMatrix<BlockRows, BlockCols> block(Index startRow,
-                                          Index startCol) const {
-        return SubMatrix<BlockRows, BlockCols>(
-            derivedInner().template block<BlockRows, BlockCols>(startRow,
-                                                                startCol)
-        );
+    ConstSubMatrixBlock<BlockRows, BlockCols> block(Index startRow,
+                                                    Index startCol) const {
+        return ConstSubMatrixBlock<BlockRows, BlockCols>(derived(),
+                                                         startRow,
+                                                         startCol);
     }
     SubMatrixBlock<Dynamic, Dynamic> topLeftCorner(int blockRows,
                                                    int blockCols) {
         return block(0, 0, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> topLeftCorner(int blockRows,
-                                              int blockCols) const {
+    ConstSubMatrixBlock<Dynamic, Dynamic> topLeftCorner(int blockRows,
+                                                        int blockCols) const {
         return block(0, 0, blockRows, blockCols);
     }
     template <int BlockRows, int BlockCols>
@@ -1031,15 +1037,15 @@ public:
         return block<BlockRows, BlockCols>(0, 0);
     }
     template <int BlockRows, int BlockCols>
-    SubMatrix<BlockRows, BlockCols> topLeftCorner() const {
+    ConstSubMatrixBlock<BlockRows, BlockCols> topLeftCorner() const {
         return block<BlockRows, BlockCols>(0, 0);
     }
     SubMatrixBlock<Dynamic, Dynamic> topRightCorner(int blockRows,
                                                     int blockCols) {
         return block(0, cols()-blockCols, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> topRightCorner(int blockRows,
-                                               int blockCols) const {
+    ConstSubMatrixBlock<Dynamic, Dynamic> topRightCorner(int blockRows,
+                                                         int blockCols) const {
         return block(0, cols()-blockCols, blockRows, blockCols);
     }
     template <int BlockRows, int BlockCols>
@@ -1047,15 +1053,15 @@ public:
         return block<BlockRows, BlockCols>(0, cols()-BlockCols);
     }
     template <int BlockRows, int BlockCols>
-    SubMatrix<BlockRows, BlockCols> topRightCorner() const {
+    ConstSubMatrixBlock<BlockRows, BlockCols> topRightCorner() const {
         return block<BlockRows, BlockCols>(0, cols()-BlockCols);
     }
     SubMatrixBlock<Dynamic, Dynamic> bottomLeftCorner(int blockRows,
                                                       int blockCols) {
         return block(rows()-blockRows, 0, blockRows, blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> bottomLeftCorner(int blockRows,
-                                                 int blockCols) const {
+    ConstSubMatrixBlock<Dynamic, Dynamic>
+    bottomLeftCorner(int blockRows, int blockCols) const {
         return block(rows()-blockRows, 0, blockRows, blockCols);
     }
     template <int BlockRows, int BlockCols>
@@ -1063,7 +1069,7 @@ public:
         return block<BlockRows, BlockCols>(rows()-BlockRows, 0);
     }
     template <int BlockRows, int BlockCols>
-    SubMatrix<BlockRows, BlockCols> bottomLeftCorner() const {
+    ConstSubMatrixBlock<BlockRows, BlockCols> bottomLeftCorner() const {
         return block<BlockRows, BlockCols>(rows()-BlockRows, 0);
     }
     SubMatrixBlock<Dynamic, Dynamic> bottomRightCorner(int blockRows,
@@ -1073,8 +1079,8 @@ public:
                      blockRows,
                      blockCols);
     }
-    SubMatrix<Dynamic, Dynamic> bottomRightCorner(int blockRows,
-                                                  int blockCols) const {
+    ConstSubMatrixBlock<Dynamic, Dynamic>
+    bottomRightCorner(int blockRows, int blockCols) const {
         return block(rows()-blockRows,
                      cols()-blockCols,
                      blockRows,
@@ -1086,7 +1092,7 @@ public:
                                            cols()-BlockCols);
     }
     template <int BlockRows, int BlockCols>
-    SubMatrix<BlockRows, BlockCols> bottomRightCorner() const {
+    ConstSubMatrixBlock<BlockRows, BlockCols> bottomRightCorner() const {
         return block<BlockRows, BlockCols>(rows()-BlockRows,
                                            cols()-BlockCols);
     }
@@ -1098,6 +1104,11 @@ private:
                                              blockRows,
                                              Cols);
     }
+    ConstSubMatrixBlock<Dynamic, Cols> anyRows(int startRow,
+                                               int blockRows) const {
+        return ConstSubMatrixBlock<Dynamic, Cols>(
+            derived(), startRow, 0, blockRows, Cols);
+    }
     template <int BlockRows>
     SubMatrixBlock<BlockRows, Cols> anyRows(int startRow) {
         return SubMatrixBlock<BlockRows, Cols>(derived(),
@@ -1106,95 +1117,104 @@ private:
                                                BlockRows,
                                                Cols);
     }
+    template <int BlockRows>
+    ConstSubMatrixBlock<BlockRows, Cols> anyRows(int startRow) const {
+        return ConstSubMatrixBlock<BlockRows, Cols>(derived(),
+                                                    startRow,
+                                                    0,
+                                                    BlockRows,
+                                                    Cols);
+    }
 public:
+    // Row and column accessors
+    SubMatrixBlock<1, Cols> row(Index i) {
+        return anyRows<1>(i);
+    }
+    ConstSubMatrixBlock<1, Cols> row(Index i) const {
+        return anyRows<1>(i);
+    }
     SubMatrixBlock<Dynamic, Cols> topRows(int blockRows) {
         return anyRows(0, blockRows);
     }
-    SubMatrix<Dynamic, Cols> topRows(int blockRows) const {
-        return SubMatrix<Dynamic, Cols>(
-            derivedInner().topRows(blockRows)
-        );
+    ConstSubMatrixBlock<Dynamic, Cols> topRows(int blockRows) const {
+        return anyRows(0, blockRows);
     }
     template <int BlockRows>
     SubMatrixBlock<BlockRows, Cols> topRows() {
         return anyRows<BlockRows>(0);
     }
     template <int BlockRows>
-    SubMatrix<BlockRows, Cols> topRows() const {
-        return SubMatrix<BlockRows, Cols>(
-            derivedInner().template topRows<BlockRows>()
-        );
+    ConstSubMatrixBlock<BlockRows, Cols> topRows() const {
+        return anyRows<BlockRows>(0);
     }
     SubMatrixBlock<Dynamic, Cols> bottomRows(int blockRows) {
         return anyRows(rows()-blockRows, blockRows);
     }
-    SubMatrix<Dynamic, Cols> bottomRows(int blockRows) const {
-        return SubMatrix<Dynamic, Cols>(
-            derivedInner().bottomRows(blockRows)
-        );
+    ConstSubMatrixBlock<Dynamic, Cols> bottomRows(int blockRows) const {
+        return anyRows(rows()-blockRows, blockRows);
     }
     template <int BlockRows>
     SubMatrixBlock<BlockRows, Cols> bottomRows() {
         return anyRows<BlockRows>(rows()-BlockRows);
     }
     template <int BlockRows>
-    SubMatrix<BlockRows, Cols> bottomRows() const {
-        return SubMatrix<BlockRows, Cols>(
-            derivedInner().template bottomRows<BlockRows>()
-        );
+    ConstSubMatrixBlock<BlockRows, Cols> bottomRows() const {
+        return anyRows<BlockRows>(rows()-BlockRows);
     }
 private:
     SubMatrixBlock<Rows, Dynamic> anyCols(int startCol, int blockCols) {
-        return SubMatrixBlock<Rows, Dynamic>(derived(),
-                                             0,
-                                             startCol,
-                                             Rows,
-                                             blockCols);
+        return SubMatrixBlock<Rows, Dynamic>(
+            derived(), 0, startCol, Rows, blockCols);
+    }
+    ConstSubMatrixBlock<Rows, Dynamic> anyCols(int startCol,
+                                               int blockCols) const {
+        return ConstSubMatrixBlock<Rows, Dynamic>(
+            derived(), 0, startCol, Rows, blockCols);
     }
     template <int BlockCols>
     SubMatrixBlock<Rows, BlockCols> anyCols(int startCol) {
-        return SubMatrixBlock<Rows, BlockCols>(derived(),
-                                               0,
-                                               startCol,
-                                               Rows,
-                                               BlockCols);
+        return SubMatrixBlock<Rows, BlockCols>(
+            derived(), 0, startCol, Rows, BlockCols);
+    }
+    template <int BlockCols>
+    ConstSubMatrixBlock<Rows, BlockCols> anyCols(int startCol) const {
+        return ConstSubMatrixBlock<Rows, BlockCols>(
+            derived(), 0, startCol, Rows, BlockCols);
     }
 public:
+    SubMatrixBlock<Rows, 1> col(Index j) {
+        return anyCols<1>(j);
+    }
+    ConstSubMatrixBlock<Rows, 1> col(Index j) const {
+        return anyCols<1>(j);
+    }
     SubMatrixBlock<Rows, Dynamic> leftCols(int blockCols) {
         return anyCols(0, blockCols);
     }
-    SubMatrix<Rows, Dynamic> leftCols(int blockCols) const {
-        return SubMatrix<Rows, Dynamic>(
-            derivedInner().leftCols(blockCols)
-        );
+    ConstSubMatrixBlock<Rows, Dynamic> leftCols(int blockCols) const {
+        return anyCols(0, blockCols);
     }
     template <int BlockCols>
     SubMatrixBlock<Rows, BlockCols> leftCols() {
         return anyCols<BlockCols>(0);
     }
     template <int BlockCols>
-    SubMatrix<Rows, BlockCols> leftCols() const {
-        return SubMatrix<Rows, BlockCols>(
-            derivedInner().template leftCols<BlockCols>()
-        );
+    ConstSubMatrixBlock<Rows, BlockCols> leftCols() const {
+        return anyCols<BlockCols>(0);
     }
     SubMatrixBlock<Rows, Dynamic> rightCols(int blockCols) {
         return anyCols(cols()-blockCols, blockCols);
     }
-    SubMatrix<Rows, Dynamic> rightCols(int blockCols) const {
-        return SubMatrix<Rows, Dynamic>(
-            derivedInner().rightCols(blockCols)
-        );
+    ConstSubMatrixBlock<Rows, Dynamic> rightCols(int blockCols) const {
+        return anyCols(cols()-blockCols, blockCols);
     }
     template <int BlockCols>
     SubMatrixBlock<Rows, BlockCols> rightCols() {
         return anyCols<BlockCols>(cols()-BlockCols);
     }
     template <int BlockCols>
-    SubMatrix<Rows, BlockCols> rightCols() const {
-        return SubMatrix<Rows, BlockCols>(
-            derivedInner().template rightCols<BlockCols>()
-        );
+    ConstSubMatrixBlock<Rows, BlockCols> rightCols() const {
+        return anyCols<BlockCols>(cols()-BlockCols);
     }
 
     // /!\ UNDOCUMENTED /!\ Scalar cast
@@ -1223,7 +1243,7 @@ public:
 
 private:
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

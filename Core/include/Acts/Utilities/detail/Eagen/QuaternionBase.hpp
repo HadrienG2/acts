@@ -8,9 +8,11 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
-#include "Map.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
 #include "RotationBase.hpp"
@@ -22,32 +24,38 @@ namespace detail {
 namespace Eagen {
 
 // Spiritual cousin of Eigen::QuaternionBase
-template <typename Derived>
-class QuaternionBase : public RotationBase<Derived, 3> {
-private:
-    // Bring some RotationBase typedefs into scope
-    using Super = RotationBase<Derived, 3>;
-    using Inner = typename Super::Inner;
-    using DerivedTraits = typename Super::DerivedTraits;
+template <typename _Derived>
+class QuaternionBase : public RotationBase<_Derived, 3> {
+    using Super = RotationBase<_Derived, 3>;
 
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // Wrapped Eigen type
+    using Inner = typename Super::Inner;
+
+    // Expose parameters of the child Quaternion type
+    using Scalar = typename Super::Scalar;
+protected:
+    using DerivedTraits = typename Super::DerivedTraits;
 public:
-    // Re-export base class interface
+    static constexpr int Options = DerivedTraits::Options;
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
     using Super::derived;
     using Super::derivedInner;
+    using Super::operator*;
 
-    // Derived class scalar type
-    using Scalar = typename Super::Scalar;
+    // === Eigen::QuaternionBase API ===
 
     // Transform a vector
     using Vector3 = Vector<Scalar, 3>;
     Vector3 _transformVector(const Vector3& v) const {
         return Vector3(derivedInner()._transformVector(v.getInner()));
-    }
-private:
-    using Vector3Inner = typename Vector3::Inner;
-public:
-    Vector3 _transformVector(const Vector3Inner& v) const {
-        return Vector3(derivedInner()._transformVector(v));
     }
 
     // Angular distance between quaternions
@@ -65,45 +73,49 @@ public:
     }
 
     // Coefficient access
+    using Coefficients = Matrix<Scalar, 4, 1, Options>;
 private:
-    using Coefficients = Vector<Scalar, 4>;
-    using CoefficientsMap = Map<Coefficients>;
+    using CoefficientsInner = typename Coefficients::Inner;
 public:
-    Coefficients coeffs() const {
-        return Coefficients(derivedInner().coeffs());
+    const Coefficients& coeffs() const {
+        const auto& resultInner = derivedInner().coeffs();
+        static_assert(
+            std::is_same_v<decltype(resultInner), const CoefficientsInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const Coefficients&>(resultInner);
     }
-    CoefficientsMap coeffs() {
-        return CoefficientsMap(derivedInner().coeffs().data());
+    Coefficients& coeffs() {
+        auto& resultInner = derivedInner().coeffs();
+        static_assert(
+            std::is_same_v<decltype(resultInner), CoefficientsInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<Coefficients&>(resultInner);
     }
-private:
-    using ImaginaryPart = Vector3;
-    using ImaginaryPartMap = Map<Vector3>;
-public:
-    ImaginaryPart vec() const {
-        return ImaginaryPart(derivedInner().vec());
+    VectorBlock<const Coefficients, 3> vec() const {
+        return coeffs().template head<3>();
     }
-    ImaginaryPartMap vec() {
-        return ImaginaryPartMap(derivedInner().vec().data());
+    VectorBlock<Coefficients, 3> vec() {
+        return coeffs().template head<3>();
     }
-    const Scalar& w() const {
+    Scalar w() const {
         return derivedInner().w();
     }
     Scalar& w() {
         return derivedInner().w();
     }
-    const Scalar& x() const {
+    Scalar x() const {
         return derivedInner().x();
     }
     Scalar& x() {
         return derivedInner().x();
     }
-    const Scalar& y() const {
+    Scalar y() const {
         return derivedInner().y();
     }
     Scalar& y() {
         return derivedInner().y();
     }
-    const Scalar& z() const {
+    Scalar z() const {
         return derivedInner().z();
     }
     Scalar& z() {
@@ -127,7 +139,10 @@ public:
     }
 
     // Approximate equality
-    using RealScalar = typename Inner::RealScalar;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
     template <typename OtherDerived>
     bool isApprox(const QuaternionBase<OtherDerived>& other,
                   const RealScalar& prec = dummy_precision()) const {
@@ -147,9 +162,6 @@ public:
     Scalar squaredNorm() const {
         return derivedInner().squaredNorm();
     }
-
-    // Inherit rotation multiplication
-    using Super::operator*;
 
     // Quaternion product
     template <typename OtherDerived>
@@ -215,7 +227,7 @@ public:
 
 private:
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

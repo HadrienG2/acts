@@ -26,18 +26,25 @@ namespace Eagen {
 // than Eigen::PlainObjectBase (hence the different name). But it can be turned
 // into a true Eigen::PlainObjectBase equivalent if needed.
 //
-template <typename Derived>
-class PlainMatrixBase : public MatrixBase<Derived> {
-private:
-    // Bring some MatrixBase typedefs into scope
-    using Super = MatrixBase<Derived>;
-    using Inner = typename Super::Inner;
-    using Index = typename Super::Index;
-    using DerivedTraits = typename Super::DerivedTraits;
+template <typename _Derived>
+class PlainMatrixBase : public MatrixBase<_Derived> {
+    using Super = MatrixBase<_Derived>;
 
 public:
-    // Re-expose superclass interface
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // Wrapped Eigen type
+    using Inner = typename Super::Inner;
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
     using Scalar = typename Super::Scalar;
+    using RealScalar = typename Super::RealScalar;
     using Super::derived;
     using Super::derivedInner;
     using Super::operator=;
@@ -109,82 +116,158 @@ public:
     }
 
     // Map foreign data
-private:
+    //
+    // NOTE: This isn't currently used by Acts, and thus disabled for now in
+    //       an attempt to reduce build overhead.
+    //
+/* private:
     template <typename Stride>
     using StridedMapType = Map<Derived, Unaligned, Stride>;
     template <typename Stride>
+    using ConstStridedMapType = Map<const Derived, Unaligned, Stride>;
+    template <typename Stride>
     using StridedAlignedMapType = Map<Derived, Aligned16, Stride>;
+    template <typename Stride>
+    using ConstStridedAlignedMapType = Map<const Derived, Aligned16, Stride>;
     using DefaultStride = Stride<DerivedTraits::OuterStride,
                                  DerivedTraits::InnerStride>;
     using MapType = StridedMapType<DefaultStride>;
+    using ConstMapType = ConstStridedMapType<DefaultStride>;
     using AlignedMapType = StridedAlignedMapType<DefaultStride>;
+    using ConstAlignedMapType = ConstStridedAlignedMapType<DefaultStride>;
 public:
-    template <typename... Args>
-    static Derived Map(const Scalar* data, Args&&... args) {
-        return Derived(Inner::Map(data, std::forward<Args>(args)...));
-    }
-    template <typename... Args>
-    static Derived MapAligned(const Scalar* data, Args&&... args) {
-        return Derived(Inner::MapAligned(data, std::forward<Args>(args)...));
+    static ConstMapType Map(const Scalar* data) {
+        return ConstMapType(data);
     }
     static MapType Map(Scalar* data) {
         return MapType(data);
     }
+    static ConstMapType Map(const Scalar* data, Index size) {
+        return ConstMapType(data, size);
+    }
     static MapType Map(Scalar* data, Index size) {
         return MapType(data, size);
+    }
+    static ConstMapType Map(const Scalar* data, Index rows, Index cols) {
+        return ConstMapType(data, rows, cols);
     }
     static MapType Map(Scalar* data, Index rows, Index cols) {
         return MapType(data, rows, cols);
     }
+    static ConstAlignedMapType MapAligned(const Scalar* data) {
+        return ConstAlignedMapType(data);
+    }
     static AlignedMapType MapAligned(Scalar* data) {
         return AlignedMapType(data);
+    }
+    static ConstAlignedMapType MapAligned(const Scalar* data, Index size) {
+        return ConstAlignedMapType(data, size);
     }
     static AlignedMapType MapAligned(Scalar* data, Index size) {
         return AlignedMapType(data, size);
     }
+    static ConstAlignedMapType MapAligned(const Scalar* data,
+                                          Index rows,
+                                          Index cols) {
+        return ConstAlignedMapType(data, rows, cols);
+    }
     static AlignedMapType MapAligned(Scalar* data, Index rows, Index cols) {
         return AlignedMapType(data, rows, cols);
     }
-    template <int Outer, int Inner>
-    static StridedMapType<Stride<Outer, Inner>>
-    Map(Scalar* data, const Stride<Outer, Inner>& stride) {
-        return StridedMapType<Stride<Outer, Inner>>(data, stride);
+    template <int OuterStride, int InnerStride>
+    static ConstStridedMapType<Stride<OuterStride, InnerStride>>
+    Map(const Scalar* data, const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedMapType<Stride<OuterStride, InnerStride>>(
+            data, stride);
     }
-    template <int Outer, int Inner>
-    static StridedMapType<Stride<Outer, Inner>>
-    Map(Scalar* data, Index size, const Stride<Outer, Inner>& stride) {
-        return StridedMapType<Stride<Outer, Inner>>(data, size, stride);
+    template <int OuterStride, int InnerStride>
+    static StridedMapType<Stride<OuterStride, InnerStride>>
+    Map(Scalar* data, const Stride<OuterStride, InnerStride>& stride) {
+        return StridedMapType<Stride<OuterStride, InnerStride>>(data, stride);
     }
-    template <int Outer, int Inner>
-    static StridedMapType<Stride<Outer, Inner>>
+    template <int OuterStride, int InnerStride>
+    static ConstStridedMapType<Stride<OuterStride, InnerStride>>
+    Map(const Scalar* data,
+        Index size,
+        const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedMapType<Stride<OuterStride, InnerStride>>(
+            data, size, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static StridedMapType<Stride<OuterStride, InnerStride>>
+    Map(Scalar* data,
+        Index size,
+        const Stride<OuterStride, InnerStride>& stride)
+    {
+        return StridedMapType<Stride<OuterStride, InnerStride>>(
+            data, size, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static ConstStridedMapType<Stride<OuterStride, InnerStride>>
+    Map(const Scalar* data,
+        Index rows,
+        Index cols,
+        const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedMapType<Stride<OuterStride, InnerStride>>(
+            data, rows, cols, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static StridedMapType<Stride<OuterStride, InnerStride>>
     Map(Scalar* data,
         Index rows,
         Index cols,
-        const Stride<Outer, Inner>& stride)
+        const Stride<OuterStride, InnerStride>& stride)
     {
-        return StridedMapType<Stride<Outer, Inner>>(data, rows, cols, stride);
+        return StridedMapType<Stride<OuterStride, InnerStride>>(
+            data, rows, cols, stride);
     }
-    template <int Outer, int Inner>
-    static StridedAlignedMapType<Stride<Outer, Inner>>
-    MapAligned(Scalar* data, const Stride<Outer, Inner>& stride) {
-        return StridedAlignedMapType<Stride<Outer, Inner>>(data, stride);
+    template <int OuterStride, int InnerStride>
+    static ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>
+    MapAligned(const Scalar* data,
+               const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, stride);
     }
-    template <int Outer, int Inner>
-    static StridedAlignedMapType<Stride<Outer, Inner>>
-    MapAligned(Scalar* data, Index size, const Stride<Outer, Inner>& stride) {
-        return StridedAlignedMapType<Stride<Outer, Inner>>(data, size, stride);
+    template <int OuterStride, int InnerStride>
+    static StridedAlignedMapType<Stride<OuterStride, InnerStride>>
+    MapAligned(Scalar* data, const Stride<OuterStride, InnerStride>& stride) {
+        return StridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, stride);
     }
-    template <int Outer, int Inner>
-    static StridedAlignedMapType<Stride<Outer, Inner>>
+    template <int OuterStride, int InnerStride>
+    static ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>
+    MapAligned(const Scalar* data,
+               Index size,
+               const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, size, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static StridedAlignedMapType<Stride<OuterStride, InnerStride>>
+    MapAligned(Scalar* data,
+               Index size,
+               const Stride<OuterStride, InnerStride>& stride) {
+        return StridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, size, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>
+    MapAligned(const Scalar* data,
+               Index rows,
+               Index cols,
+               const Stride<OuterStride, InnerStride>& stride) {
+        return ConstStridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, rows, cols, stride);
+    }
+    template <int OuterStride, int InnerStride>
+    static StridedAlignedMapType<Stride<OuterStride, InnerStride>>
     MapAligned(Scalar* data,
                Index rows,
                Index cols,
-               const Stride<Outer, Inner>& stride) {
-        return StridedAlignedMapType<Stride<Outer, Inner>>(data,
-                                                           rows,
-                                                           cols,
-                                                           stride);
-    }
+               const Stride<OuterStride, InnerStride>& stride) {
+        return StridedAlignedMapType<Stride<OuterStride, InnerStride>>(
+            data, rows, cols, stride);
+    } */
 };
 
 }  // namespace Eagen

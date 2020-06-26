@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
+#include "ForwardDeclarations.hpp"
 #include "TypeTraits.hpp"
 
 namespace Acts {
@@ -18,12 +21,35 @@ namespace detail {
 namespace Eagen {
 
 // Comma initializer
-template <typename Derived>
+template <typename _Derived>
 class CommaInitializer {
+public:
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // Wrapped Eigen type
 private:
     using DerivedTraits = TypeTraits<Derived>;
-
+    using DerivedInner = typename DerivedTraits::Inner;
 public:
+    using Inner = Eigen::CommaInitializer<DerivedInner>;
+
+    // Access the inner Eigen object
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // === Eigen::CommaInitializer API ===
+
+    // Inner scalar type
     using Scalar = typename DerivedTraits::Scalar;
 
     // Constructor from (expression, scalar) pair
@@ -33,6 +59,9 @@ public:
     {}
 
     // Constructor from (expression, expression) pair
+    //
+    // NOTE: Remove Eigen::DenseBase overload if we ever wrap Eigen::Array.
+    //
     template<typename OtherDerived>
     CommaInitializer(Derived& derived, const DenseBase<OtherDerived>& other)
         : CommaInitializer(derived, other.derivedInner())
@@ -61,6 +90,9 @@ public:
     }
 
     // Expression insertion
+    //
+    // NOTE: Remove Eigen::DenseBase overload if we ever wrap Eigen::Array.
+    //
     template<typename OtherDerived>
     CommaInitializer& operator,(const DenseBase<OtherDerived>& other) {
         return *this, other.derivedInner();
@@ -79,7 +111,7 @@ public:
 
 private:
     Derived& m_derived;
-    Eigen::CommaInitializer<typename DerivedTraits::Inner> m_inner;
+    Inner m_inner;
 };
 
 }  // namespace Eagen

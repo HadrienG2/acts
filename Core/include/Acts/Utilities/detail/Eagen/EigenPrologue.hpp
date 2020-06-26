@@ -50,6 +50,9 @@ constexpr int Dynamic = Eigen::Dynamic;
 using NoChange_t = Eigen::NoChange_t;
 constexpr NoChange_t NoChange = Eigen::NoChange;
 //
+template <typename Scalar>
+using NumTraits = Eigen::NumTraits<Scalar>;
+//
 using QRPreconditioners = Eigen::QRPreconditioners;
 constexpr QRPreconditioners NoQRPreconditioner = Eigen::NoQRPreconditioner;
 constexpr QRPreconditioners HouseholderQRPreconditioner =

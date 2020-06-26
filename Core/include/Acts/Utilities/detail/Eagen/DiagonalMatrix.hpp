@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "DiagonalBase.hpp"
 #include "EigenDense.hpp"
 #include "MatrixBase.hpp"
@@ -23,9 +25,7 @@ template <typename _Scalar, int _Size, int _MaxSize>
 class DiagonalMatrix : public DiagonalBase<DiagonalMatrix<_Scalar,
                                                           _Size,
                                                           _MaxSize>> {
-private:
-    // Superclass
-    using Super = DiagonalBase<DiagonalMatrix<_Scalar, _Size, _MaxSize>>;
+    using Super = DiagonalBase<DiagonalMatrix>;
 
 public:
     // === Eagen wrapper API ===
@@ -35,10 +35,10 @@ public:
     static constexpr int Size = _Size;
     static constexpr int MaxSize = _MaxSize;
 
-    // Underlying Eigen matrix type
+    // Wrapped Eigen type
     using Inner = Eigen::DiagonalMatrix<Scalar, Size, MaxSize>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the inner Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -49,35 +49,32 @@ public:
         return std::move(m_inner);
     }
 
-    // Re-expose typedefs from Eigen
-    using Index = Eigen::Index;
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
+    using Super::diagonal;
 
     // === Eigen::DiagonalMatrix API ===
-
-    // Inherit useful methods from superclass
-    using Super::diagonal;
 
     // Default constructor
     DiagonalMatrix() = default;
 
+    // Constructor from inner Eigen type
+    DiagonalMatrix(const Inner& inner)
+        : m_inner(inner)
+    {}
+
     // Constructor from other diagonal matrix
     template <typename OtherDerived>
-    explicit DiagonalMatrix(const DiagonalBase<OtherDerived>& other)
+    DiagonalMatrix(const DiagonalBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
-    {}
-    template <typename OtherDerived>
-    explicit DiagonalMatrix(const Eigen::DiagonalBase<OtherDerived>& other)
-        : m_inner(other)
     {}
 
     // Constructor from vector
     template <typename OtherDerived>
     explicit DiagonalMatrix(const MatrixBase<OtherDerived>& other)
         : m_inner(other.derivedInner())
-    {}
-    template <typename OtherDerived>
-    explicit DiagonalMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-        : m_inner(other)
     {}
 
     // Constructor from a set of scalars

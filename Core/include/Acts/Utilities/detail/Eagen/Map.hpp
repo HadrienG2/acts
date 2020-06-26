@@ -11,9 +11,7 @@
 #include <utility>
 
 #include "EigenDense.hpp"
-#include "EigenPrologue.hpp"
 #include "PlainMatrixBase.hpp"
-#include "TypeTraits.hpp"
 
 namespace Acts {
 
@@ -21,21 +19,24 @@ namespace detail {
 
 namespace Eagen {
 
-template <typename Derived, int MapOptions, typename StrideType>
-class Map : public PlainMatrixBase<Map<Derived,
-                                       MapOptions,
-                                       StrideType>> {
-private:
+template <typename _Derived, int _MapOptions, typename _StrideType>
+class Map : public PlainMatrixBase<Map<_Derived,
+                                       _MapOptions,
+                                       _StrideType>> {
     using Super = PlainMatrixBase<Map>;
-    using DerivedTraits = TypeTraits<Derived>;
-    using DerivedInner = typename DerivedTraits::Inner;
-    using SelfTraits = TypeTraits<Map>;
-    using Inner = typename SelfTraits::Inner;
-    using PointerArgType = typename Inner::PointerArgType;
-    using Index = Eigen::Index;
 
 public:
-    // Access the inner Eigen map
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+    static constexpr int MapOptions = _MapOptions;
+    using StrideType = _StrideType;
+
+    // Wrapped Eigen type
+    using Inner = typename Super::Inner;
+
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -45,6 +46,17 @@ public:
     Inner&& moveInner() {
         return std::move(m_inner);
     }
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Super::operator=;
+
+    // === Eigen::Map API ===
+
+    // Typedefs useful for constructors
+    using PointerArgType = typename Inner::PointerArgType;
+    using Index = typename Super::Index;
 
     // Eigen-like foreign data map constructors
     Map(PointerArgType dataPtr, const StrideType& stride = StrideType())
@@ -61,9 +73,6 @@ public:
         const StrideType& stride = StrideType())
         : m_inner(dataPtr, size, stride)
     {}
-
-    // Inherit useful base class facilities
-    using Super::operator=;
 
 private:
     Inner m_inner;

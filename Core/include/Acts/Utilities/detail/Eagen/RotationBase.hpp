@@ -23,25 +23,80 @@ namespace detail {
 
 namespace Eagen {
 
+namespace detail2 {
+    template <typename RotationDerived,
+              typename OtherDerived,
+              bool OtherIsVector>
+    struct RotationEigenProdResult;
+
+    template <typename RotationDerived, typename OtherMatrix>
+    struct RotationEigenProdResult<RotationDerived, OtherMatrix, false> {
+    private:
+        static constexpr int Dim = RotationDerived::Dim;
+        using Scalar = typename RotationDerived::Scalar;
+    public:
+        using Type = Matrix<Scalar, Dim, Dim>;
+    };
+
+    template <typename RotationDerived, typename Scalar, int Dim, int MaxDim>
+    struct RotationEigenProdResult<RotationDerived,
+                                   DiagonalMatrix<Scalar, Dim, MaxDim>,
+                                   false> {
+        using Type = Transform<Scalar, Dim, Affine>;
+    };
+
+    template <typename RotationDerived, typename OtherVector>
+    struct RotationEigenProdResult<RotationDerived, OtherVector, true> {
+    private:
+        static constexpr int Dim = RotationDerived::Dim;
+        using Scalar = typename RotationDerived::Scalar;
+    public:
+        using Type = Vector<Scalar, Dim>;
+    };
+}
+
 // Spiritual equivalent of Eigen::RotationBase
 template <typename _Derived, int _Dim>
 class RotationBase {
 public:
+    // === Eagen wrapper API ===
+
     // Re-expose template parameters
     using Derived = _Derived;
     static constexpr int Dim = _Dim;
 
+    // Wrapped Eigen type
 protected:
-    // Eigen type wrapped by the CRTP daughter class
     using DerivedTraits = TypeTraits<Derived>;
+public:
     using Inner = typename DerivedTraits::Inner;
 
-public:
+    // Access the wrapped Eigen object
+    Inner& derivedInner() {
+        return derived().getInner();
+    }
+    const Inner& derivedInner() const {
+        return derived().getInner();
+    }
+    Inner&& moveDerivedInner() {
+        return derived().moveInner();
+    }
+
     // === Eigen::RotationBase API ===
 
-    // Typedefs
+    // Scalar type
     using Scalar = typename DerivedTraits::Scalar;
+
+    // Rotation matrix type for this rotation
     using RotationMatrixType = Matrix<Scalar, Dim, Dim>;
+
+    // CRTP daughter class access
+    Derived& derived() {
+        return *static_cast<Derived*>(this);
+    }
+    const Derived& derived() const {
+        return *static_cast<const Derived*>(this);
+    }
 
     // Invert the rotation
     Derived inverse() const {
@@ -57,25 +112,18 @@ public:
     }
 
     // Multiply by a matrix or vector
+    // NOTE: No need for Eigen::EigenBase version as this does not support Array
 protected:
     template <typename OtherDerived>
     using MatProdResult =
-        std::conditional_t<OtherDerived::IsVectorAtCompileTime,
-                           OtherDerived,
-                           Derived>;
+        typename detail2::RotationEigenProdResult<
+            Derived, OtherDerived, OtherDerived::IsVectorAtCompileTime>::Type;
 public:
     template <typename OtherDerived>
     MatProdResult<OtherDerived>
     operator*(const EigenBase<OtherDerived>& e) const {
         return MatProdResult<OtherDerived>(
             derivedInner() * e.derivedInner()
-        );
-    }
-    template <typename OtherDerived>
-    MatProdResult<OtherDerived>
-    operator*(const Eigen::EigenBase<OtherDerived>& e) const {
-        return MatProdResult<OtherDerived>(
-            derivedInner() * e
         );
     }
 
@@ -113,27 +161,6 @@ public:
         return RotationMatrixType(
             derivedInner() * s.getInner()
         );
-    }
-
-    // === Eagen-specific interface ===
-
-    // CRTP daughter class access
-    Derived& derived() {
-        return *static_cast<Derived*>(this);
-    }
-    const Derived& derived() const {
-        return *static_cast<const Derived*>(this);
-    }
-
-    // Access the inner Eigen object held by the CRTP daughter class
-    Inner& derivedInner() {
-        return derived().getInner();
-    }
-    const Inner& derivedInner() const {
-        return derived().getInner();
-    }
-    Inner&& moveDerivedInner() {
-        return derived().moveInner();
     }
 };
 

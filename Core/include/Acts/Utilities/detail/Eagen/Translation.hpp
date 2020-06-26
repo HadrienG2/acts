@@ -9,9 +9,11 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 #include "EigenBase.hpp"
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
@@ -35,15 +37,18 @@ public:
     using Scalar = _Scalar;
     static constexpr int Dim = _Dim;
 
-    // Inner Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::Translation<Scalar, Dim>;
 
-    // Access the inner Eigen type
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
     const Inner& getInner() const {
         return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
     }
 
     // === Eigen::Translation API ===
@@ -100,7 +105,10 @@ public:
     }
 
     // Approximate equality
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
     bool isApprox(const Translation& other,
                   const RealScalar& prec = dummy_precision()) const {
         return m_inner.isApprox(other.m_inner, prec);
@@ -191,7 +199,7 @@ private:
     Inner m_inner;
 
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

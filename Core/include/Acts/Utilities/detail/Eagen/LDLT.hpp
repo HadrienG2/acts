@@ -8,7 +8,13 @@
 
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
+#include "EigenBase.hpp"
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
+#include "Matrix.hpp"
 #include "SolverBase.hpp"
 
 namespace Acts {
@@ -20,6 +26,8 @@ namespace Eagen {
 // Eigen::LDLT wrapper
 template <typename _MatrixType, int _UpLo>
 class LDLT : public SolverBase<LDLT<_MatrixType, _UpLo>> {
+    using Super = SolverBase<LDLT>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -27,13 +35,13 @@ public:
     using MatrixType = _MatrixType;
     static constexpr int UpLo = _UpLo;
 
-    // Eigen type that is being wrapped
+    // Wrapped Eigen type
 private:
     using MatrixTypeInner = typename MatrixType::Inner;
 public:
     using Inner = Eigen::LDLT<MatrixTypeInner, UpLo>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -44,44 +52,33 @@ public:
         return std::move(m_inner);
     }
 
-    // Bring back useful superclass API
-private:
-    using Super = SolverBase<LDLT<MatrixType, UpLo>>;
-public:
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
     using Scalar = typename Super::Scalar;
     static constexpr int Size = Super::Rows;
     static_assert(Super::Cols == Super::Rows, "Matrix type is not square");
 
     // === Eigen::LDLT API ===
 
-    // Traditional Index typedef
-    using Index = Eigen::Index;
-
     // Default constructor
     LDLT() = default;
 
     // Construct factorization of a given matrix
     template <typename InputType>
-    LDLT(const EigenBase<InputType>& matrix)
+    explicit LDLT(const EigenBase<InputType>& matrix)
         : m_inner(matrix.derivedInner())
-    {}
-    template <typename InputType>
-    LDLT(const Eigen::EigenBase<InputType>& matrix)
-        : m_inner(matrix)
     {}
 
     // Perform in-place decomposition, if possible
     template <typename InputType>
-    LDLT(EigenBase<InputType>& matrix)
+    explicit LDLT(EigenBase<InputType>& matrix)
         : m_inner(matrix.derivedInner())
-    {}
-    template <typename InputType>
-    LDLT(Eigen::EigenBase<InputType>& matrix)
-        : m_inner(matrix)
     {}
 
     // Preallocating constructor
-    LDLT(Index size)
+    explicit LDLT(Index size)
         : m_inner(size)
     {}
 
@@ -89,11 +86,6 @@ public:
     template <typename InputType>
     LDLT& compute(const EigenBase<InputType>& a) {
         m_inner.compute(a.derivedInner());
-        return *this;
-    }
-    template <typename InputType>
-    LDLT& compute(const Eigen::EigenBase<InputType>& a) {
-        m_inner.compute(a);
         return *this;
     }
 
@@ -110,15 +102,28 @@ public:
         return m_inner.isPositive();
     }
 
-    // Access inner matrices
-    // TODO: Consider providing true triangular views as an optimization
+    // Access the internal LDLT decomposition matrix
+    const MatrixType& matrixLDLT() const {
+        const auto& resultInner = m_inner.matrixLDLT();
+        static_assert(
+            std::is_same_v<decltype(resultInner),
+                           const MatrixTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const MatrixType&>(resultInner);
+    }
+
+    // Access views of the lower and upper triangular matrices L and U
+    //
+    // FIXME: Should provide true triangular views, not just as an optimization
+    //        but also because the difference between owned values and const
+    //        references is observable if the user takes a dangling reference
+    //        using something like
+    //        `const auto& bad = ldlt.matrixL().topLeftCorner<2, 2>()`.
+    //
     using MatrixL = Matrix<Scalar, Size, Size>;
     using MatrixU = Matrix<Scalar, Size, Size>;
     MatrixL matrixL() const {
         return MatrixL(m_inner.matrixL());
-    }
-    MatrixType matrixLDLT() const {
-        return MatrixType(m_inner.matrixLDLT());
     }
     MatrixU matrixU() const {
         return MatrixU(m_inner.matrixU());
@@ -128,7 +133,10 @@ public:
     //       This requires a bit of work, and isn't used by Acts yet
 
     // Estimate of the reciprocal condition number
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
     RealScalar rcond() const {
         return m_inner.rcond();
     }
@@ -147,7 +155,12 @@ public:
     //       This requires a bit of work, and isn't used by Acts yet
 
     // Access the coefficients of the diagonal matrix D
-    // TODO: Consider providing a true diagonal view as an optimization
+    //
+    // FIXME: Should provide a true diagonal view, not just as an optimization
+    //        but also because the difference between owned values and const
+    //        references is observable if the user takes a dangling reference
+    //        using something like `const auto& bad = ldlt.vectorD().head<2>()`.
+    //
     MatrixType vectorD() const {
         return MatrixType(m_inner.vectorD());
     }

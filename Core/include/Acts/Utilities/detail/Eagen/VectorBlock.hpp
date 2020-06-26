@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "MatrixBase.hpp"
@@ -23,15 +25,38 @@ namespace Eagen {
 // We cannot eliminate this expression template because some code in Acts needs
 // write access to matrix blocks.
 //
-template <typename Derived, int Size>
-class VectorBlock : public MatrixBase<VectorBlock<Derived, Size>> {
-private:
-    using DerivedTraits = TypeTraits<Derived>;
-    using DerivedInner = typename DerivedTraits::Inner;
-    using Inner = Eigen::VectorBlock<DerivedInner, Size>;
-    using Index = Eigen::Index;
+template <typename _Derived, int _Size>
+class VectorBlock : public MatrixBase<VectorBlock<_Derived, _Size>> {
+    using Super = MatrixBase<VectorBlock>;
 
 public:
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+    static constexpr int Size = _Size;
+
+    // Wrapped Eigen type
+    using Inner = typename Super::Inner;
+
+    // Access the inner Eigen object
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
+
+    // === Eigen::VectorBlock API ===
+
     // Eigen-style constructor from an Eagen expression
     VectorBlock(Derived& xpr, Index start) : m_inner(xpr.getInner(), start) {}
     VectorBlock(Derived& xpr, Index start, Index size)
@@ -61,17 +86,6 @@ public:
         return *this;
     }
 #endif
-
-    // Access the inner Eigen block (used for CRTP)
-    Inner& getInner() {
-        return m_inner;
-    }
-    const Inner& getInner() const {
-        return m_inner;
-    }
-    Inner&& moveInner() {
-        return std::move(m_inner);
-    }
 
 private:
     Inner m_inner;

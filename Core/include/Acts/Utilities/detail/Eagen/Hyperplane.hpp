@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
@@ -25,41 +27,61 @@ namespace Eagen {
 template <typename _Scalar, int _AmbientDim, int _Options = AutoAlign>
 class Hyperplane {
 public:
-    // Eigen-style typedefs and constant propagation
-    using Index = Eigen::Index;
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
     using Scalar = _Scalar;
     static constexpr int AmbientDim = _AmbientDim;
     static constexpr int Options = _Options;
 
+    // Convenience typedefs
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
+
     // Wrapped Eigen type
     using Inner = Eigen::Hyperplane<Scalar, AmbientDim, Options>;
 
+    // Access the wrapped Eigen object
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // === Eigen::Hyperplane API ===
+
+    // Good old Index typedef
+    using Index = Eigen::Index;
+
     // More Eigen-style typedefs
-    using RealScalar = typename Inner::RealScalar;
     using VectorType = Vector<Scalar, AmbientDim>;
-private:
-    using InnerVectorType = typename VectorType::Inner;
-public:
-    using Coefficients = Vector<Scalar,
-                                (AmbientDim == Dynamic) ? Dynamic
-                                                        : (AmbientDim + 1)>;
 
     // Default constructor
     Hyperplane() = default;
 
+    // Constructor from inner Eigen type
+    Hyperplane(const Inner& inner)
+        : m_inner(inner)
+    {}
+
     // Constructor from another hyperplane
     template <typename OtherScalarType, int OtherOptions>
-    Hyperplane(const Hyperplane<OtherScalarType, AmbientDim, OtherOptions>& other)
+    Hyperplane(const Hyperplane<OtherScalarType,
+                                AmbientDim,
+                                OtherOptions>& other)
         : m_inner(other.m_inner)
-    {}
-    template <typename OtherScalarType, int OtherOptions>
-    Hyperplane(const Eigen::Hyperplane<OtherScalarType, AmbientDim, OtherOptions>& other)
-        : m_inner(other)
     {}
 
     // Constructor from a parametrized line
     // NOTE: No Eagen equivalent of this at this point in time
-    Hyperplane(const Eigen::ParametrizedLine<Scalar, AmbientDim>& parametrized)
+    explicit Hyperplane(const Eigen::ParametrizedLine<Scalar,
+                                                      AmbientDim>& parametrized)
         : m_inner(parametrized)
     {}
 
@@ -67,26 +89,14 @@ public:
     Hyperplane(const VectorType& n, const Scalar& d)
         : m_inner(n.getInner(), d)
     {}
-    Hyperplane(const InnerVectorType& n, const Scalar& d)
-        : m_inner(n, d)
-    {}
 
     // Constructor from two vectors
     Hyperplane(const VectorType& n, const VectorType& e)
         : m_inner(n.getInner(), e.getInner())
     {}
-    Hyperplane(const InnerVectorType& n, const VectorType& e)
-        : m_inner(n, e.getInner())
-    {}
-    Hyperplane(const VectorType& n, const InnerVectorType& e)
-        : m_inner(n.getInner(), e)
-    {}
-    Hyperplane(const InnerVectorType& n, const InnerVectorType& e)
-        : m_inner(n, e)
-    {}
 
     // Dynamic hyperplane constructor
-    Hyperplane(Index dim) : m_inner(dim) {}
+    explicit Hyperplane(Index dim) : m_inner(dim) {}
 
     // Distances from point to hyperplane
     Scalar absDistance(const VectorType& p) const {
@@ -180,7 +190,7 @@ private:
     Inner m_inner;
 
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

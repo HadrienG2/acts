@@ -13,6 +13,7 @@
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
 #include "MatrixBase.hpp"
+#include "TypeTraits.hpp"
 
 namespace Acts {
 
@@ -25,18 +26,43 @@ namespace Eagen {
 // We cannot eliminate this expression template because some code in Acts needs
 // write access to matrix blocks.
 //
-template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
-class Block : public MatrixBase<Block<Derived,
-                                      BlockRows,
-                                      BlockCols,
-                                      InnerPanel>> {
-private:
-    using DerivedTraits = TypeTraits<Derived>;
-    using DerivedInner = typename DerivedTraits::Inner;
-    using Inner = Eigen::Block<DerivedInner, BlockRows, BlockCols, InnerPanel>;
-    using Index = Eigen::Index;
+template <typename _Derived, int _BlockRows, int _BlockCols, bool _InnerPanel>
+class Block : public MatrixBase<Block<_Derived,
+                                      _BlockRows,
+                                      _BlockCols,
+                                      _InnerPanel>> {
+    using Super = MatrixBase<Block>;
 
 public:
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+    static constexpr int BlockCols = _BlockCols;
+    static constexpr int BlockRows = _BlockRows;
+    static constexpr int InnerPanel = _InnerPanel;
+
+    // Wrapped Eigen type
+    using Inner = typename Super::Inner;
+
+    // Access the inner Eigen object
+    Inner& getInner() {
+        return m_inner;
+    }
+    const Inner& getInner() const {
+        return m_inner;
+    }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
+
+    // === Eigen::Block API ===
+
     // Eigen-style constructor from an Eagen expression
     Block(Derived& xpr, Index i) : m_inner(xpr.getInner(), i) {}
     Block(Derived& xpr, Index startRow, Index startCol)
@@ -55,6 +81,9 @@ public:
     Block(BlockXpr&& block) : m_inner(std::move(block)) {}
 
     // Assignment from Eagen and Eigen expressions
+    //
+    // NOTE: Remove Eigen::EigenBase overloads if we ever wrap Eigen::Array.
+    //
     template <typename OtherDerived>
     Block& operator=(const EigenBase<OtherDerived>& other) {
         m_inner = other.derivedInner();
@@ -77,17 +106,6 @@ public:
         return *this;
     }
 #endif
-
-    // Access the inner Eigen block (used for CRTP)
-    Inner& getInner() {
-        return m_inner;
-    }
-    const Inner& getInner() const {
-        return m_inner;
-    }
-    Inner&& moveInner() {
-        return std::move(m_inner);
-    }
 
 private:
     Inner m_inner;

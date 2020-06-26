@@ -9,8 +9,9 @@
 #pragma once
 
 #include "EigenBase.hpp"
-#include "EigenDense.hpp"
+#include "ForwardDeclarations.hpp"
 #include "Matrix.hpp"
+#include "MatrixBase.hpp"
 
 namespace Acts {
 
@@ -19,23 +20,36 @@ namespace detail {
 namespace Eagen {
 
 // Spiritual equivalent of Eigen::SolverBase
-template <typename Derived>
-class SolverBase : public EigenBase<Derived> {
-private:
-    // Access the parent class and derived class type traits
-    using Super = EigenBase<Derived>;
-    using DerivedTraits = typename Super::DerivedTraits;
+template <typename _Derived>
+class SolverBase : public EigenBase<_Derived> {
+    using Super = EigenBase<_Derived>;
 
 public:
-    // Bring back some of the parent interface which for some reason gets lost
+    // === Eagen wrapper API ===
+
+    // Re-expose template parameters
+    using Derived = _Derived;
+
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
     using Super::derived;
     using Super::derivedInner;
 
+    // === Eigen::SolverBase API ===
+
     // Expose decomposed matrix type information
+protected:
+    using DerivedTraits = typename Super::DerivedTraits;
+public:
     using MatrixType = typename DerivedTraits::MatrixType;
     using Scalar = typename MatrixType::Scalar;
     static constexpr int Rows = MatrixType::Rows;
     static constexpr int Cols = MatrixType::Cols;
+    static constexpr int Options = MatrixType::Options;
+    static constexpr int MaxRows = MatrixType::MaxRows;
+    static constexpr int MaxCols = MatrixType::MaxCols;
 
     // TODO: Support transpose() and adjoint()
     //       These require quite a bit of work and aren't used by Acts yet

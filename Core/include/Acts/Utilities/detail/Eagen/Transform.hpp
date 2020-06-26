@@ -8,11 +8,17 @@
 
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
+#include "Block.hpp"
 #include "DiagonalBase.hpp"
+#include "EigenBase.hpp"
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
-#include "Map.hpp"
+#include "RotationBase.hpp"
 #include "Matrix.hpp"
+#include "MatrixBase.hpp"
 
 namespace Acts {
 
@@ -39,25 +45,36 @@ public:
     static constexpr int Mode = _Mode;
     static constexpr int Options = _Options;
 
-    // Inner Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::Transform<Scalar, Dim, Mode, Options>;
 
-    // Access the inner Eigen type
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
     const Inner& getInner() const {
         return m_inner;
     }
+    Inner&& moveInner() {
+        return std::move(m_inner);
+    }
 
     // === Eigen::Transform API ===
 
     // Eigen-style typedefs and consts
     using Index = Eigen::Index;
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+private:
+    using ScalarTraits = NumTraits<Scalar>;
+public:
+    using RealScalar = typename ScalarTraits::Real;
 
     // Default constructor
     Transform() = default;
+
+    // Constructor from inner type
+    Transform(const Inner& inner)
+        : m_inner(inner)
+    {}
 
     // Constructor from a transformation matrix
     template <typename OtherDerived>
@@ -76,13 +93,6 @@ public:
                               OtherMode,
                               OtherOptions>& other)
         : m_inner(other.getInner())
-    {}
-    template <typename OtherScalarType, int OtherMode, int OtherOptions>
-    Transform(const Eigen::Transform<OtherScalarType,
-                                     Dim,
-                                     OtherMode,
-                                     OtherOptions>& other)
-        : m_inner(other)
     {}
 
     // TODO: Support affine()
@@ -111,7 +121,8 @@ public:
     //       This requires quite a bit of work, and isn't used by Acts yet.
 
     // Invert the transform
-    Transform inverse(TransformTraits traits = static_cast<TransformTraits>(Mode)) const {
+    Transform
+    inverse(TransformTraits traits = static_cast<TransformTraits>(Mode)) const {
         return Transform(m_inner.inverse(traits));
     }
 
@@ -121,55 +132,72 @@ public:
         return m_inner.isApprox(other.getInner(), prec);
     }
 
+    // Access the inner transformation matrix
+    using MatrixType = Matrix<Scalar, Inner::Rows, Inner::HDim, Options>;
+private:
+    using MatrixTypeInner = typename MatrixType::Inner;
+public:
+    const MatrixType& matrix() const {
+        const auto& resultInner = m_inner.matrix();
+        static_assert(
+            std::is_same_v<decltype(resultInner), const MatrixTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const MatrixType&>(resultInner);
+    }
+    MatrixType& matrix() {
+        auto& resultInner = m_inner.matrix();
+        static_assert(
+            std::is_same_v<decltype(resultInner), MatrixTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<MatrixType&>(resultInner);
+    }
+
     // Access the linear part of the transform
 private:
-    using LinearPart = Matrix<Scalar, Dim, Dim>;
-    static constexpr int OuterStride = (Mode == AffineCompact) ? Dim : (Dim+1);
-    using LinearPartMap = Map<LinearPart,
-                              Unaligned,
-                              Stride<OuterStride, 1>>;
+    static constexpr int NotRowMajor = ((Options & RowMajor) == 0);
+    static constexpr bool LinearPartInnerPanel =
+        (int(Mode) == AffineCompact) && NotRowMajor;
+    template <typename _MatrixType>
+    using GenericLinearPart = Block<_MatrixType,
+                                    Dim,
+                                    Dim,
+                                    LinearPartInnerPanel>;
 public:
-    LinearPart linear() const {
-        return LinearPart(m_inner.linear());
+    using ConstLinearPart = GenericLinearPart<const MatrixType>;
+    ConstLinearPart linear() const {
+        return ConstLinearPart(matrix(), 0, 0);
     }
-    LinearPartMap linear() {
-        return LinearPartMap(m_inner.linear().data());
+    using LinearPart = GenericLinearPart<MatrixType>;
+    LinearPart linear() {
+        return LinearPart(matrix(), 0, 0);
     }
 
     // Access the rotation part of the transform
-    Matrix<Scalar, Dim, Dim> rotation() const {
+    using LinearMatrixType = Matrix<Scalar, Dim, Dim>;
+    LinearMatrixType rotation() const {
         return m_inner.rotation();
     }
 
     // Access the translation part of the transform
 private:
-    using TranslationPart = Vector<Scalar, Dim>;
-    using TranslationPartMap = Map<TranslationPart,
-                                   Unaligned,
-                                   Stride<OuterStride, 1>>;
+    template <typename _MatrixType>
+    using GenericTranslationPart = Block<_MatrixType,
+                                         Dim,
+                                         1,
+                                         NotRowMajor>;
 public:
-    TranslationPart translation() const {
-        return TranslationPart(m_inner.translation());
+    using ConstTranslationPart = GenericTranslationPart<const MatrixType>;
+    ConstTranslationPart translation() const {
+        return ConstTranslationPart(matrix(), 0, Dim);
     }
-    TranslationPartMap translation() {
-        return TranslationPartMap(m_inner.translation().data());
+    using TranslationPart = GenericTranslationPart<MatrixType>;
+    TranslationPart translation() {
+        return TranslationPart(matrix(), 0, Dim);
     }
 
     // Set the last row to [0 ... 0 1]
     void makeAffine() {
         m_inner.makeAffine();
-    }
-
-    // Access the inner transformation matrix
-private:
-    using MatrixType = Matrix<Scalar, Inner::Rows, Inner::HDim, Options>;
-    using MatrixTypeMap = Map<MatrixType>;
-public:
-    MatrixType matrix() const {
-        return MatrixType(m_inner.matrix());
-    }
-    MatrixTypeMap matrix() {
-        return MatrixTypeMap(m_inner.matrix().data());
     }
 
     // Coefficient accessors
@@ -185,6 +213,7 @@ public:
     Transform operator*(const DiagonalBase<DiagonalDerived>& b) const {
         return Transform(m_inner * b.derivedInner());
     }
+    // FIXME: Not the right return type
     template <typename OtherDerived>
     OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
         return OtherDerived(m_inner * other.derivedInner());
@@ -277,7 +306,6 @@ public:
     }
 
     // Pre-apply various transforms
-    // FIXME: Should support Eigen rotations here, but how?
     template <typename RotationType>
     Transform& prerotate(const RotationType& rotation) {
         m_inner.prerotate(rotation.derivedInner());
@@ -303,7 +331,6 @@ public:
     }
 
     // Post-apply various transforms
-    // FIXME: Should support Eigen rotations here, but how?
     template <typename RotationType>
     Transform& rotate(const RotationType& rotation) {
         m_inner.rotate(rotation.derivedInner());
@@ -350,26 +377,26 @@ private:
     Inner m_inner;
 
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 
-using Affine2f = Transform<float,2,Affine>;
-using Affine3f = Transform<float,3,Affine>;
-using Affine2d = Transform<double,2,Affine>;
-using Affine3d = Transform<double,3,Affine>;
-using AffineCompact2f = Transform<float,2,AffineCompact>;
-using AffineCompact3f = Transform<float,3,AffineCompact>;
-using AffineCompact2d = Transform<double,2,AffineCompact>;
-using AffineCompact3d = Transform<double,3,AffineCompact>;
-using Isometry2f = Transform<float,2,Isometry>;
-using Isometry3f = Transform<float,3,Isometry>;
-using Isometry2d = Transform<double,2,Isometry>;
-using Isometry3d = Transform<double,3,Isometry>;
-using Projective2f = Transform<float,2,Projective>;
-using Projective3f = Transform<float,3,Projective>;
-using Projective2d = Transform<double,2,Projective>;
-using Projective3d = Transform<double,3,Projective>;
+using Affine2f = Transform<float, 2, Affine>;
+using Affine3f = Transform<float, 3, Affine>;
+using Affine2d = Transform<double, 2, Affine>;
+using Affine3d = Transform<double, 3, Affine>;
+using AffineCompact2f = Transform<float, 2, AffineCompact>;
+using AffineCompact3f = Transform<float, 3, AffineCompact>;
+using AffineCompact2d = Transform<double, 2, AffineCompact>;
+using AffineCompact3d = Transform<double, 3, AffineCompact>;
+using Isometry2f = Transform<float, 2, Isometry>;
+using Isometry3f = Transform<float, 3, Isometry>;
+using Isometry2d = Transform<double, 2, Isometry>;
+using Isometry3d = Transform<double, 3, Isometry>;
+using Projective2f = Transform<float, 2, Projective>;
+using Projective3f = Transform<float, 3, Projective>;
+using Projective2d = Transform<double, 2, Projective>;
+using Projective3d = Transform<double, 3, Projective>;
 
 }  // namespace Eagen
 

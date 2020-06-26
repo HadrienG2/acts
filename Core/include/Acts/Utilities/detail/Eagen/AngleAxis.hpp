@@ -8,9 +8,12 @@
 
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
 #include "EigenDense.hpp"
+#include "EigenPrologue.hpp"
 #include "ForwardDeclarations.hpp"
-#include "Map.hpp"
 #include "MatrixBase.hpp"
 #include "Matrix.hpp"
 #include "QuaternionBase.hpp"
@@ -25,8 +28,7 @@ namespace Eagen {
 // Wrapper of Eigen::AngleAxis
 template <typename _Scalar>
 class AngleAxis : public RotationBase<AngleAxis<_Scalar>, 3> {
-private:
-    using Super = RotationBase<AngleAxis<_Scalar>, 3>;
+    using Super = RotationBase<AngleAxis, 3>;
 
 public:
     // === Eagen wrapper API ===
@@ -34,13 +36,14 @@ public:
     // Re-expose template parameters
     using Scalar = _Scalar;
 
-    // Convenience typedef
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+    // Convenience typedefs
+    using ScalarTraits = NumTraits<Scalar>;
+    using RealScalar = typename ScalarTraits::Real;
 
-    // Underlying Eigen type
+    // Wrapped Eigen type
     using Inner = Eigen::AngleAxis<Scalar>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -56,14 +59,15 @@ public:
     // Default constructor
     AngleAxis() = default;
 
+    // Constructor from inner Eigen type
+    AngleAxis(const Inner& inner)
+        : m_inner(inner)
+    {}
+
     // Constructor from another AngleAxis transform
     template <typename OtherScalar>
     AngleAxis(const AngleAxis<OtherScalar>& other)
         : m_inner(other.m_inner)
-    {}
-    template <typename OtherScalar>
-    AngleAxis(const Eigen::AngleAxis<OtherScalar>& other)
-        : m_inner(other)
     {}
 
     // Constructor from quaternion
@@ -71,20 +75,11 @@ public:
     explicit AngleAxis(const QuaternionBase<QuatDerived>& q)
         : m_inner(q.derivedInner())
     {}
-    template <typename QuatDerived>
-    explicit AngleAxis(const Eigen::QuaternionBase<QuatDerived>& q)
-        : m_inner(q)
-    {}
 
     // Constructor from angle and axis
     template <typename Derived>
     explicit AngleAxis(const Scalar& angle, const MatrixBase<Derived>& axis)
         : m_inner(angle, axis.derivedInner())
-    {}
-    template <typename Derived>
-    explicit AngleAxis(const Scalar& angle,
-                       const Eigen::MatrixBase<Derived>& axis)
-        : m_inner(angle, axis)
     {}
 
     // Angle accessor
@@ -96,15 +91,23 @@ public:
     }
 
     // Axis accessor
+    using Vector3 = Vector<Scalar, 3>;
 private:
-    using AxisType = Vector<Scalar, 3>;
-    using AxisTypeMap = Map<AxisType>;
+    using Vector3Inner = typename Vector3::Inner;
 public:
-    AxisType axis() const {
-        return AxisType(m_inner.axis());
+    const Vector3& axis() const {
+        const auto& resultInner = m_inner.axis();
+        static_assert(
+            std::is_same_v<decltype(resultInner), const Vector3Inner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const Vector3&>(resultInner);
     }
-    AxisTypeMap axis() {
-        return AxisTypeMap(m_inner.axis().data());
+    Vector3& axis() {
+        auto& resultInner = m_inner.axis();
+        static_assert(
+            std::is_same_v<decltype(resultInner), Vector3Inner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<Vector3&>(resultInner);
     }
 
     // Scalar type casting
@@ -155,7 +158,7 @@ private:
     Inner m_inner;
 
     static RealScalar dummy_precision() {
-        return Eigen::NumTraits<Scalar>::dummy_precision();
+        return ScalarTraits::dummy_precision();
     }
 };
 

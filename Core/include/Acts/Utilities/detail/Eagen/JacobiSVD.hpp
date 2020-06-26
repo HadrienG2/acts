@@ -8,9 +8,11 @@
 
 #pragma once
 
+#include <type_traits>
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "EigenPrologue.hpp"
-#include "MatrixBase.hpp"
 #include "Matrix.hpp"
 #include "SolverBase.hpp"
 
@@ -23,6 +25,8 @@ namespace Eagen {
 // Eigen::JacobiSVD wrapper
 template <typename _MatrixType, int _QRPreconditioner>
 class JacobiSVD : public SolverBase<JacobiSVD<_MatrixType, _QRPreconditioner>> {
+    using Super = SolverBase<JacobiSVD>;
+
 public:
     // === Eagen wrapper API ===
 
@@ -30,13 +34,13 @@ public:
     using MatrixType = _MatrixType;
     static constexpr int QRPreconditioner = _QRPreconditioner;
 
-    // Eigen type that is being wrapped
+    // Wrapped Eigen type
 private:
     using MatrixTypeInner = typename MatrixType::Inner;
 public:
     using Inner = Eigen::JacobiSVD<MatrixTypeInner, QRPreconditioner>;
 
-    // Access the inner Eigen matrix (used for CRTP)
+    // Access the wrapped Eigen object
     Inner& getInner() {
         return m_inner;
     }
@@ -47,18 +51,20 @@ public:
         return std::move(m_inner);
     }
 
-    // Bring back useful superclass API
-private:
-    using Super = SolverBase<JacobiSVD<MatrixType, QRPreconditioner>>;
-public:
+    // === Base class API ===
+
+    // Re-export useful base class interface
+    using Index = typename Super::Index;
     using Scalar = typename Super::Scalar;
     static constexpr int Rows = Super::Rows;
     static constexpr int Cols = Super::Cols;
+    static constexpr int Options = Super::Options;
+    static constexpr int MaxRows = Super::MaxRows;
+    static constexpr int MaxCols = Super::MaxCols;
 
     // === Eigen::SVDBase API ===
 
-    // Eigen-style typedefs
-    using Index = Eigen::Index;
+    // Real version of the scalar type
     using RealScalar = typename Inner::RealScalar;
 
     // Truth that the U and V matrices will be computed
@@ -70,13 +76,29 @@ public:
     }
 
     // Access matrices U and V
-    using MatrixUType = Matrix<Scalar, Rows, Rows>;
-    MatrixUType matrixU() const {
-        return MatrixUType(m_inner.matrixU());
+    using MatrixUType = Matrix<Scalar, Rows, Rows, Options, MaxRows, MaxRows>;
+private:
+    using MatrixUTypeInner = typename MatrixUType::Inner;
+public:
+    const MatrixUType& matrixU() const {
+        const auto& resultInner = m_inner.matrixU();
+        static_assert(
+            std::is_same_v<decltype(resultInner),
+                           const MatrixUTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const MatrixUType&>(resultInner);
     }
-    using MatrixVType = Matrix<Scalar, Cols, Cols>;
-    MatrixUType matrixV() const {
-        return MatrixVType(m_inner.matrixV());
+    using MatrixVType = Matrix<Scalar, Cols, Cols, Options, MaxCols, MaxCols>;
+private:
+    using MatrixVTypeInner = typename MatrixVType::Inner;
+public:
+    const MatrixVType& matrixV() const {
+        const auto& resultInner = m_inner.matrixV();
+        static_assert(
+            std::is_same_v<decltype(resultInner),
+                           const MatrixVTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const MatrixVType&>(resultInner);
     }
 
     // Number of nonzero singular values
@@ -107,9 +129,22 @@ public:
     }
 
     // Query the singular values
-    using SingularValuesType = Vector<Scalar, std::min(Rows, Cols)>;
-    SingularValuesType singularValues() const {
-        return SingularValuesType(m_inner.singularValues());
+    using SingularValuesType = Matrix<Scalar,
+                                      std::min(Rows, Cols),
+                                      1,
+                                      Options & ~RowMajor,
+                                      std::min(MaxRows, MaxCols),
+                                      1>;
+private:
+    using SingularValuesTypeInner = typename SingularValuesType::Inner;
+public:
+    const SingularValuesType& singularValues() const {
+        const auto& resultInner = m_inner.singularValues();
+        static_assert(
+            std::is_same_v<decltype(resultInner),
+                           const SingularValuesTypeInner&>,
+            "Unexpected return type from Eigen in-place accessor");
+        return reinterpret_cast<const SingularValuesType&>(resultInner);
     }
 
     // === Eigen::JacobiSVD API ===
@@ -118,12 +153,8 @@ public:
     JacobiSVD() = default;
 
     // Constructor from matrix and optionally decomposition options
-    JacobiSVD(const MatrixType& matrix, int computationOptions = 0)
+    explicit JacobiSVD(const MatrixType& matrix, int computationOptions = 0)
         : m_inner(matrix.getInner(), computationOptions)
-    {}
-    JacobiSVD(const MatrixTypeInner& matrix,
-              unsigned int computationOptions = 0)
-        : m_inner(matrix, computationOptions)
     {}
 
     // Constructor with matrix size and decomposition options
@@ -138,20 +169,11 @@ public:
         m_inner.compute(matrix.derivedInner());
         return *this;
     }
-    JacobiSVD& compute(const MatrixTypeInner& matrix) {
-        m_inner.compute(matrix);
-        return *this;
-    }
 
     // Perform the decomposition using custom options
     JacobiSVD& compute(const MatrixType& matrix,
                        unsigned int computationOptions = 0) {
         m_inner.compute(matrix.derivedInner(), computationOptions);
-        return *this;
-    }
-    JacobiSVD& compute(const MatrixTypeInner& matrix,
-                       unsigned int computationOptions = 0) {
-        m_inner.compute(matrix, computationOptions);
         return *this;
     }
 
