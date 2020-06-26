@@ -213,13 +213,15 @@ public:
     Transform operator*(const DiagonalBase<DiagonalDerived>& b) const {
         return Transform(m_inner * b.derivedInner());
     }
-    // FIXME: Not the right return type
+    // NOTE: No Eigen::EigenBase overload needed, this is only ever applied to
+    //       matrices, not arrays.
     template <typename OtherDerived>
-    OtherDerived operator*(const EigenBase<OtherDerived>& other) const {
-        return OtherDerived(m_inner * other.derivedInner());
+    typename OtherDerived::PlainObject
+    operator*(const EigenBase<OtherDerived>& other) const {
+        return typename OtherDerived::PlainObject(
+            m_inner * other.derivedInner()
+        );
     }
-    // TODO: Support transforming Eigen::EigenBase too, requires figuring out
-    //       the right Eagen matrix type.
 
     // Multiply two transforms with each other
 private:
