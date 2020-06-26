@@ -124,9 +124,10 @@ public:
     // Access the linear part of the transform
 private:
     using LinearPart = Matrix<Scalar, Dim, Dim>;
+    static constexpr int OuterStride = (Mode == AffineCompact) ? Dim : (Dim+1);
     using LinearPartMap = Map<LinearPart,
                               Unaligned,
-                              Stride<Dim+1, 1>>;
+                              Stride<OuterStride, 1>>;
 public:
     LinearPart linear() const {
         return LinearPart(m_inner.linear());
@@ -145,7 +146,7 @@ private:
     using TranslationPart = Vector<Scalar, Dim>;
     using TranslationPartMap = Map<TranslationPart,
                                    Unaligned,
-                                   Stride<Dim+1, Dim+1>>;
+                                   Stride<OuterStride, 1>>;
 public:
     TranslationPart translation() const {
         return TranslationPart(m_inner.translation());
