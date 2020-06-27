@@ -42,6 +42,9 @@ public:
     // === Base class API ===
 
     // Re-export useful base class interface
+protected:
+    using DerivedTraits = typename Super::DerivedTraits;
+public:
     using Index = typename Super::Index;
     using Scalar = typename Super::Scalar;
     using RealScalar = typename Super::RealScalar;
@@ -116,11 +119,7 @@ public:
     }
 
     // Map foreign data
-    //
-    // NOTE: This isn't currently used by Acts, and thus disabled for now in
-    //       an attempt to reduce build overhead.
-    //
-/* private:
+private:
     template <typename Stride>
     using StridedMapType = Map<Derived, Unaligned, Stride>;
     template <typename Stride>
@@ -267,7 +266,7 @@ public:
                const Stride<OuterStride, InnerStride>& stride) {
         return StridedAlignedMapType<Stride<OuterStride, InnerStride>>(
             data, rows, cols, stride);
-    } */
+    }
 };
 
 }  // namespace Eagen

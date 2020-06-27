@@ -182,10 +182,8 @@ public:
     Index count() const {
         return derivedInner().count();
     }
-    // NOTE: select() has quite a large API footprint and is not currently used
-    //       by Acts, so I'm disabling it in an attempt to reduce build costs.
     // TODO: Roll out a simpler select() if Array support is added to Eagen.
-    /* template <typename ThenDerived, typename ElseDerived>
+    template <typename ThenDerived, typename ElseDerived>
     PlainObject select(const DenseBase<ThenDerived>& thenMatrix,
                        const DenseBase<ElseDerived>& elseMatrix) const {
         return PlainObject(derivedInner().select(thenMatrix.derivedInner(),
@@ -243,7 +241,7 @@ public:
         const Eigen::DenseBase<ElseDerived>& elseMatrix
     ) const {
         return PlainObject(derivedInner().select(thenScalar, elseMatrix));
-    } */
+    }
 
     // IEEE 754 error handling stupidity
     bool allFinite() const {
@@ -313,9 +311,7 @@ public:
                   const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApprox(other, prec);
     }
-    // NOTE: Many comparison functions aren't used by Acts, so I'm disabling
-    //       them for now in an attempt to improve build performance
-    /* bool isApproxToConstant(const Scalar& value,
+    bool isApproxToConstant(const Scalar& value,
                             const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isApproxToConstant(value, prec);
     }
@@ -342,7 +338,7 @@ public:
     }
     bool isZero(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isZero(prec);
-    } */
+    }
 
     // Data reduction
     Scalar maxCoeff() const {
@@ -697,10 +693,7 @@ public:
     }
 
     // Approximate comparisons
-    //
-    // NOTE: Not used by Acts, and therefore disabled for now
-    //
-    /* bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
+    bool isDiagonal(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isDiagonal(prec);
     }
     bool isIdentity(const RealScalar& prec = dummy_precision()) const {
@@ -714,7 +707,7 @@ public:
     }
     bool isUpperTriangular(const RealScalar& prec = dummy_precision()) const {
         return derivedInner().isUpperTriangular(prec);
-    } */
+    }
 
     // TODO: Support lazyProduct()
     //       This is not currently used by Acts, so lower-priority.
@@ -920,8 +913,6 @@ public:
     }
 
     // --- Sub-matrices ---
-    //
-    // TODO: Comment out the subset of this interface which isn't used by Acts
 
     // Sub-vector accessors
     template <int Length>
