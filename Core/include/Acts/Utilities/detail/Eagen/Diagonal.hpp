@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include "EigenDense.hpp"
 #include "ForwardDeclarations.hpp"
 #include "MatrixBase.hpp"
@@ -57,7 +59,7 @@ public:
 
     // Constructor from a matrix + dynamic diagonal index
     explicit Diagonal(MatrixType& matrix, Index a_index = DiagIndex)
-        : m_inner(matrix.derivedInner())
+        : m_inner(matrix.getInner())
     {}
 
 private:
