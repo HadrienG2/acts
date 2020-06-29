@@ -11,6 +11,7 @@
 #include <complex>
 
 #include "DiagonalMatrix.hpp"
+#include "DiagonalWrapper.hpp"
 #include "MatrixBase.hpp"
 #include "UniformScaling.hpp"
 
@@ -43,15 +44,10 @@ Scaling(const Scalar& sx, const Scalar& sy, const Scalars&... others) {
 }
 
 // Constuct an axis aligned scaling from a vector expression
-//
-// FIXME: Should return a DiagonalWrapper to avoid dangling pointer issues if
-//        a block is subsequently taken.
-//
 template <typename Derived>
-inline DiagonalMatrix<typename Derived::Scalar,
-                      std::max(Derived::Rows, Derived::Cols)>
+inline DiagonalWrapper<const Derived>
 Scaling(const MatrixBase<Derived>& coeffs) {
-    return coeffs.asDiagonal();
+    return DiagonalWrapper<const Derived>(coeffs.derived());
 }
 
 }  // namespace Eagen

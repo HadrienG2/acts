@@ -155,14 +155,8 @@ public:
     //       This requires a bit of work, and isn't used by Acts yet
 
     // Access the coefficients of the diagonal matrix D
-    //
-    // FIXME: Should provide a true diagonal view, not just as an optimization
-    //        but also because the difference between owned values and const
-    //        references is observable if the user takes a dangling reference
-    //        using something like `const auto& bad = ldlt.vectorD().head<2>()`.
-    //
-    MatrixType vectorD() const {
-        return MatrixType(m_inner.vectorD());
+    DiagonalWrapper<MatrixType> vectorD() const {
+        return DiagonalWrapper(m_inner.matrix());
     }
 
 private:

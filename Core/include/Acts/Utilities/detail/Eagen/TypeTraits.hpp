@@ -86,6 +86,29 @@ struct TypeTraits<DiagonalMatrix<_Scalar, _Size, _MaxSize>> {
     using Inner = Eigen::DiagonalMatrix<Scalar, Size, MaxSize>;
 };
 
+// Diagonal matrix vector wrapper type traits
+template <typename _DiagonalVectorType>
+struct TypeTraits<DiagonalWrapper<_DiagonalVectorType>> {
+    using DiagonalVectorType = _DiagonalVectorType;
+private:
+    using DiagonalVectorTraits = TypeTraits<DiagonalVectorType>;
+public:
+    using Scalar = typename DiagonalVectorTraits::Scalar;
+    static constexpr int Size = std::max(DiagonalVectorTraits::Rows,
+                                         DiagonalVectorTraits::Cols);
+    static constexpr int MaxSize = std::max(DiagonalVectorTraits::MaxRows,
+                                            DiagonalVectorTraits::MaxCols);
+private:
+    using DiagonalVectorTypeInner = typename DiagonalVectorType::Inner;
+    template <typename _VectorInner>
+    using GenericInner = Eigen::DiagonalWrapper<_VectorInner>;
+public:
+    using Inner =
+        std::conditional_t<std::is_const_v<DiagonalVectorType>,
+                           GenericInner<const DiagonalVectorTypeInner>,
+                           GenericInner<DiagonalVectorTypeInner>>;
+};
+
 // Jacobi SVD decomposition type traits
 template <typename _MatrixType, int _QRPreconditioner>
 struct TypeTraits<JacobiSVD<_MatrixType, _QRPreconditioner>> {

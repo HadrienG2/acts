@@ -558,20 +558,10 @@ public:
     }
 
     // Reinterpret a vector as a diagonal matrix
-    //
-    // FIXME: Need to replicate Eigen's `DiagonalWrapper`, because the
-    //        difference between an owned value and a const-reference is
-    //        actually observable if the caller tries to take a reference to the
-    //        the returned data, using something like
-    //        `const auto& bad = m.asDiagonal().head<2>()`, as the reference
-    //        will end up dangling...
-    //
-    DiagonalMatrix<Scalar, std::max(Rows, Cols)>
+    DiagonalWrapper<const Derived>
     asDiagonal() const {
         assert(std::min(Rows, Cols) == 1);
-        return DiagonalMatrix<Scalar, std::max(Rows, Cols)>(
-            Vector<Scalar, std::max(Rows, Cols)>(derivedInner())
-        );
+        return DiagonalWrapper<const Derived>(derived());
     }
 
     // Perform SVD decomposition
