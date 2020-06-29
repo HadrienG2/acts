@@ -43,6 +43,10 @@ Scaling(const Scalar& sx, const Scalar& sy, const Scalars&... others) {
 }
 
 // Constuct an axis aligned scaling from a vector expression
+//
+// FIXME: Should return a DiagonalWrapper to avoid dangling pointer issues if
+//        a block is subsequently taken.
+//
 template <typename Derived>
 inline DiagonalMatrix<typename Derived::Scalar,
                       std::max(Derived::Rows, Derived::Cols)>
