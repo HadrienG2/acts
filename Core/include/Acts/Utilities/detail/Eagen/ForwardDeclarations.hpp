@@ -25,6 +25,7 @@ struct TypeTraits;
 template <typename Scalar> class AngleAxis;
 template <typename Derived, int BlockRows, int BlockCols, bool InnerPanel>
 class Block;
+template <typename MatrixType, int DiagIndex = 0> class Diagonal;
 template <typename Derived> class DiagonalBase;
 template <typename Scalar, int Size, int MaxSize = Size>
 class DiagonalMatrix;

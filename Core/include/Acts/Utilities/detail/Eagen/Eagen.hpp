@@ -12,6 +12,7 @@
 #include "AngleAxis.hpp"
 #include "Block.hpp"
 #include "CommaInitializer.hpp"
+#include "Diagonal.hpp"
 #include "DiagonalBase.hpp"
 #include "DiagonalMatrix.hpp"
 #include "EigenBase.hpp"

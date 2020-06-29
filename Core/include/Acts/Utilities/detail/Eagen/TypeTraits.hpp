@@ -56,6 +56,26 @@ public:
     static constexpr int OuterStride = DerivedTraits::OuterStride;
 };
 
+// Matrix diagonal wrapper type traits
+template <typename MatrixType, int DiagIndex>
+struct TypeTraits<Diagonal<MatrixType, DiagIndex>> {
+private:
+    using MatrixTypeTraits = TypeTraits<MatrixType>;
+    using MatrixTypeInner = typename MatrixTypeTraits::Inner;
+public:
+    using Scalar = typename MatrixTypeInner::Scalar;
+    static constexpr int Rows =
+        std::min(MatrixTypeTraits::Rows - std::max(-DiagIndex, 0),
+                 MatrixTypeTraits::Cols - std::max(DiagIndex, 0));
+    static constexpr int Cols = 1;
+    static constexpr int Options = MatrixTypeTraits::Options;
+    static constexpr int MaxRows =
+        std::min(MatrixTypeTraits::MaxRows - std::max(-DiagIndex, 0),
+                 MatrixTypeTraits::MaxCols - std::max(DiagIndex, 0));
+    static constexpr int MaxCols = 1;
+    using Inner = Eigen::Diagonal<MatrixTypeInner, DiagIndex>;
+};
+
 // Diagonal matrix type traits
 template <typename _Scalar, int _Size, int _MaxSize>
 struct TypeTraits<DiagonalMatrix<_Scalar, _Size, _MaxSize>> {

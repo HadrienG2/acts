@@ -645,18 +645,14 @@ public:
     }
 
     // Diagonal and associated properties
-    //
-    // FIXME: Need to replicate Eigen's `Diagonal` wrapper, because...
-    //        - Non-const diagonal access is needed and used by Acts
-    //        - The difference between an owned value and a const-reference is
-    //          actually observable if the caller tries to take a reference to
-    //          the returned data, using something like
-    //          `const auto& bad = m.diagonal().head<2>()`, as the reference
-    //          will end up dangling...
-    //
-    template <typename... Index>
-    Vector<Scalar, Rows> diagonal(Index... indices) const {
-        return Vector<Scalar, Rows>(derivedInner().diagonal(indices...));
+    using DiagonalReturnType = Diagonal<Derived>;
+    template <int DiagIndex = 0>
+    Diagonal<Derived, DiagIndex> diagonal() {
+        return Diagonal(derived());
+    }
+    template <int DiagIndex = 0>
+    Diagonal<const Derived, DiagIndex> diagonal() const {
+        return Diagonal(derived());
     }
 
     // Size of the matrix' diagonal
