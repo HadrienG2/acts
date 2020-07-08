@@ -13,8 +13,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <Eigen/Core>
-
 namespace Acts {
 namespace detail_lt {
 template <typename SL, size_t M, bool ReadOnly>

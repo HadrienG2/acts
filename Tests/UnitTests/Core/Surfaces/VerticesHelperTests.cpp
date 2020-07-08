@@ -17,8 +17,6 @@
 #include <algorithm>
 #include <limits>
 
-#include <Eigen/Geometry>
-
 namespace utf = boost::unit_test;
 
 namespace Acts {
