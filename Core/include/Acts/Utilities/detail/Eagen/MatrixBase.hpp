@@ -446,9 +446,6 @@ public:
 
     // Matrix transposition
     // NOTE: Will need adaptations if array support is needed
-    Matrix<Scalar, Cols, Rows> transpose() {
-        return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
-    }
     Matrix<Scalar, Cols, Rows> transpose() const {
         return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
     }
