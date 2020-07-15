@@ -967,15 +967,15 @@ public:
     using SubVector = Vector<Scalar, Length>;
     template <int n>
     SubVector<n> extractHead() const {
-        return SubVector<n>(head<n>());
+        return SubVector<n>(derivedInner().template head<n>());
     }
     template <int n>
     SubVector<n> extractTail() const {
-        return SubVector<n>(tail<n>());
+        return SubVector<n>(derivedInner().template tail<n>());
     }
     template <int n>
     SubVector<n> extractSegment(Index pos) const {
-        return SubVector<n>(segment<n>(pos));
+        return SubVector<n>(derivedInner().template segment<n>(pos));
     }
 
     // Sub-matrix accessors
