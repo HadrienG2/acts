@@ -948,6 +948,36 @@ public:
         return ConstSubVectorBlock<n>(derived(), pos);
     }
 
+    // Sub-vector extractors (/!\ EAGEN EXTENSION /!\)
+    //
+    // Same idea as the templated sub-vector accessors above, but return an
+    // owned sub-vector instead of a sub-vector view.
+    //
+    // This is not appropriate in all cases, as you must be careful not to build
+    // dangling pointers to these owned vectors, and of course you should not
+    // try to write to them. But when it works, it should be good for compile
+    // time, without a noticeable run-time impact since compilers are actually
+    // quite good at eliding copies.
+    //
+    // I'm more hesitant to do the same for dynamic-sized blocks, as
+    // dynamic-sized vectors require memory allocation and compilers are less
+    // good at removing that (clang manages sometimes, GCC almost never).
+    //
+    template <int Length>
+    using SubVector = Vector<Scalar, Length>;
+    template <int n>
+    SubVector<n> extractHead() const {
+        return SubVector<n>(head<n>());
+    }
+    template <int n>
+    SubVector<n> extractTail() const {
+        return SubVector<n>(tail<n>());
+    }
+    template <int n>
+    SubVector<n> extractSegment(Index pos) const {
+        return SubVector<n>(segment<n>(pos));
+    }
+
     // Sub-matrix accessors
 private:
     template <typename DerivedType, int BlockRows, int BlockCols>
