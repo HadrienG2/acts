@@ -68,7 +68,7 @@ class Hit {
   /// Space-time position four-vector.
   const Vector4& position4() const { return m_pos4; }
   /// Three-position, i.e. spatial coordinates without the time.
-  auto position() const { return m_pos4.segment<3>(Acts::ePos0); }
+  Vector3 position() const { return m_pos4.extractSegment<3>(Acts::ePos0); }
   /// Time coordinate.
   Scalar time() const { return m_pos4[Acts::eTime]; }
 
@@ -78,17 +78,19 @@ class Hit {
   const Vector4& momentum4After() const { return m_after4; }
   /// Normalized particle direction vector before the hit.
   Vector3 unitDirectionBefore() const {
-    return m_before4.segment<3>(Acts::eMom0).normalized();
+    return m_before4.extractSegment<3>(Acts::eMom0).normalized();
   }
   /// Normalized particle direction vector the hit.
   Vector3 unitDirectionAfter() const {
-    return m_after4.segment<3>(Acts::eMom0).normalized();
+    return m_after4.extractSegment<3>(Acts::eMom0).normalized();
   }
   /// Average normalized particle direction vector through the surface.
   Vector3 unitDirection() const {
-    auto dir0 = m_before4 / (2 * m_before4.segment<3>(Acts::eMom0).norm());
-    auto dir1 = m_after4 / (2 * m_after4.segment<3>(Acts::eMom0).norm());
-    return (dir0 + dir1).segment<3>(Acts::eMom0).normalized();
+    auto dir0 =
+        m_before4 / (2 * m_before4.extractSegment<3>(Acts::eMom0).norm());
+    auto dir1 =
+        m_after4 / (2 * m_after4.extractSegment<3>(Acts::eMom0).norm());
+    return (dir0 + dir1).extractSegment<3>(Acts::eMom0).normalized();
   }
   /// Energy deposited by the hit.
   ///

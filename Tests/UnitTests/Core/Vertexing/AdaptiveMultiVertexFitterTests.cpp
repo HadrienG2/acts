@@ -487,13 +487,13 @@ BOOST_AUTO_TEST_CASE(adaptive_multi_vertex_fitter_test_athena) {
   // Fit vertices
   fitter.fit(state, vtxList, linearizer, vertexingOptions);
 
-  auto vtx1Pos = state.vertexCollection.at(0)->position();
-  auto vtx1Cov = state.vertexCollection.at(0)->covariance();
+  const Vector3D vtx1Pos = state.vertexCollection.at(0)->position();
+  const ActsSymMatrixD<3> vtx1Cov = state.vertexCollection.at(0)->covariance();
   // auto vtx1Trks = state.vertexCollection.at(0)->tracks();
   auto vtx1FQ = state.vertexCollection.at(0)->fitQuality();
 
-  auto vtx2Pos = state.vertexCollection.at(1)->position();
-  auto vtx2Cov = state.vertexCollection.at(1)->covariance();
+  const Vector3D vtx2Pos = state.vertexCollection.at(1)->position();
+  const ActsSymMatrixD<3> vtx2Cov = state.vertexCollection.at(1)->covariance();
   // auto vtx2Trks = state.vertexCollection.at(1)->tracks();
   auto vtx2FQ = state.vertexCollection.at(1)->fitQuality();
 

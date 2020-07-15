@@ -95,7 +95,8 @@ ActsExamples::ProcessCode ActsExamples::DigitizationAlgorithm::execute(
       const auto& hit = *ih;
       const auto idx = hits.index_of(ih);
 
-      Acts::Vector2D localIntersect = (invTransfrom * hit.position()).head<2>();
+      Acts::Vector2D localIntersect =
+          (invTransfrom * hit.position()).extractHead<2>();
       Acts::Vector3D localDirection =
           invTransfrom.linear() * hit.unitDirection();
 

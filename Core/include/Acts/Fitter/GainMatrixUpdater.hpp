@@ -75,7 +75,10 @@ class GainMatrixUpdater {
     visit_measurement(
         trackState.calibrated(), trackState.calibratedCovariance(),
         trackState.calibratedSize(),
-        [&](const auto calibrated, const auto calibrated_covariance) {
+        [&](const auto calibrated_view, const auto calibrated_covariance_view) {
+          const auto calibrated = calibrated_view.eval();
+          const auto calibrated_covariance = calibrated_covariance_view.eval();
+
           constexpr size_t measdim = decltype(calibrated)::RowsAtCompileTime;
           using cov_t = ActsSymMatrixD<measdim>;
           using par_t = ActsVectorD<measdim>;

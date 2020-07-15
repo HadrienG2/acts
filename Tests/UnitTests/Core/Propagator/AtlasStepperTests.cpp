@@ -326,9 +326,9 @@ BOOST_AUTO_TEST_CASE(Reset) {
   BOOST_CHECK(stateCopy.covTransport);
   BOOST_CHECK_EQUAL(*stateCopy.covariance, cov);
   BOOST_CHECK_EQUAL(stepper.position(stateCopy),
-                    freeParams.template segment<3>(eFreePos0));
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(stepper.direction(stateCopy),
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(stepper.momentum(stateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(stepper.charge(stateCopy), stepper.charge(state.stepping));
@@ -348,9 +348,9 @@ BOOST_AUTO_TEST_CASE(Reset) {
   BOOST_CHECK(stateCopy.covTransport);
   BOOST_CHECK_EQUAL(*stateCopy.covariance, cov);
   BOOST_CHECK_EQUAL(stepper.position(stateCopy),
-                    freeParams.template segment<3>(eFreePos0));
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(stepper.direction(stateCopy),
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(stepper.momentum(stateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(stepper.charge(stateCopy), stepper.charge(state.stepping));
@@ -371,9 +371,9 @@ BOOST_AUTO_TEST_CASE(Reset) {
   BOOST_CHECK(stateCopy.covTransport);
   BOOST_CHECK_EQUAL(*stateCopy.covariance, cov);
   BOOST_CHECK_EQUAL(stepper.position(stateCopy),
-                    freeParams.template segment<3>(eFreePos0));
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(stepper.direction(stateCopy),
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(stepper.momentum(stateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(stepper.charge(stateCopy), stepper.charge(state.stepping));

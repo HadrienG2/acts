@@ -625,7 +625,8 @@ class AtlasStepper {
   /// @param [in] pars The new track parameters at start
   void update(State& state, const FreeVector& parameters,
               const Covariance& covariance) const {
-    Vector3D direction = parameters.template segment<3>(eFreeDir0).normalized();
+    Vector3D direction =
+        parameters.template extractSegment<3>(eFreeDir0).normalized();
     state.pVector[0] = parameters[eFreePos0];
     state.pVector[1] = parameters[eFreePos1];
     state.pVector[2] = parameters[eFreePos2];

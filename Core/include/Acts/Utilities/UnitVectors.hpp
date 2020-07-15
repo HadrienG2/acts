@@ -77,7 +77,7 @@ inline auto makeCurvilinearUnitU(
   // explicit version of U = Z x T
   unitU[0] = -direction[1];
   unitU[1] = direction[0];
-  const auto scale = unitU.template head<2>().norm();
+  const auto scale = unitU.template extractHead<2>().norm();
   // if the absolute scale is tiny, the initial direction vector is aligned with
   // the z-axis. the ZxT product is ill-defined since any vector in the x-y
   // plane would be orthogonal to the direction. fix the U unit vector along the

@@ -132,7 +132,9 @@ class Particle {
   /// Space-time position four-vector.
   constexpr const Vector4 &position4() const { return m_position4; }
   /// Three-position, i.e. spatial coordinates without the time.
-  auto position() const { return m_position4.segment<3>(Acts::ePos0); }
+  Vector3 position() const {
+    return m_position4.extractSegment<3>(Acts::ePos0);
+  }
   /// Time coordinate.
   Scalar time() const { return m_position4[Acts::eTime]; }
   /// Energy-momentum four-vector.
@@ -149,7 +151,8 @@ class Particle {
   const Vector3 &unitDirection() const { return m_unitDirection; }
   /// Absolute momentum in the x-y plane.
   Scalar transverseMomentum() const {
-    return m_absMomentum * m_unitDirection.segment<2>(Acts::eMom0).norm();
+    return
+        m_absMomentum * m_unitDirection.extractSegment<2>(Acts::eMom0).norm();
   }
   /// Absolute momentum.
   constexpr Scalar absMomentum() const { return m_absMomentum; }

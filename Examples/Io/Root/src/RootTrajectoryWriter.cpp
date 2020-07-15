@@ -408,7 +408,8 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectoryWriter::writeT(
       truthPHI = phi(truthHit.unitDirection());
       truthTHETA = theta(truthHit.unitDirection());
       truthQOP =
-          m_t_charge / truthHit.momentum4Before().template head<3>().norm();
+          m_t_charge
+              / truthHit.momentum4Before().template extractHead<3>().norm();
       truthTIME = truthHit.time();
 
       // push the truth track parameter at this track State
@@ -506,7 +507,8 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectoryWriter::writeT(
         m_pT_prt.push_back(p * std::hypot(freeParams[Acts::eFreeDir0],
                                           freeParams[Acts::eFreeDir1]));
         m_eta_prt.push_back(
-            Acts::VectorHelpers::eta(freeParams.segment<3>(Acts::eFreeDir0)));
+            Acts::VectorHelpers::eta(
+                freeParams.extractSegment<3>(Acts::eFreeDir0)));
       } else {
         // push default values if no predicted parameter
         m_res_x_hit.push_back(-99.);
@@ -621,7 +623,8 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectoryWriter::writeT(
         m_pT_flt.push_back(p * std::hypot(freeParams[Acts::eFreeDir0],
                                           freeParams[Acts::eFreeDir1]));
         m_eta_flt.push_back(
-            Acts::VectorHelpers::eta(freeParams.segment<3>(Acts::eFreeDir0)));
+            Acts::VectorHelpers::eta(
+                freeParams.extractSegment<3>(Acts::eFreeDir0)));
         m_chi2.push_back(state.chi2());
       } else {
         // push default values if no filtered parameter
@@ -731,7 +734,8 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectoryWriter::writeT(
         m_pT_smt.push_back(p * std::hypot(freeParams[Acts::eFreeDir0],
                                           freeParams[Acts::eFreeDir1]));
         m_eta_smt.push_back(
-            Acts::VectorHelpers::eta(freeParams.segment<3>(Acts::eFreeDir0)));
+            Acts::VectorHelpers::eta(
+                freeParams.extractSegment<3>(Acts::eFreeDir0)));
       } else {
         // push default values if no smoothed parameter
         m_eLOC0_smt.push_back(-99.);

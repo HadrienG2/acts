@@ -105,14 +105,14 @@ class SingleFreeTrackParameters {
   ///
   /// @return 3D vector with global position
   Vector3D position() const {
-    return parameters().template segment<3>(eFreePos0);
+    return parameters().template extractSegment<3>(eFreePos0);
   }
 
   /// @brief access momentum in global coordinate system
   ///
   /// @return 3D vector with global momentum
   Vector3D momentum() const {
-    return parameters().template segment<3>(eFreeDir0) /
+    return parameters().template extractSegment<3>(eFreeDir0) /
            std::abs(get<eFreeQOverP>());
   }
 

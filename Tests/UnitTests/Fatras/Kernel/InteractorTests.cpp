@@ -52,10 +52,10 @@ struct MockStepper {
   using Scalar = MockStepperState::Scalar;
   using Vector3 = MockStepperState::Vector3;
 
-  auto position(MockStepperState &state) const { return state.position; }
-  auto time(MockStepperState &state) const { return state.time; }
-  auto direction(MockStepperState &state) const { return state.direction; }
-  auto momentum(MockStepperState &state) const { return state.momentum; }
+  Vector3 position(MockStepperState &state) const { return state.position; }
+  Scalar time(MockStepperState &state) const { return state.time; }
+  Vector3 direction(MockStepperState &state) const { return state.direction; }
+  Scalar momentum(MockStepperState &state) const { return state.momentum; }
   void update(MockStepperState &state, const Vector3 &position,
               const Vector3 &direction, Scalar momentum, Scalar time) {
     state.position = position;

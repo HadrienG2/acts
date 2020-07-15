@@ -89,13 +89,15 @@ FreeToBoundMatrix surfaceDerivative(
   // Initialize the transport final frame jacobian
   FreeToBoundMatrix jacToLocal = FreeToBoundMatrix::Zero();
   // Initalize the jacobian to local, returns the transposed ref frame
-  auto rframeT = surface.initJacobianToLocal(geoContext, jacToLocal,
-                                             parameters.segment<3>(eFreePos0),
-                                             parameters.segment<3>(eFreeDir0));
+  auto rframeT =
+      surface.initJacobianToLocal(geoContext,
+                                  jacToLocal,
+                                  parameters.extractSegment<3>(eFreePos0),
+                                  parameters.extractSegment<3>(eFreeDir0));
   // Calculate the form factors for the derivatives
   const BoundRowVector sVec = surface.derivativeFactors(
-      geoContext, parameters.segment<3>(eFreePos0),
-      parameters.segment<3>(eFreeDir0), rframeT, jacobianLocalToGlobal);
+      geoContext, parameters.extractSegment<3>(eFreePos0),
+      parameters.extractSegment<3>(eFreeDir0), rframeT, jacobianLocalToGlobal);
   jacobianLocalToGlobal -= derivatives * sVec;
   // Return the jacobian to local
   return jacToLocal;
@@ -158,8 +160,8 @@ void reinitializeJacobians(
 
   // Reset the jacobian from local to global
   Vector2D loc{0., 0.};
-  const Vector3D position = parameters.segment<3>(eFreePos0);
-  const Vector3D direction = parameters.segment<3>(eFreeDir0);
+  const Vector3D position = parameters.extractSegment<3>(eFreePos0);
+  const Vector3D direction = parameters.extractSegment<3>(eFreeDir0);
   surface.globalToLocal(geoContext, position, direction, loc);
   BoundVector pars;
   pars << loc[eLOC_0], loc[eLOC_1], phi(direction), theta(direction),
@@ -229,9 +231,10 @@ BoundState boundState(std::reference_wrapper<const GeometryContext> geoContext,
     cov = covarianceMatrix;
   }
   // Create the bound parameters
-  const Vector3D& position = parameters.segment<3>(eFreePos0);
+  const Vector3D position = parameters.extractSegment<3>(eFreePos0);
   const Vector3D momentum =
-      std::abs(1. / parameters[eFreeQOverP]) * parameters.segment<3>(eFreeDir0);
+      std::abs(1. / parameters[eFreeQOverP])
+          * parameters.extractSegment<3>(eFreeDir0);
   const double charge = std::copysign(1., parameters[eFreeQOverP]);
   const double time = parameters[eFreeTime];
   BoundParameters boundParameters(geoContext, cov, position, momentum, charge,
@@ -248,7 +251,7 @@ CurvilinearState curvilinearState(Covariance& covarianceMatrix,
                                   BoundToFreeMatrix& jacobianLocalToGlobal,
                                   const FreeVector& parameters,
                                   bool covTransport, double accumulatedPath) {
-  const Vector3D& direction = parameters.segment<3>(eFreeDir0);
+  const Vector3D direction = parameters.extractSegment<3>(eFreeDir0);
 
   // Covariance transport
   std::optional<BoundSymMatrix> cov = std::nullopt;
@@ -258,7 +261,7 @@ CurvilinearState curvilinearState(Covariance& covarianceMatrix,
     cov = covarianceMatrix;
   }
   // Create the curvilinear parameters
-  const Vector3D& position = parameters.segment<3>(eFreePos0);
+  const Vector3D position = parameters.extractSegment<3>(eFreePos0);
   const Vector3D momentum = std::abs(1. / parameters[eFreeQOverP]) * direction;
   const double charge = std::copysign(1., parameters[eFreeQOverP]);
   const double time = parameters[eFreeTime];

@@ -49,10 +49,10 @@ BOOST_DATA_TEST_CASE(
   // convert to free parameters
   FreeVector fv = detail::transformBoundToFreeParameters(*surface, geoCtx, bv);
 
-  CHECK_CLOSE_OR_SMALL(fv.segment<3>(eFreePos0), pos, eps, eps);
+  CHECK_CLOSE_OR_SMALL(fv.extractSegment<3>(eFreePos0), pos, eps, eps);
   CHECK_CLOSE_OR_SMALL(fv[eFreeTime], bv[eBoundTime], eps, eps);
-  CHECK_CLOSE_REL(fv.segment<3>(eFreeDir0).norm(), 1, eps);
-  CHECK_CLOSE_OR_SMALL(fv.segment<3>(eFreeDir0), dir, eps, eps);
+  CHECK_CLOSE_REL(fv.extractSegment<3>(eFreeDir0).norm(), 1, eps);
+  CHECK_CLOSE_OR_SMALL(fv.extractSegment<3>(eFreeDir0), dir, eps, eps);
   CHECK_CLOSE_OR_SMALL(fv[eFreeQOverP], bv[eBoundQOverP], eps, eps);
 }
 

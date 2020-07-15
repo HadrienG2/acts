@@ -140,8 +140,8 @@ struct EventDataView3D {
     }
 
     // Draw the parameter shaft and cone
-    auto position = parameters.position(gctx);
-    auto direction = parameters.momentum().normalized();
+    Vector3D position = parameters.position(gctx);
+    Vector3D direction = parameters.momentum().normalized();
     double p = parameters.momentum().norm();
 
     ViewConfig lparConfig = parConfig;
@@ -156,7 +156,7 @@ struct EventDataView3D {
 
     if (parameters.covariance().has_value()) {
       auto paramVec = parameters.parameters();
-      auto lposition = paramVec.template block<2, 1>(0, 0);
+      Vector2D lposition = paramVec.template block<2, 1>(0, 0);
 
       // Draw the local covariance
       const auto& covariance = *parameters.covariance();
@@ -226,7 +226,8 @@ struct EventDataView3D {
       // @Todo: how to draw 1D measurement?
       if (measurementConfig.visible and state.hasCalibrated() and
           state.calibratedSize() == 2) {
-        const Vector2D& lposition = state.calibrated().template head<2>();
+        const Vector2D lposition =
+            state.calibrated().template extractHead<2>();
         ActsSymMatrixD<2> covariance =
             state.calibratedCovariance().template topLeftCorner<2, 2>();
         drawCovarianceCartesian(helper, lposition, covariance,

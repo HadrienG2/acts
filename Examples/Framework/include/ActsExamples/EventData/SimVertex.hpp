@@ -19,6 +19,7 @@ namespace ActsExamples {
 /// A simultated vertex e.g. from a physics process.
 struct SimVertex {
   using Scalar = double;
+  using Vector3 = Acts::ActsVector<Scalar, 3>;
   using Vector4 = Acts::ActsVector<Scalar, 4>;
 
   /// The vertex four-position.
@@ -48,7 +49,7 @@ struct SimVertex {
   SimVertex& operator=(SimVertex&&) = default;
 
   /// The vertex three-position.
-  auto position() const { return position4.head<3>(); }
+  Vector3 position() const { return position4.extractHead<3>(); }
   /// The vertex time.
   Scalar time() const { return position4[3]; }
 };

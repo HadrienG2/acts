@@ -36,8 +36,8 @@ StraightLineStepper::curvilinearState(State& state) const {
 
 void StraightLineStepper::update(State& state, const FreeVector& parameters,
                                  const Covariance& covariance) const {
-  state.pos = parameters.template segment<3>(eFreePos0);
-  state.dir = parameters.template segment<3>(eFreeDir0).normalized();
+  state.pos = parameters.template extractSegment<3>(eFreePos0);
+  state.dir = parameters.template extractSegment<3>(eFreeDir0).normalized();
   state.p = std::abs(1. / parameters[eFreeQOverP]);
   state.t = parameters[eFreeTime];
 

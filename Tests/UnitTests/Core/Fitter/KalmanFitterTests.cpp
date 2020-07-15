@@ -432,10 +432,12 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
   auto& fittedAgainTrack = *fitRes;
   auto fittedAgainParameters = fittedAgainTrack.fittedParameters.value();
 
-  CHECK_CLOSE_REL(fittedParameters.parameters().template head<5>(),
-                  fittedAgainParameters.parameters().template head<5>(), 1e-5);
-  CHECK_CLOSE_ABS(fittedParameters.parameters().template tail<1>(),
-                  fittedAgainParameters.parameters().template tail<1>(), 1e-5);
+  CHECK_CLOSE_REL(fittedParameters.parameters().template extractHead<5>(),
+                  fittedAgainParameters.parameters().template extractHead<5>(),
+                  1e-5);
+  CHECK_CLOSE_ABS(fittedParameters.parameters().template extractTail<1>(),
+                  fittedAgainParameters.parameters().template extractTail<1>(),
+                  1e-5);
 
   // Fit without target surface
   kfOptions.referenceSurface = nullptr;
@@ -459,11 +461,11 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
   auto& fittedShuffledTrack = *fitRes;
   auto fittedShuffledParameters = fittedShuffledTrack.fittedParameters.value();
 
-  CHECK_CLOSE_REL(fittedParameters.parameters().template head<5>(),
-                  fittedShuffledParameters.parameters().template head<5>(),
+  CHECK_CLOSE_REL(fittedParameters.parameters().template extractHead<5>(),
+                  fittedShuffledParameters.parameters().template extractHead<5>(),
                   1e-5);
-  CHECK_CLOSE_ABS(fittedParameters.parameters().template tail<1>(),
-                  fittedShuffledParameters.parameters().template tail<1>(),
+  CHECK_CLOSE_ABS(fittedParameters.parameters().template extractTail<1>(),
+                  fittedShuffledParameters.parameters().template extractTail<1>(),
                   1e-5);
 
   // Remove one measurement and find a hole
@@ -493,7 +495,7 @@ BOOST_AUTO_TEST_CASE(kalman_fitter_zero_field) {
   // And the parameters should be different
   //~
   // BOOST_CHECK(!Acts::Test::checkCloseRel(fittedParameters.parameters().template
-  // head<5>(), ~ fittedWithHoleParameters.parameters().template head<5>(), ~
+  // extractHead<5>(), ~ fittedWithHoleParameters.parameters().template extractHead<5>(), ~
   // 1e-6));
   BOOST_CHECK(!Acts::Test::checkCloseRel(fittedParameters.parameters(),
                                          fittedWithHoleParameters.parameters(),

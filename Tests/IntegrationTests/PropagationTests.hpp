@@ -190,7 +190,7 @@ struct ZCylinderSurfaceBuilder {
       const Acts::GeometryContext& geoCtx) {
     auto transform =
         std::make_shared<Acts::Transform3D>(Acts::Transform3D::Identity());
-    auto radius = params.position(geoCtx).template head<2>().norm();
+    auto radius = params.position(geoCtx).template extractHead<2>().norm();
     auto halfz = std::numeric_limits<double>::max();
     return Acts::Surface::makeShared<Acts::CylinderSurface>(
         std::move(transform), radius, halfz);

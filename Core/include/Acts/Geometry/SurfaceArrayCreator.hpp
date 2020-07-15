@@ -235,7 +235,7 @@ class SurfaceArrayCreator {
            pos2 = b->binningPosition(gctx, binR);
 
       // Project them on the (x, y) plane, where Phi angles are calculated
-      auto proj1 = pos1.head<2>(), proj2 = pos2.head<2>();
+      auto proj1 = pos1.extractHead<2>(), proj2 = pos2.extractHead<2>();
 
       // Basic dot and cross products identities give us the cosine and sine
       // of these angles, time the squared vector norm

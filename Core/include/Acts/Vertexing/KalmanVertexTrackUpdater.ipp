@@ -14,7 +14,7 @@
 template <typename input_track_t>
 void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
                                             const Vertex<input_track_t>& vtx) {
-  const Vector3D vtxPos = vtx.fullPosition().template head<3>();
+  const Vector3D vtxPos = vtx.fullPosition().template extractHead<3>();
 
   // Get the linearized track
   const LinearizedTrack& linTrack = track.linearizedState;
@@ -28,7 +28,7 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
   // Retrieve linTrack information
   const ActsMatrixD<5, 3> posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
   const ActsMatrixD<5, 3> momJac = linTrack.momentumJacobian.block<5, 3>(0, 0);
-  const ActsVectorD<5> trkParams = linTrack.parametersAtPCA.head<5>();
+  const ActsVectorD<5> trkParams = linTrack.parametersAtPCA.extractHead<5>();
   const ActsSymMatrixD<5> trkParamWeight =
       linTrack.weightAtPCA.block<5, 5>(0, 0);
 
@@ -36,7 +36,7 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
   ActsSymMatrixD<3> sMat =
       (momJac.transpose() * (trkParamWeight * momJac)).inverse();
 
-  const ActsVectorD<5> residual = linTrack.constantTerm.head<5>();
+  const ActsVectorD<5> residual = linTrack.constantTerm.extractHead<5>();
 
   // Refit track momentum
   Vector3D newTrkMomentum = sMat * momJac.transpose() * trkParamWeight *
@@ -76,15 +76,16 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
 
   // Get smoothed params
   ActsVectorD<5> smParams =
-      trkParams - (residual + posJac * vtx.fullPosition().template head<3>() +
-                   momJac * newTrkMomentum);
+      trkParams - (residual
+                   + posJac * vtx.fullPosition().template extractHead<3>()
+                   + momJac * newTrkMomentum);
 
   // New chi2 to be set later
   double chi2 = posDiff.dot(reducedVtxWeight * posDiff) +
                 smParams.dot(trkParamWeight * smParams);
 
-  // Not yet 4d ready. This can be removed together will all head<> statements,
-  // once time is consistently introduced to vertexing
+  // Not yet 4d ready. This can be removed together will all extractHead<>
+  // statements, once time is consistently introduced to vertexing
   ActsMatrixD<4, 3> newFullTrkCov(ActsMatrixD<4, 3>::Zero());
   newFullTrkCov.block<3, 3>(0, 0) = newTrkCov;
 

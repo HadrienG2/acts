@@ -55,7 +55,7 @@ struct MaterialCollector {
   void operator()(propagator_state_t& state, const stepper_t& stepper,
                   result_type& result) const {
     if (state.navigation.currentVolume != nullptr) {
-      auto position = stepper.position(state.stepping);
+      Vector3D position = stepper.position(state.stepping);
       result.matTrue.push_back(
           (state.navigation.currentVolume->volumeMaterial() != nullptr)
               ? state.navigation.currentVolume->volumeMaterial()->material(

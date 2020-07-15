@@ -193,13 +193,13 @@ inline ActsMatrixD<3, 3> cross(const ActsMatrixD<3, 3>& m, const Vector3D& v) {
 }
 
 /// Access the three-position components in a four-position vector.
-inline auto position(const Vector4D& pos4) {
-  return pos4.segment<3>(ePos0);
+inline Vector3D position(const Vector4D& pos4) {
+  return pos4.extractSegment<3>(ePos0);
 }
 
 /// Access the three-position components in a free parameters vector.
-inline auto position(const FreeVector& params) {
-  return params.segment<3>(eFreePos0);
+inline Vector3D position(const FreeVector& params) {
+  return params.extractSegment<3>(eFreePos0);
 }
 
 }  // namespace VectorHelpers

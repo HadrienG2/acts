@@ -301,9 +301,10 @@ BOOST_AUTO_TEST_CASE(eigen_stepper_test) {
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
   BOOST_CHECK_EQUAL(esStateCopy.cov, cov2);
-  BOOST_CHECK_EQUAL(esStateCopy.pos, freeParams.template segment<3>(eFreePos0));
+  BOOST_CHECK_EQUAL(esStateCopy.pos,
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(esStateCopy.dir,
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(esStateCopy.p, std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(esStateCopy.q, ps.stepping.q);
   BOOST_CHECK_EQUAL(esStateCopy.t, freeParams[eFreeTime]);
@@ -324,9 +325,10 @@ BOOST_AUTO_TEST_CASE(eigen_stepper_test) {
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
   BOOST_CHECK_EQUAL(esStateCopy.cov, cov2);
-  BOOST_CHECK_EQUAL(esStateCopy.pos, freeParams.template segment<3>(eFreePos0));
+  BOOST_CHECK_EQUAL(esStateCopy.pos,
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(esStateCopy.dir,
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(esStateCopy.p, std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(esStateCopy.q, ps.stepping.q);
   BOOST_CHECK_EQUAL(esStateCopy.t, freeParams[eFreeTime]);
@@ -348,9 +350,10 @@ BOOST_AUTO_TEST_CASE(eigen_stepper_test) {
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
   BOOST_CHECK_EQUAL(esStateCopy.cov, cov2);
-  BOOST_CHECK_EQUAL(esStateCopy.pos, freeParams.template segment<3>(eFreePos0));
+  BOOST_CHECK_EQUAL(esStateCopy.pos,
+                    freeParams.template extractSegment<3>(eFreePos0));
   BOOST_CHECK_EQUAL(esStateCopy.dir,
-                    freeParams.template segment<3>(eFreeDir0).normalized());
+                    freeParams.template extractSegment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(esStateCopy.p, std::abs(1. / freeParams[eFreeQOverP]));
   BOOST_CHECK_EQUAL(esStateCopy.q, ps.stepping.q);
   BOOST_CHECK_EQUAL(esStateCopy.t, freeParams[eFreeTime]);
