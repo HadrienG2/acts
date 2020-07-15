@@ -26,11 +26,13 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
   }
 
   // Retrieve linTrack information
-  const ActsMatrixD<5, 3> posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
-  const ActsMatrixD<5, 3> momJac = linTrack.momentumJacobian.block<5, 3>(0, 0);
+  const ActsMatrixD<5, 3> posJac =
+      linTrack.positionJacobian.extractBlock<5, 3>(0, 0);
+  const ActsMatrixD<5, 3> momJac =
+      linTrack.momentumJacobian.extractBlock<5, 3>(0, 0);
   const ActsVectorD<5> trkParams = linTrack.parametersAtPCA.extractHead<5>();
   const ActsSymMatrixD<5> trkParamWeight =
-      linTrack.weightAtPCA.block<5, 5>(0, 0);
+      linTrack.weightAtPCA.extractBlock<5, 5>(0, 0);
 
   // Calculate S matrix
   ActsSymMatrixD<3> sMat =
@@ -55,7 +57,7 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
 
   // Vertex covariance and weight matrices
   const ActsSymMatrixD<3> vtxCov =
-      vtx.fullCovariance().template block<3, 3>(0, 0);
+      vtx.fullCovariance().template extractBlock<3, 3>(0, 0);
   const ActsSymMatrixD<3> vtxWeight = vtxCov.inverse();
 
   // New track covariance matrix
@@ -120,16 +122,18 @@ Acts::KalmanVertexTrackUpdater::detail::createFullTrackCovariance(
     const BoundVector& newTrkParams) {
   // Now new momentum covariance
   ActsSymMatrixD<3> momCov =
-      sMat + (newTrkCov.block<3, 3>(0, 0)).transpose() *
-                 (vtxWeight.block<3, 3>(0, 0) * newTrkCov.block<3, 3>(0, 0));
+      sMat + (newTrkCov.extractBlock<3, 3>(0, 0)).transpose() *
+                 (vtxWeight.extractBlock<3, 3>(0, 0) *
+                      newTrkCov.extractBlock<3, 3>(0, 0));
 
   // Full (x,y,z,phi, theta, q/p) covariance matrix
   // To be made 7d again after switching to (x,y,z,phi, theta, q/p, t)
   ActsSymMatrixD<6> fullTrkCov(ActsSymMatrixD<6>::Zero());
 
-  fullTrkCov.block<3, 3>(0, 0) = vtxCov.block<3, 3>(0, 0);
-  fullTrkCov.block<3, 3>(0, 3) = newTrkCov.block<3, 3>(0, 0);
-  fullTrkCov.block<3, 3>(3, 0) = (newTrkCov.block<3, 3>(0, 0)).transpose();
+  fullTrkCov.block<3, 3>(0, 0) = vtxCov.extractBlock<3, 3>(0, 0);
+  fullTrkCov.block<3, 3>(0, 3) = newTrkCov.extractBlock<3, 3>(0, 0);
+  fullTrkCov.block<3, 3>(3, 0) =
+      (newTrkCov.extractBlock<3, 3>(0, 0)).transpose();
   fullTrkCov.block<3, 3>(3, 3) = momCov;
 
   // Combined track jacobian

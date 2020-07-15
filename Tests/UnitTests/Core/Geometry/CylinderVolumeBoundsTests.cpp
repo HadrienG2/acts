@@ -206,14 +206,16 @@ BOOST_DATA_TEST_CASE(CylinderVolumeBoundsOrientedSurfaces,
   // positive disc durface should point in positive direction in the frame of
   // the volume
   CHECK_CLOSE_REL(
-      transformPtr->rotation().col(2).dot(boundarySurfaces.at(1).first->normal(
-          tgContext, Acts::Vector2D(0., 0.))),
+      transformPtr->rotation().extractCol(2).dot(
+          boundarySurfaces.at(1).first->normal(
+              tgContext, Acts::Vector2D(0., 0.))),
       1., 1e-12);
   // negative disc durface should point in positive direction in the frame of
   // the volume
   CHECK_CLOSE_REL(
-      transformPtr->rotation().col(2).dot(boundarySurfaces.at(0).first->normal(
-          tgContext, Acts::Vector2D(0., 0.))),
+      transformPtr->rotation().extractCol(2).dot(
+          boundarySurfaces.at(0).first->normal(
+              tgContext, Acts::Vector2D(0., 0.))),
       1., 1e-12);
   // test in r
   CHECK_CLOSE_REL(boundarySurfaces.at(3).first->center(tgContext), pos, 1e-12);
@@ -294,9 +296,9 @@ BOOST_AUTO_TEST_CASE(CylinderVolumeOrientedBoundaries) {
 
     // Test the orientation of the boundary surfaces
     auto rot = os.first->transform(geoCtx).rotation();
-    BOOST_CHECK(rot.col(0).isApprox(xaxis));
-    BOOST_CHECK(rot.col(1).isApprox(yaxis));
-    BOOST_CHECK(rot.col(2).isApprox(zaxis));
+    BOOST_CHECK(rot.extractCol(0).isApprox(xaxis));
+    BOOST_CHECK(rot.extractCol(1).isApprox(yaxis));
+    BOOST_CHECK(rot.extractCol(2).isApprox(zaxis));
   }
 }
 

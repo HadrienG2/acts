@@ -67,9 +67,10 @@ Acts::Extent Acts::Polyhedron::extent(const Transform3D& transform) const {
       auto radialDistance = [&](const Vector3D& pos1,
                                 const Vector3D& pos2) -> double {
         Vector2D O(0, 0);
-        Vector2D p1p2 = (pos2.block<2, 1>(0, 0) - pos1.block<2, 1>(0, 0));
+        Vector2D p1p2 =
+            (pos2.extractBlock<2, 1>(0, 0) - pos1.extractBlock<2, 1>(0, 0));
         double L = p1p2.norm();
-        Vector2D p1O = (O - pos1.block<2, 1>(0, 0));
+        Vector2D p1O = (O - pos1.extractBlock<2, 1>(0, 0));
 
         // Don't try parallel lines
         if (L < 1e-7) {
@@ -79,7 +80,8 @@ Acts::Extent Acts::Polyhedron::extent(const Transform3D& transform) const {
 
         // Clamp to [0, |p1p2|]
         f = std::min(L, std::max(0., f));
-        Vector2D closest = f * p1p2.normalized() + pos1.block<2, 1>(0, 0);
+        Vector2D closest =
+            f * p1p2.normalized() + pos1.extractBlock<2, 1>(0, 0);
         double dist = (closest - O).norm();
         return dist;
       };

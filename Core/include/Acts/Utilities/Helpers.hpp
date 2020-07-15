@@ -185,9 +185,9 @@ inline double cast(const Vector3D& position, BinningValue bval) {
 /// @return Constructed matrix
 inline ActsMatrixD<3, 3> cross(const ActsMatrixD<3, 3>& m, const Vector3D& v) {
   ActsMatrixD<3, 3> r;
-  r.col(0) = m.col(0).cross(v);
-  r.col(1) = m.col(1).cross(v);
-  r.col(2) = m.col(2).cross(v);
+  r.col(0) = m.extractCol(0).cross(v);
+  r.col(1) = m.extractCol(1).cross(v);
+  r.col(2) = m.extractCol(2).cross(v);
 
   return r;
 }

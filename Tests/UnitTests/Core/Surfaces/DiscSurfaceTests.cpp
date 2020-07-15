@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(DiscSurfaceAlignment) {
 
   const auto& rotation = pTransform->rotation();
   // The local frame z axis
-  const Vector3D localZAxis = rotation.col(2);
+  const Vector3D localZAxis = rotation.extractCol(2);
   // Check the local z axis is aligned to global z axis
   CHECK_CLOSE_ABS(localZAxis, Vector3D(0., 0., 1.), 1e-15);
 

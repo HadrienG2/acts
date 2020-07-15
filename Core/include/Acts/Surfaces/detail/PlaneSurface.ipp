@@ -38,9 +38,11 @@ inline SurfaceIntersection PlaneSurface::intersect(
     // Built-in local to global for speed reasons
     const auto& tMatrix = gctxTransform.matrix();
     // Create the reference vector in local
-    const Vector3D vecLocal(intersection.position - tMatrix.block<3, 1>(0, 3));
-    if (not insideBounds(tMatrix.block<3, 2>(0, 0).transpose() * vecLocal,
-                         bcheck)) {
+    const Vector3D vecLocal(
+        intersection.position - tMatrix.extractBlock<3, 1>(0, 3));
+    if (not insideBounds(
+                tMatrix.extractBlock<3, 2>(0, 0).transpose() * vecLocal,
+                bcheck)) {
       intersection.status = Intersection3D::Status::missed;
     }
   }

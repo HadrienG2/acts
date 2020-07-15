@@ -59,11 +59,12 @@ ActsExamples::Contextual::AlignmentDecorator::decorate(
             // Add a translation - if there is any
             if (tx != 0. or ty != 0. or tz != 0.) {
               const auto& tMatrix = atForm->matrix();
-              auto colX = tMatrix.block<3, 1>(0, 0).transpose();
-              auto colY = tMatrix.block<3, 1>(0, 1).transpose();
-              auto colZ = tMatrix.block<3, 1>(0, 2).transpose();
-              Acts::Vector3D newCenter = tMatrix.block<3, 1>(0, 3).transpose() +
-                                         tx * colX + ty * colY + tz * colZ;
+              auto colX = tMatrix.extractBlock<3, 1>(0, 0).transpose();
+              auto colY = tMatrix.extractBlock<3, 1>(0, 1).transpose();
+              auto colZ = tMatrix.extractBlock<3, 1>(0, 2).transpose();
+              Acts::Vector3D newCenter =
+                  tMatrix.extractBlock<3, 1>(0, 3).transpose() +
+                      tx * colX + ty * colY + tz * colZ;
               atForm->translation() = newCenter;
             }
             // now modify it - rotation around local X

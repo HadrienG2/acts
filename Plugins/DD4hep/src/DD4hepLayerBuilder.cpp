@@ -94,12 +94,14 @@ const Acts::LayerVector Acts::DD4hepLayerBuilder::endcapLayers(
         double rMax = tube->GetRmax() * UnitConstants::cm;
         double zMin =
             (transform->translation() -
-             transform->rotation().col(2) * tube->GetDz() * UnitConstants::cm)
-                .z();
+             transform->rotation().extractCol(2) * tube->GetDz() *
+                UnitConstants::cm)
+                    .z();
         double zMax =
             (transform->translation() +
-             transform->rotation().col(2) * tube->GetDz() * UnitConstants::cm)
-                .z();
+             transform->rotation().extractCol(2) * tube->GetDz() *
+                UnitConstants::cm)
+                    .z();
         if (zMin > zMax) {
           std::swap(zMin, zMax);
         }

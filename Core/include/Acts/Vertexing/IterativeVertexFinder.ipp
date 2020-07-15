@@ -215,18 +215,18 @@ Acts::IterativeVertexFinder<vfitter_t, sfinder_t>::getCompatibility(
 
   // Calculate reduced weight
   SymMatrix2D weightReduced =
-      linTrack.covarianceAtPCA.template block<2, 2>(0, 0);
+      linTrack.covarianceAtPCA.template extractBlock<2, 2>(0, 0);
 
   SymMatrix2D errorVertexReduced =
       (linTrack.positionJacobian *
        (vertex.fullCovariance() * linTrack.positionJacobian.transpose()))
-          .template block<2, 2>(0, 0);
+          .template extractBlock<2, 2>(0, 0);
   weightReduced += errorVertexReduced;
   weightReduced = weightReduced.inverse();
 
   // Calculate compatibility / chi2
   Vector2D trackParameters2D =
-      linTrack.parametersAtPCA.template block<2, 1>(0, 0);
+      linTrack.parametersAtPCA.template extractBlock<2, 1>(0, 0);
   double compatibility =
       trackParameters2D.dot(weightReduced * trackParameters2D);
 

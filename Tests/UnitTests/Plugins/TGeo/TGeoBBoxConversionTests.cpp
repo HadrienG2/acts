@@ -88,12 +88,15 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   const Vector3D center_XYZ = plane_XYZ->center(tgContext) + offset_XYZ;
   GeometryView3D::drawArrowForward(
       objVis, center_XYZ,
-      center_XYZ + 0.6 * (maxX - minX) * rotation_XYZ.col(0), 4., 2.5, red);
+      center_XYZ + 0.6 * (maxX - minX) * rotation_XYZ.extractCol(0), 4., 2.5,
+      red);
   GeometryView3D::drawArrowForward(
       objVis, center_XYZ,
-      center_XYZ + 0.6 * (maxY - minY) * rotation_XYZ.col(1), 4., 2.5, green);
+      center_XYZ + 0.6 * (maxY - minY) * rotation_XYZ.extractCol(1), 4., 2.5,
+      green);
   GeometryView3D::drawArrowForward(
-      objVis, center_XYZ, center_XYZ + 2 * rotation_XYZ.col(2), 4., 2.5, blue);
+      objVis, center_XYZ, center_XYZ + 2 * rotation_XYZ.extractCol(2), 4., 2.5,
+      blue);
 
   // Lower case ---------------------------------
   auto plane_xyz = TGeoSurfaceConverter::toSurface(*vol->GetShape(),
@@ -107,9 +110,12 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   BOOST_CHECK_EQUAL(bounds_xyz, bounds_XYZ);
   auto transform_xyz = plane_xyz->transform(tgContext);
   auto rotation_xyz = transform_xyz.rotation();
-  BOOST_CHECK(rotation_xyz.col(0).isApprox(-1 * rotation_XYZ.col(0)));
-  BOOST_CHECK(rotation_xyz.col(1).isApprox(-1 * rotation_XYZ.col(1)));
-  BOOST_CHECK(rotation_xyz.col(2).isApprox(rotation_XYZ.col(2)));
+  BOOST_CHECK(
+      rotation_xyz.extractCol(0).isApprox(-1 * rotation_XYZ.extractCol(0)));
+  BOOST_CHECK(
+      rotation_xyz.extractCol(1).isApprox(-1 * rotation_XYZ.extractCol(1)));
+  BOOST_CHECK(
+      rotation_xyz.extractCol(2).isApprox(rotation_XYZ.extractCol(2)));
 
   const Vector3D offset_xyz{-2 * x, 0., 0.};
   GeometryView3D::drawSurface(objVis, *plane_xyz, tgContext,
@@ -117,12 +123,15 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   const Vector3D center_xyz = plane_xyz->center(tgContext) + offset_xyz;
   GeometryView3D::drawArrowForward(
       objVis, center_xyz,
-      center_xyz + 0.6 * (maxX - minX) * rotation_xyz.col(0), 4., 2.5, red);
+      center_xyz + 0.6 * (maxX - minX) * rotation_xyz.extractCol(0), 4., 2.5,
+      red);
   GeometryView3D::drawArrowForward(
       objVis, center_xyz,
-      center_xyz + 0.6 * (maxY - minY) * rotation_xyz.col(1), 4., 2.5, green);
+      center_xyz + 0.6 * (maxY - minY) * rotation_xyz.extractCol(1), 4., 2.5,
+      green);
   GeometryView3D::drawArrowForward(
-      objVis, center_xyz, center_xyz + 2 * rotation_xyz.col(2), 4., 2.5, blue);
+      objVis, center_xyz, center_xyz + 2 * rotation_xyz.extractCol(2), 4., 2.5,
+      blue);
 
   // Mixed case ---------------------------------
   auto plane_xYz = TGeoSurfaceConverter::toSurface(*vol->GetShape(),
@@ -136,9 +145,12 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   BOOST_CHECK_EQUAL(bounds_xYz, bounds_xYz);
   auto transform_xYz = plane_xYz->transform(tgContext);
   auto rotation_xYz = transform_xYz.rotation();
-  BOOST_CHECK(rotation_xYz.col(0).isApprox(-1 * rotation_XYZ.col(0)));
-  BOOST_CHECK(rotation_xYz.col(1).isApprox(rotation_XYZ.col(1)));
-  BOOST_CHECK(rotation_xYz.col(2).isApprox(-1. * rotation_XYZ.col(2)));
+  BOOST_CHECK(
+      rotation_xYz.extractCol(0).isApprox(-1 * rotation_XYZ.extractCol(0)));
+  BOOST_CHECK(
+      rotation_xYz.extractCol(1).isApprox(rotation_XYZ.extractCol(1)));
+  BOOST_CHECK(
+      rotation_xYz.extractCol(2).isApprox(-1. * rotation_XYZ.extractCol(2)));
 
   const Vector3D offset_xYz{2 * x, 0., 0.};
   GeometryView3D::drawSurface(
@@ -147,12 +159,15 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   const Vector3D center_xYz = plane_xYz->center(tgContext) + offset_xYz;
   GeometryView3D::drawArrowForward(
       objVis, center_xYz,
-      center_xYz + 0.6 * (maxX - minX) * rotation_xYz.col(0), 4., 2.5, red);
+      center_xYz + 0.6 * (maxX - minX) * rotation_xYz.extractCol(0), 4., 2.5,
+      red);
   GeometryView3D::drawArrowForward(
       objVis, center_xYz,
-      center_xYz + 0.6 * (maxY - minY) * rotation_xYz.col(1), 4., 2.5, green);
+      center_xYz + 0.6 * (maxY - minY) * rotation_xYz.extractCol(1), 4., 2.5,
+      green);
   GeometryView3D::drawArrowForward(
-      objVis, center_xYz, center_xYz + 2 * rotation_xYz.col(2), 4., 2.5, blue);
+      objVis, center_xYz, center_xYz + 2 * rotation_xYz.extractCol(2), 4., 2.5,
+      blue);
 
   // Swap case --------------------------------- (x/y) here
   auto plane_YXz = TGeoSurfaceConverter::toSurface(*vol->GetShape(),
@@ -170,9 +185,12 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
 
   auto transform_YXz = plane_YXz->transform(tgContext);
   auto rotation_YXz = transform_YXz.rotation();
-  BOOST_CHECK(rotation_YXz.col(0).isApprox(rotation_XYZ.col(1)));
-  BOOST_CHECK(rotation_YXz.col(1).isApprox(rotation_XYZ.col(0)));
-  BOOST_CHECK(rotation_YXz.col(2).isApprox(-1. * rotation_XYZ.col(2)));
+  BOOST_CHECK(
+      rotation_YXz.extractCol(0).isApprox(rotation_XYZ.extractCol(1)));
+  BOOST_CHECK(
+      rotation_YXz.extractCol(1).isApprox(rotation_XYZ.extractCol(0)));
+  BOOST_CHECK(
+      rotation_YXz.extractCol(2).isApprox(-1. * rotation_XYZ.extractCol(2)));
 
   const Vector3D offset_YXz{5.5 * x, 0., 0.};
   GeometryView3D::drawSurface(objVis, *plane_YXz, tgContext,
@@ -180,12 +198,15 @@ BOOST_AUTO_TEST_CASE(TGeoBBox_to_PlaneSurface) {
   const Vector3D center_YXz = plane_YXz->center(tgContext) + offset_YXz;
   GeometryView3D::drawArrowForward(
       objVis, center_YXz,
-      center_YXz + 0.6 * (maxX - minX) * rotation_YXz.col(0), 4., 2.5, red);
+      center_YXz + 0.6 * (maxX - minX) * rotation_YXz.extractCol(0), 4., 2.5,
+      red);
   GeometryView3D::drawArrowForward(
       objVis, center_YXz,
-      center_YXz + 0.6 * (maxY - minY) * rotation_YXz.col(1), 4., 2.5, green);
+      center_YXz + 0.6 * (maxY - minY) * rotation_YXz.extractCol(1), 4., 2.5,
+      green);
   GeometryView3D::drawArrowForward(
-      objVis, center_YXz, center_YXz + 2 * rotation_YXz.col(2), 4., 2.5, blue);
+      objVis, center_YXz, center_YXz + 2 * rotation_YXz.extractCol(2), 4., 2.5,
+      blue);
 
   // Scaling test ---------------------------------
   auto plane_XYZ10 = TGeoSurfaceConverter::toSurface(*vol->GetShape(),

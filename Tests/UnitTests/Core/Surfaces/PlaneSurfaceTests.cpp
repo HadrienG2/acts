@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(PlaneSurfaceAlignment) {
       Surface::makeShared<PlaneSurface>(pTransform, rBounds);
   const auto& rotation = pTransform->rotation();
   // The local frame z axis
-  const Vector3D localZAxis = rotation.col(2);
+  const Vector3D localZAxis = rotation.extractCol(2);
   // Check the local z axis is aligned to global z axis
   CHECK_CLOSE_ABS(localZAxis, Vector3D(0., 0., 1.), 1e-15);
 
@@ -303,8 +303,8 @@ BOOST_AUTO_TEST_CASE(PlaneSurfaceAlignment) {
   const AlignmentToBoundMatrix& alignToBound =
       planeSurfaceObject->alignmentToBoundDerivative(tgContext, derivatives,
                                                      globalPosition, direction);
-  const AlignmentRowVector& alignToloc0 = alignToBound.block<1, 6>(0, 0);
-  const AlignmentRowVector& alignToloc1 = alignToBound.block<1, 6>(1, 0);
+  const AlignmentRowVector alignToloc0 = alignToBound.extractBlock<1, 6>(0, 0);
+  const AlignmentRowVector alignToloc1 = alignToBound.extractBlock<1, 6>(1, 0);
   // The expected results
   AlignmentRowVector expAlignToloc0;
   expAlignToloc0 << -1, 0, 0, 0, 0, 2;

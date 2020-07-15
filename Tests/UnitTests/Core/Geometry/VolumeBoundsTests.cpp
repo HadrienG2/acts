@@ -30,19 +30,19 @@ BOOST_AUTO_TEST_CASE(VolumeBoundsTest) {
   Vector3D zaxis(0., 0., 1.);
 
   auto rotXY = s_planeXY.rotation();
-  BOOST_CHECK(rotXY.col(0).isApprox(xaxis));
-  BOOST_CHECK(rotXY.col(1).isApprox(yaxis));
-  BOOST_CHECK(rotXY.col(2).isApprox(zaxis));
+  BOOST_CHECK(rotXY.extractCol(0).isApprox(xaxis));
+  BOOST_CHECK(rotXY.extractCol(1).isApprox(yaxis));
+  BOOST_CHECK(rotXY.extractCol(2).isApprox(zaxis));
 
   auto rotYZ = s_planeYZ.rotation();
-  BOOST_CHECK(rotYZ.col(0).isApprox(yaxis));
-  BOOST_CHECK(rotYZ.col(1).isApprox(zaxis));
-  BOOST_CHECK(rotYZ.col(2).isApprox(xaxis));
+  BOOST_CHECK(rotYZ.extractCol(0).isApprox(yaxis));
+  BOOST_CHECK(rotYZ.extractCol(1).isApprox(zaxis));
+  BOOST_CHECK(rotYZ.extractCol(2).isApprox(xaxis));
 
   auto rotZX = s_planeZX.rotation();
-  BOOST_CHECK(rotZX.col(0).isApprox(zaxis));
-  BOOST_CHECK(rotZX.col(1).isApprox(xaxis));
-  BOOST_CHECK(rotZX.col(2).isApprox(yaxis));
+  BOOST_CHECK(rotZX.extractCol(0).isApprox(zaxis));
+  BOOST_CHECK(rotZX.extractCol(1).isApprox(xaxis));
+  BOOST_CHECK(rotZX.extractCol(2).isApprox(yaxis));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

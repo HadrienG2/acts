@@ -96,8 +96,8 @@ inline SurfaceIntersection LineSurface::intersect(
   const Vector3D& ea = direction;
   // line two is the line surface
   const auto& tMatrix = transform(gctx).matrix();
-  Vector3D mb = tMatrix.block<3, 1>(0, 3).transpose();
-  Vector3D eb = tMatrix.block<3, 1>(0, 2).transpose();
+  Vector3D mb = tMatrix.extractBlock<3, 1>(0, 3).transpose();
+  Vector3D eb = tMatrix.extractBlock<3, 1>(0, 2).transpose();
   // now go ahead and solve for the closest approach
   Vector3D mab(mb - ma);
   double eaTeb = ea.dot(eb);
@@ -156,7 +156,7 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   // retrieve the reference frame
   const auto rframe = referenceFrame(gctx, position, direction);
   // the local error components - given by the reference frame
-  jacobian.topLeftCorner<3, 2>() = rframe.topLeftCorner<3, 2>();
+  jacobian.topLeftCorner<3, 2>() = rframe.extractTopLeftCorner<3, 2>();
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -168,16 +168,22 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   jacobian(7, eQOP) = 1;
 
   // the projection of direction onto ref frame normal
-  double ipdn = 1. / direction.dot(rframe.col(2));
+  double ipdn = 1. / direction.dot(rframe.extractCol(2));
   // build the cross product of d(D)/d(ePHI) components with y axis
-  auto dDPhiY = rframe.block<3, 1>(0, 1).cross(jacobian.block<3, 1>(4, ePHI));
+  auto dDPhiY =
+      rframe.extractBlock<3, 1>(0, 1).cross(
+        jacobian.extractBlock<3, 1>(4, ePHI));
   // and the same for the d(D)/d(eTheta) components
   auto dDThetaY =
-      rframe.block<3, 1>(0, 1).cross(jacobian.block<3, 1>(4, eTHETA));
+      rframe.extractBlock<3, 1>(0, 1).cross(
+        jacobian.extractBlock<3, 1>(4, eTHETA));
   // and correct for the x axis components
-  dDPhiY -= rframe.block<3, 1>(0, 0) * (rframe.block<3, 1>(0, 0).dot(dDPhiY));
+  dDPhiY -=
+      rframe.extractBlock<3, 1>(0, 0)
+        * (rframe.extractBlock<3, 1>(0, 0).dot(dDPhiY));
   dDThetaY -=
-      rframe.block<3, 1>(0, 0) * (rframe.block<3, 1>(0, 0).dot(dDThetaY));
+      rframe.extractBlock<3, 1>(0, 0)
+        * (rframe.extractBlock<3, 1>(0, 0).dot(dDThetaY));
   // set the jacobian components for global d/ phi/Theta
   jacobian.block<3, 1>(0, ePHI) = dDPhiY * pars[eLOC_0] * ipdn;
   jacobian.block<3, 1>(0, eTHETA) = dDThetaY * pars[eLOC_0] * ipdn;
@@ -190,16 +196,16 @@ inline const BoundRowVector LineSurface::derivativeFactors(
   // the vector between position and center
   ActsRowVectorD<3> pc = (position - center(gctx)).transpose();
   // the longitudinal component vector (alogn local z)
-  ActsRowVectorD<3> locz = rft.block<1, 3>(1, 0);
+  ActsRowVectorD<3> locz = rft.extractBlock<1, 3>(1, 0);
   // build the norm vector comonent by subtracting the longitudinal one
   double long_c = (locz * direction).value();
   ActsRowVectorD<3> norm_vec = direction.transpose() - long_c * locz;
   // calculate the s factors for the dependency on X
   const BoundRowVector s_vec =
-      norm_vec * jacobian.topLeftCorner<3, eBoundParametersSize>();
+      norm_vec * jacobian.extractTopLeftCorner<3, eBoundParametersSize>();
   // calculate the d factors for the dependency on Tx
   const BoundRowVector d_vec =
-      locz * jacobian.block<3, eBoundParametersSize>(4, 0);
+      locz * jacobian.extractBlock<3, eBoundParametersSize>(4, 0);
   // normalisation of normal & longitudinal components
   double norm = 1. / (1. - long_c * long_c);
   // create a matrix representation
@@ -210,8 +216,9 @@ inline const BoundRowVector LineSurface::derivativeFactors(
   long_mat.derivedInner().colwise() += locz.transpose().derivedInner();
   // build the combined normal & longitudinal components
   return (norm *
-          (s_vec - pc * (long_mat * d_vec.asDiagonal() -
-                         jacobian.block<3, eBoundParametersSize>(4, 0))));
+          (s_vec -
+              pc * (long_mat * d_vec.asDiagonal() -
+                    jacobian.extractBlock<3, eBoundParametersSize>(4, 0))));
 }
 
 inline const AlignmentRowVector LineSurface::alignmentToPathDerivative(
@@ -224,7 +231,7 @@ inline const AlignmentRowVector LineSurface::alignmentToPathDerivative(
   const auto& sTransform = transform(gctx);
   const auto& rotation = sTransform.rotation();
   // The local frame z axis
-  const Vector3D localZAxis = rotation.col(2);
+  const Vector3D localZAxis = rotation.extractCol(2);
   // The local z coordinate
   const double localZ = (pcRowVec * localZAxis).value();
 

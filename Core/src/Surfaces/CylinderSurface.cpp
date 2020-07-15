@@ -147,7 +147,9 @@ const Acts::Vector3D Acts::CylinderSurface::normal(
     const GeometryContext& gctx, const Acts::Vector2D& lposition) const {
   double phi = lposition[Acts::eLOC_RPHI] / m_bounds->get(CylinderBounds::eR);
   Vector3D localNormal(cos(phi), sin(phi), 0.);
-  return Vector3D(transform(gctx).matrix().block<3, 3>(0, 0) * localNormal);
+  return Vector3D(
+    transform(gctx).matrix().extractBlock<3, 3>(0, 0) * localNormal
+  );
 }
 
 const Acts::Vector3D Acts::CylinderSurface::normal(

@@ -156,17 +156,18 @@ struct EventDataView3D {
 
     if (parameters.covariance().has_value()) {
       auto paramVec = parameters.parameters();
-      Vector2D lposition = paramVec.template block<2, 1>(0, 0);
+      Vector2D lposition = paramVec.template extractBlock<2, 1>(0, 0);
 
       // Draw the local covariance
       const auto& covariance = *parameters.covariance();
       drawCovarianceCartesian(helper, lposition,
-                              covariance.template block<2, 2>(0, 0),
+                              covariance.template extractBlock<2, 2>(0, 0),
                               parameters.referenceSurface().transform(gctx),
                               locErrorScale, covConfig);
 
       drawCovarianceAngular(
-          helper, position, direction, covariance.template block<2, 2>(2, 2),
+          helper, position, direction,
+          covariance.template extractBlock<2, 2>(2, 2),
           0.9 * p * momentumScale, angularErrorScale, covConfig);
     }
   }
@@ -229,7 +230,7 @@ struct EventDataView3D {
         const Vector2D lposition =
             state.calibrated().template extractHead<2>();
         ActsSymMatrixD<2> covariance =
-            state.calibratedCovariance().template topLeftCorner<2, 2>();
+            state.calibratedCovariance().template extractTopLeftCorner<2, 2>();
         drawCovarianceCartesian(helper, lposition, covariance,
                                 state.referenceSurface().transform(gctx),
                                 locErrorScale, measurementConfig);

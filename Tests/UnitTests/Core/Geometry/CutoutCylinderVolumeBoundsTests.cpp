@@ -202,9 +202,9 @@ BOOST_AUTO_TEST_CASE(CutoutCylinderVolumeOrientedBoundaries) {
 
     // Test the orientation of the boundary surfaces
     auto rot = os.first->transform(geoCtx).rotation();
-    BOOST_CHECK(rot.col(0).isApprox(xaxis));
-    BOOST_CHECK(rot.col(1).isApprox(yaxis));
-    BOOST_CHECK(rot.col(2).isApprox(zaxis));
+    BOOST_CHECK(rot.extractCol(0).isApprox(xaxis));
+    BOOST_CHECK(rot.extractCol(1).isApprox(yaxis));
+    BOOST_CHECK(rot.extractCol(2).isApprox(zaxis));
   }
 }
 

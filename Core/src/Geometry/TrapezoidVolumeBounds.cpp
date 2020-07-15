@@ -59,9 +59,9 @@ Acts::OrientedSurfaces Acts::TrapezoidVolumeBounds::orientedSurfaces(
 
   // Face surfaces xy
   RotationMatrix3D trapezoidRotation(transform.rotation());
-  Vector3D trapezoidX(trapezoidRotation.col(0));
-  Vector3D trapezoidY(trapezoidRotation.col(1));
-  Vector3D trapezoidZ(trapezoidRotation.col(2));
+  Vector3D trapezoidX(trapezoidRotation.extractCol(0));
+  Vector3D trapezoidY(trapezoidRotation.extractCol(1));
+  Vector3D trapezoidZ(trapezoidRotation.extractCol(2));
   Vector3D trapezoidCenter(transform.translation());
 
   //   (1) - At negative local z

@@ -74,27 +74,27 @@ BOOST_AUTO_TEST_CASE(TrapezoidVolumeBoundarySurfaces) {
   // Test the orientation of the boundary surfaces
   auto nFaceXY =
       tvbOrientedSurfaces[negativeFaceXY].first->transform(geoCtx).rotation();
-  BOOST_CHECK(nFaceXY.col(0).isApprox(xaxis));
-  BOOST_CHECK(nFaceXY.col(1).isApprox(yaxis));
-  BOOST_CHECK(nFaceXY.col(2).isApprox(zaxis));
+  BOOST_CHECK(nFaceXY.extractCol(0).isApprox(xaxis));
+  BOOST_CHECK(nFaceXY.extractCol(1).isApprox(yaxis));
+  BOOST_CHECK(nFaceXY.extractCol(2).isApprox(zaxis));
 
   auto pFaceXY =
       tvbOrientedSurfaces[positiveFaceXY].first->transform(geoCtx).rotation();
-  BOOST_CHECK(pFaceXY.col(0).isApprox(xaxis));
-  BOOST_CHECK(pFaceXY.col(1).isApprox(yaxis));
-  BOOST_CHECK(pFaceXY.col(2).isApprox(zaxis));
+  BOOST_CHECK(pFaceXY.extractCol(0).isApprox(xaxis));
+  BOOST_CHECK(pFaceXY.extractCol(1).isApprox(yaxis));
+  BOOST_CHECK(pFaceXY.extractCol(2).isApprox(zaxis));
 
   auto nFaceZX =
       tvbOrientedSurfaces[negativeFaceZX].first->transform(geoCtx).rotation();
-  BOOST_CHECK(nFaceZX.col(0).isApprox(zaxis));
-  BOOST_CHECK(nFaceZX.col(1).isApprox(xaxis));
-  BOOST_CHECK(nFaceZX.col(2).isApprox(yaxis));
+  BOOST_CHECK(nFaceZX.extractCol(0).isApprox(zaxis));
+  BOOST_CHECK(nFaceZX.extractCol(1).isApprox(xaxis));
+  BOOST_CHECK(nFaceZX.extractCol(2).isApprox(yaxis));
 
   auto pFaceZX =
       tvbOrientedSurfaces[positiveFaceZX].first->transform(geoCtx).rotation();
-  BOOST_CHECK(pFaceZX.col(0).isApprox(zaxis));
-  BOOST_CHECK(pFaceZX.col(1).isApprox(xaxis));
-  BOOST_CHECK(pFaceZX.col(2).isApprox(yaxis));
+  BOOST_CHECK(pFaceZX.extractCol(0).isApprox(zaxis));
+  BOOST_CHECK(pFaceZX.extractCol(1).isApprox(xaxis));
+  BOOST_CHECK(pFaceZX.extractCol(2).isApprox(yaxis));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

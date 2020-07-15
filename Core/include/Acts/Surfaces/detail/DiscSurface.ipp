@@ -50,10 +50,11 @@ inline void DiscSurface::initJacobianToGlobal(const GeometryContext& gctx,
   double lsin_phi = sin(lphi);
   // the local error components - rotated from reference frame
   jacobian.block<3, 1>(0, eLOC_0) =
-      lcos_phi * rframe.block<3, 1>(0, 0) + lsin_phi * rframe.block<3, 1>(0, 1);
+      lcos_phi * rframe.extractBlock<3, 1>(0, 0) +
+          lsin_phi * rframe.extractBlock<3, 1>(0, 1);
   jacobian.block<3, 1>(0, eLOC_1) =
-      lrad * (lcos_phi * rframe.block<3, 1>(0, 1) -
-              lsin_phi * rframe.block<3, 1>(0, 0));
+      lrad * (lcos_phi * rframe.extractBlock<3, 1>(0, 1) -
+              lsin_phi * rframe.extractBlock<3, 1>(0, 0));
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -90,8 +91,8 @@ inline const RotationMatrix3D DiscSurface::initJacobianToLocal(
   const double lcphi = cos(lphi);
   const double lsphi = sin(lphi);
   // rotate into the polar coorindates
-  auto lx = rframeT.block<1, 3>(0, 0);
-  auto ly = rframeT.block<1, 3>(1, 0);
+  auto lx = rframeT.extractBlock<1, 3>(0, 0);
+  auto ly = rframeT.extractBlock<1, 3>(1, 0);
   jacobian.block<1, 3>(0, 0) = lcphi * lx + lsphi * ly;
   jacobian.block<1, 3>(1, 0) = (lcphi * ly - lsphi * lx) / lr;
   // Time element
@@ -120,9 +121,10 @@ inline SurfaceIntersection DiscSurface::intersect(
       m_bounds != nullptr) {
     // Built-in local to global for speed reasons
     const auto& tMatrix = gctxTransform.matrix();
-    const Vector3D vecLocal(intersection.position - tMatrix.block<3, 1>(0, 3));
+    const Vector3D vecLocal =
+        intersection.position - tMatrix.extractBlock<3, 1>(0, 3);
     const Vector2D lcartesian =
-        tMatrix.block<3, 2>(0, 0).transpose() * vecLocal;
+        tMatrix.extractBlock<3, 2>(0, 0).transpose() * vecLocal;
     if (bcheck.type() == BoundaryCheck::Type::eAbsolute and
         m_bounds->coversFullAzimuth()) {
       double tolerance = s_onSurfaceTolerance + bcheck.tolerance()[eLOC_R];

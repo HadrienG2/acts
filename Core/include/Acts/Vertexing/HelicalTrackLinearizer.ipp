@@ -175,7 +175,7 @@ Acts::Result<Acts::LinearizedTrack> Acts::
 
   // The parameter weight
   ActsSymMatrixD<5> parWeight =
-      (parCovarianceAtPCA.block<5, 5>(0, 0)).inverse();
+      (parCovarianceAtPCA.extractBlock<5, 5>(0, 0)).inverse();
 
   BoundSymMatrix weightAtPCA{BoundSymMatrix::Identity()};
   weightAtPCA.block<5, 5>(0, 0) = parWeight;

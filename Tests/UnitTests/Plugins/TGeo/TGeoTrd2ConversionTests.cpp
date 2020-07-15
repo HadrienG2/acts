@@ -87,12 +87,14 @@ BOOST_AUTO_TEST_CASE(TGeoTrd2_xz_to_PlaneSurface) {
         Translation3D{offset} * Transform3D::Identity());
     const Vector3D center = plane->center(tgContext) + offset;
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * (hXminY + hXmaxY) * rotation.col(0), 4.,
-        2.5, red);
+        objVis, center,
+        center + 1.2 * (hXminY + hXmaxY) * rotation.extractCol(0), 4., 2.5,
+        red);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * hY * rotation.col(1), 4., 2.5, green);
+        objVis, center, center + 1.2 * hY * rotation.extractCol(1), 4., 2.5,
+        green);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 2 * rotation.col(2), 4., 2.5, blue);
+        objVis, center, center + 2 * rotation.extractCol(2), 4., 2.5, blue);
   }
   objVis.write("TGeoConversion_TGeoTrd2_xz_PlaneSurface");
 
@@ -153,12 +155,14 @@ BOOST_AUTO_TEST_CASE(TGeoTrd2_yz_to_PlaneSurface) {
         Translation3D{offset} * Transform3D::Identity());
     const Vector3D center = plane->center(tgContext) + offset;
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * (hXminY + hXmaxY) * rotation.col(0), 4.,
-        2.5, red);
+        objVis, center,
+        center + 1.2 * (hXminY + hXmaxY) * rotation.extractCol(0), 4., 2.5,
+        red);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * hY * rotation.col(1), 4., 2.5, green);
+        objVis, center, center + 1.2 * hY * rotation.extractCol(1), 4., 2.5,
+        green);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 2 * rotation.col(2), 4., 2.5, blue);
+        objVis, center, center + 2 * rotation.extractCol(2), 4., 2.5, blue);
   }
   objVis.write("TGeoConversion_TGeoTrd2_yz_PlaneSurface");
 

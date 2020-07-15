@@ -53,7 +53,7 @@ const Acts::Vector4D& Acts::Vertex<input_track_t>::fullPosition() const {
 
 template <typename input_track_t>
 Acts::SymMatrix3D Acts::Vertex<input_track_t>::covariance() const {
-  return m_covariance.block<3, 3>(ePos0, ePos0);
+  return m_covariance.extractBlock<3, 3>(ePos0, ePos0);
 }
 
 template <typename input_track_t>

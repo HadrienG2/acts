@@ -127,7 +127,8 @@ const FreeToBoundMatrix surfaceDerivative(
   const ActsRowVectorD<3> normVec(direction);
   const BoundRowVector sfactors =
       normVec *
-      jacobianLocalToGlobal.template topLeftCorner<3, eBoundParametersSize>();
+      jacobianLocalToGlobal
+          .template extractTopLeftCorner<3, eBoundParametersSize>();
   jacobianLocalToGlobal -= derivatives * sfactors;
   // Since the jacobian to local needs to calculated for the bound parameters
   // here, it is convenient to do the same here

@@ -62,9 +62,9 @@ const Acts::AlignmentToBoundMatrix Acts::Surface::alignmentToBoundDerivative(
   // The local frame rotation
   const auto& rotation = transform(gctx).rotation();
   // The axes of local frame
-  const Vector3D localXAxis = rotation.col(0);
-  const Vector3D localYAxis = rotation.col(1);
-  const Vector3D localZAxis = rotation.col(2);
+  const Vector3D localXAxis = rotation.extractCol(0);
+  const Vector3D localYAxis = rotation.extractCol(1);
+  const Vector3D localZAxis = rotation.extractCol(2);
 
   // 1) Calcuate the derivative of local frame axes w.r.t its rotation
   const auto& [rotToLocalXAxis, rotToLocalYAxis, rotToLocalZAxis] =
@@ -101,13 +101,13 @@ const Acts::AlignmentToBoundMatrix Acts::Surface::alignmentToBoundDerivative(
   // jacToLocal*derivatives*alignToPath
   alignToBound.block<2, eAlignmentParametersSize>(eLOC_0, eAlignmentCenter0) =
       loc3DToLocBound * alignToLoc3D +
-      jacToLocal.block<2, eFreeParametersSize>(eLOC_0, eFreePos0) *
+      jacToLocal.extractBlock<2, eFreeParametersSize>(eLOC_0, eFreePos0) *
           derivatives * alignToPath;
   // -> For bound track parameters ePHI, eTHETA, eQOP, eT, it's
   // jacToLocal*derivatives*alignToPath
   alignToBound.block<4, eAlignmentParametersSize>(ePHI, eAlignmentCenter0) =
-      jacToLocal.block<4, eFreeParametersSize>(ePHI, eFreePos0) * derivatives *
-      alignToPath;
+      jacToLocal.extractBlock<4, eFreeParametersSize>(ePHI, eFreePos0)
+          * derivatives * alignToPath;
 
   return alignToBound;
 }
@@ -121,7 +121,7 @@ const Acts::AlignmentRowVector Acts::Surface::alignmentToPathDerivative(
   // The local frame rotation
   const auto& rotation = transform(gctx).rotation();
   // The local frame z axis
-  const Vector3D localZAxis = rotation.col(2);
+  const Vector3D localZAxis = rotation.extractCol(2);
 
   // Cosine of angle between momentum direction and local frame z axis
   const double dirZ = localZAxis.dot(direction);
@@ -196,10 +196,10 @@ std::ostream& Acts::Surface::toStream(const GeometryContext& gctx,
   const Vector3D& sfcenter = center(gctx);
   sl << "     Center position  (x, y, z) = (" << sfcenter.x() << ", "
      << sfcenter.y() << ", " << sfcenter.z() << ")" << std::endl;
-  Acts::RotationMatrix3D rot(transform(gctx).matrix().block<3, 3>(0, 0));
-  Acts::Vector3D rotX(rot.col(0));
-  Acts::Vector3D rotY(rot.col(1));
-  Acts::Vector3D rotZ(rot.col(2));
+  Acts::RotationMatrix3D rot(transform(gctx).matrix().extractBlock<3, 3>(0, 0));
+  Acts::Vector3D rotX(rot.extractCol(0));
+  Acts::Vector3D rotY(rot.extractCol(1));
+  Acts::Vector3D rotZ(rot.extractCol(2));
   sl << std::setprecision(6);
   sl << "     Rotation:             colX = (" << rotX(0) << ", " << rotX(1)
      << ", " << rotX(2) << ")" << std::endl;

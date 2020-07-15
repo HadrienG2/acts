@@ -106,8 +106,8 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
       trkParams->referenceSurface().transform(gctx).translation();
 
   // x and y direction of plane
-  Vector3D xDirPlane = myRotation.col(0);
-  Vector3D yDirPlane = myRotation.col(1);
+  Vector3D xDirPlane = myRotation.extractCol(0);
+  Vector3D yDirPlane = myRotation.extractCol(1);
 
   // transform vertex position in local plane reference frame
   Vector3D vertexLocPlane = vertexPos - myTranslation;
@@ -118,7 +118,7 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
 
   // track covariance
   auto cov = trkParams->covariance();
-  SymMatrix2D myWeightXY = cov->block<2, 2>(0, 0).inverse();
+  SymMatrix2D myWeightXY = cov->extractBlock<2, 2>(0, 0).inverse();
 
   // 2-dim residual
   Vector2D myXYpos =
@@ -285,7 +285,7 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
   const double cosPhi = std::cos(phi);
   const double cosTheta = std::cos(theta);
 
-  SymMatrix2D vrtXYCov = vtx.covariance().template block<2, 2>(0, 0);
+  SymMatrix2D vrtXYCov = vtx.covariance().template extractBlock<2, 2>(0, 0);
 
   // Covariance of perigee parameters after propagation to perigee surface
   const auto& perigeeCov = *(propRes.endParameters->covariance());

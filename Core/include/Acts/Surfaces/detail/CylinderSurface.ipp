@@ -9,7 +9,7 @@
 inline const Vector3D CylinderSurface::rotSymmetryAxis(
     const GeometryContext& gctx) const {
   // fast access via tranform matrix (and not rotation())
-  return transform(gctx).matrix().block<3, 1>(0, 2);
+  return transform(gctx).matrix().extractBlock<3, 1>(0, 2);
 }
 
 inline detail::RealQuadraticEquation CylinderSurface::intersectionSolver(
@@ -20,8 +20,8 @@ inline detail::RealQuadraticEquation CylinderSurface::intersectionSolver(
 
   // Get the transformation matrtix
   const auto& tMatrix = transform.matrix();
-  Vector3D caxis = tMatrix.block<3, 1>(0, 2).transpose();
-  Vector3D ccenter = tMatrix.block<3, 1>(0, 3).transpose();
+  Vector3D caxis = tMatrix.extractBlock<3, 1>(0, 2).transpose();
+  Vector3D ccenter = tMatrix.extractBlock<3, 1>(0, 3).transpose();
 
   // Check documentation for explanation
   Vector3D pc = position - ccenter;
@@ -68,8 +68,8 @@ inline SurfaceIntersection CylinderSurface::intersect(
       // Built-in local to global for speed reasons
       const auto& tMatrix = gctxTransform.matrix();
       // Create the reference vector in local
-      const Vector3D vecLocal(solution - tMatrix.block<3, 1>(0, 3));
-      double cZ = vecLocal.dot(tMatrix.block<3, 1>(0, 2));
+      const Vector3D vecLocal(solution - tMatrix.extractBlock<3, 1>(0, 3));
+      double cZ = vecLocal.dot(tMatrix.extractBlock<3, 1>(0, 2));
       double tolerance = s_onSurfaceTolerance + bcheck.tolerance()[eLOC_Z];
       double hZ = cBounds.get(CylinderBounds::eHalfLengthZ) + tolerance;
       return (cZ * cZ < hZ * hZ) ? status : Intersection3D::Status::missed;

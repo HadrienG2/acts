@@ -85,7 +85,7 @@ globalTrackParametersCovariance(
         const size_t iCol = iRow + eBoundParametersSize * iProcessed;
         CovMatrix prev_correlation =
             fullGlobalTrackParamsCov
-                .block<eBoundParametersSize, eBoundParametersSize>(
+                .extractBlock<eBoundParametersSize, eBoundParametersSize>(
                     iRow + eBoundParametersSize, iCol);
         CovMatrix correlation = G * prev_correlation;
         fullGlobalTrackParamsCov

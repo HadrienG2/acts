@@ -90,7 +90,8 @@ class GainMatrixUpdater {
 
           const ActsMatrixD<measdim, eBoundParametersSize> H =
               trackState.projector()
-                  .template topLeftCorner<measdim, eBoundParametersSize>();
+                  .template extractTopLeftCorner<measdim,
+                                                 eBoundParametersSize>();
 
           ACTS_VERBOSE("Measurement projector H:\n" << H);
 

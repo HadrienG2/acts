@@ -28,8 +28,8 @@ static Intersection3D intersect(const Transform3D& transform,
                                 const Vector3D& direction) {
   // Get the matrix from the transform (faster access)
   const auto& tMatrix = transform.matrix();
-  const Vector3D pnormal = tMatrix.block<3, 1>(0, 2).transpose();
-  const Vector3D pcenter = tMatrix.block<3, 1>(0, 3).transpose();
+  const Vector3D pnormal = tMatrix.extractBlock<3, 1>(0, 2).transpose();
+  const Vector3D pcenter = tMatrix.extractBlock<3, 1>(0, 3).transpose();
   // It is solvable, so go on
   double denom = direction.dot(pnormal);
   if (denom != 0.0) {

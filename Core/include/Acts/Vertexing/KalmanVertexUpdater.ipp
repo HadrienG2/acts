@@ -66,13 +66,14 @@ void Acts::KalmanVertexUpdater::updatePosition(
     const Acts::LinearizedTrack& linTrack, double trackWeight, int sign,
     MatrixCache& matrixCache) {
   // Retrieve linTrack information
-  const ActsMatrixD<5, 3> posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
+  const ActsMatrixD<5, 3> posJac =
+      linTrack.positionJacobian.extractBlock<5, 3>(0, 0);
   const ActsMatrixD<5, 3> momJac =
-      linTrack.momentumJacobian.block<5, 3>(0, 0);  // B_k in comments below
+      linTrack.momentumJacobian.extractBlock<5, 3>(0, 0);  // B_k in comments below
   const ActsVectorD<5> trkParams = linTrack.parametersAtPCA.extractHead<5>();
   const ActsVectorD<5> constTerm = linTrack.constantTerm.extractHead<5>();
   const ActsSymMatrixD<5> trkParamWeight =
-      linTrack.weightAtPCA.block<5, 5>(0, 0);
+      linTrack.weightAtPCA.extractBlock<5, 5>(0, 0);
 
   // Vertex to be updated
   const Vector3D oldVtxPos = vtx.position();
@@ -115,12 +116,14 @@ template <typename input_track_t>
 double Acts::KalmanVertexUpdater::detail::trackParametersChi2(
     const LinearizedTrack& linTrack, const MatrixCache& matrixCache) {
   // Track properties
-  const ActsMatrixD<5, 3> posJac = linTrack.positionJacobian.block<5, 3>(0, 0);
-  const ActsMatrixD<5, 3> momJac = linTrack.momentumJacobian.block<5, 3>(0, 0);
+  const ActsMatrixD<5, 3> posJac =
+      linTrack.positionJacobian.extractBlock<5, 3>(0, 0);
+  const ActsMatrixD<5, 3> momJac =
+      linTrack.momentumJacobian.extractBlock<5, 3>(0, 0);
   const ActsVectorD<5> trkParams = linTrack.parametersAtPCA.extractHead<5>();
   const ActsVectorD<5> constTerm = linTrack.constantTerm.extractHead<5>();
   const ActsSymMatrixD<5> trkParamWeight =
-      linTrack.weightAtPCA.block<5, 5>(0, 0);
+      linTrack.weightAtPCA.extractBlock<5, 5>(0, 0);
 
   const ActsVectorD<5> jacVtx = posJac * matrixCache.newVertexPos;
 

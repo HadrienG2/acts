@@ -258,7 +258,7 @@ struct MinimalOutlierFinder {
           // Take the projector (measurement mapping function)
           const ActsMatrixD<measdim, eBoundParametersSize> H =
               state.projector()
-                  .template topLeftCorner<measdim, eBoundParametersSize>();
+                  .template extractTopLeftCorner<measdim, eBoundParametersSize>();
 
           // Calculate the residual
           const par_t residual = calibrated - H * predicted;

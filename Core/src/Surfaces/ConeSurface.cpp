@@ -80,7 +80,7 @@ Acts::ConeSurface& Acts::ConeSurface::operator=(const ConeSurface& other) {
 
 const Acts::Vector3D Acts::ConeSurface::rotSymmetryAxis(
     const GeometryContext& gctx) const {
-  return std::move(transform(gctx).matrix().block<3, 1>(0, 2));
+  return transform(gctx).matrix().extractBlock<3, 1>(0, 2);
 }
 
 const Acts::RotationMatrix3D Acts::ConeSurface::referenceFrame(

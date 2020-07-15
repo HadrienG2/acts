@@ -87,11 +87,14 @@ BOOST_AUTO_TEST_CASE(TGeoTube_to_CylinderSurface) {
     GeometryView3D::drawSurface(objVis, *cylinder, tgContext);
     const Vector3D center = cylinder->center(tgContext);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * bR * rotation.col(0), 4., 2.5, red);
+        objVis, center, center + 1.2 * bR * rotation.extractCol(0), 4., 2.5,
+        red);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * bR * rotation.col(1), 4., 2.5, green);
+        objVis, center, center + 1.2 * bR * rotation.extractCol(1), 4., 2.5,
+        green);
     GeometryView3D::drawArrowForward(
-        objVis, center, center + 1.2 * bhZ * rotation.col(2), 4., 2.5, blue);
+        objVis, center, center + 1.2 * bhZ * rotation.extractCol(2), 4., 2.5,
+        blue);
 
     objVis.write("TGeoConversion_TGeoTube_CylinderSurface_" +
                  std::to_string(icyl));
@@ -116,11 +119,14 @@ BOOST_AUTO_TEST_CASE(TGeoTube_to_CylinderSurface) {
       CHECK_CLOSE_ABS(mphi, 0., s_epsilon);
       GeometryView3D::drawSurface(objVis, *cylinderSegment, tgContext);
       GeometryView3D::drawArrowForward(
-          objVis, center, center + 1.2 * bR * rotation.col(0), 4., 2.5, red);
+          objVis, center, center + 1.2 * bR * rotation.extractCol(0), 4., 2.5,
+          red);
       GeometryView3D::drawArrowForward(
-          objVis, center, center + 1.2 * bR * rotation.col(1), 4., 2.5, green);
+          objVis, center, center + 1.2 * bR * rotation.extractCol(1), 4., 2.5,
+          green);
       GeometryView3D::drawArrowForward(
-          objVis, center, center + 1.2 * bhZ * rotation.col(2), 4., 2.5, blue);
+          objVis, center, center + 1.2 * bhZ * rotation.extractCol(2), 4., 2.5,
+          blue);
       objVis.write("TGeoConversion_TGeoTube_CylinderSegmentSurface_" +
                    std::to_string(icyl));
       objVis.clear();

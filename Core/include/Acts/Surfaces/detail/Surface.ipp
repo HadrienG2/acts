@@ -36,7 +36,7 @@ inline bool Surface::insideBounds(const Vector2D& lposition,
 inline const RotationMatrix3D Surface::referenceFrame(
     const GeometryContext& gctx, const Vector3D& /*unused*/,
     const Vector3D& /*unused*/) const {
-  return transform(gctx).matrix().block<3, 3>(0, 0);
+  return transform(gctx).matrix().extractBlock<3, 3>(0, 0);
 }
 
 inline void Surface::initJacobianToGlobal(const GeometryContext& gctx,
@@ -63,7 +63,7 @@ inline void Surface::initJacobianToGlobal(const GeometryContext& gctx,
   // retrieve the reference frame
   const auto rframe = referenceFrame(gctx, position, direction);
   // the local error components - given by reference frame
-  jacobian.topLeftCorner<3, 2>() = rframe.topLeftCorner<3, 2>();
+  jacobian.topLeftCorner<3, 2>() = rframe.extractTopLeftCorner<3, 2>();
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -92,7 +92,7 @@ inline const RotationMatrix3D Surface::initJacobianToLocal(
   RotationMatrix3D rframeT =
       referenceFrame(gctx, position, direction).transpose();
   // given by the refernece frame
-  jacobian.block<2, 3>(0, 0) = rframeT.block<2, 3>(0, 0);
+  jacobian.block<2, 3>(0, 0) = rframeT.extractBlock<2, 3>(0, 0);
   // Time component
   jacobian(eT, 3) = 1;
   // Directional and momentum elements for reference frame surface
@@ -111,10 +111,10 @@ inline const BoundRowVector Surface::derivativeFactors(
     const Vector3D& direction, const RotationMatrix3D& rft,
     const BoundToFreeMatrix& jacobian) const {
   // Create the normal and scale it with the projection onto the direction
-  ActsRowVectorD<3> norm_vec = rft.template block<1, 3>(2, 0);
+  ActsRowVectorD<3> norm_vec = rft.template extractBlock<1, 3>(2, 0);
   norm_vec /= (norm_vec * direction);
   // calculate the s factors
-  return (norm_vec * jacobian.topLeftCorner<3, eBoundParametersSize>());
+  return (norm_vec * jacobian.extractTopLeftCorner<3, eBoundParametersSize>());
 }
 
 inline const DetectorElementBase* Surface::associatedDetectorElement() const {
