@@ -1221,6 +1221,32 @@ public:
         return anyCols<BlockCols>(cols()-BlockCols);
     }
 
+    // Sub-block extractors (/!\ EAGEN EXTENSION /!\)
+    //
+    // Same idea as the sub-vector extractors above, but for matrix blocks.
+    //
+    // TODO: If this works out, extend to other operations
+    //
+    template <int Rows, int Cols>
+    using SubMatrix = Matrix<Scalar, Rows, Cols>;
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> extractBlock(Index startRow,
+                                                 Index startCol) const {
+        return SubMatrix<BlockRows, BlockCols>(
+            derivedInner().template block<BlockRows, BlockCols>(startRow,
+                                                                startCol)
+        );
+    }
+    template <int BlockRows, int BlockCols>
+    SubMatrix<BlockRows, BlockCols> extractTopLeftCorner() const {
+        return SubMatrix<BlockRows, BlockCols>(
+            derivedInner().template topLeftCorner<BlockRows, BlockCols>()
+        );
+    }
+    SubMatrix<Rows, 1> extractCol(Index j) const {
+        return SubMatrix<Rows, 1>(derivedInner().col(j));
+    }
+
     // /!\ UNDOCUMENTED /!\ Scalar cast
     template <typename NewScalarType>
     Matrix<NewScalarType, Rows, Cols> cast() const {
