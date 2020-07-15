@@ -60,8 +60,8 @@ class GainMatrixUpdater {
     assert(trackState.hasFiltered());
 
     // read-only handles. Types are eigen maps to backing storage
-    const auto predicted = trackState.predicted();
-    const auto predicted_covariance = trackState.predictedCovariance();
+    const auto predicted = trackState.predicted().eval();
+    const auto predicted_covariance = trackState.predictedCovariance().eval();
 
     ACTS_VERBOSE("Predicted parameters: " << predicted.transpose());
     ACTS_VERBOSE("Predicted covariance:\n" << predicted_covariance);
@@ -117,7 +117,7 @@ class GainMatrixUpdater {
           ACTS_VERBOSE("Filtered covariance:\n" << filtered_covariance);
 
           // calculate filtered residual
-          const par_t residual = (calibrated - H * filtered);
+          const par_t residual = (calibrated - H * filtered.eval());
           ACTS_VERBOSE("Residual: " << residual.transpose());
 
           trackState.chi2() =
