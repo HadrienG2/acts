@@ -1111,6 +1111,14 @@ public:
     template <int Length>
     using SubVector = Vector<Scalar, Length>;
     template <int n>
+    SubVector<n> extractSegment(Index pos) const {
+        SubVector<n> result;
+        for (Index i = 0; i < n; ++i) {
+            result.coeffRef(i) = coeff(i + pos);
+        }
+        return result;
+    }
+    template <int n>
     SubVector<n> extractHead() const {
         return extractSegment<n>(0);
     }
@@ -1118,13 +1126,30 @@ public:
     SubVector<n> extractTail() const {
         return extractSegment<n>(size() - n);
     }
-    template <int n>
-    SubVector<n> extractSegment(Index pos) const {
-        SubVector<n> result;
-        for (Index i = 0; i < n; ++i) {
-            result.coeffRef(i) = coeff(i + pos);
+
+    // Sub-vector setters (/!\ EAGEN EXTENSION /!\)
+    //
+    // Like sub-vector extractors, but in the other direction
+    //
+    template <int n, typename OtherDerived>
+    void setSegment(Index pos, const MatrixBase<OtherDerived>& other) {
+        if constexpr (n == OtherDerived::SizeAtCompileTime) {
+            // Efficient static-sized version
+            for (Index i = 0; i < n; ++i) {
+                coeffRef(i + pos) = other.coeff(i);
+            }
+        } else {
+            // Leave error reporting and dynamic-sized inputs to Eigen
+            derivedInner().template segment<n>(pos) = other.derivedInner();
         }
-        return result;
+    }
+    template <int n, typename OtherDerived>
+    void setHead(const MatrixBase<OtherDerived>& other) {
+        setSegment<n, OtherDerived>(0, other);
+    }
+    template <int n, typename OtherDerived>
+    void setTail(const MatrixBase<OtherDerived>& other) {
+        setSegment<n, OtherDerived>(size() - n, other);
     }
 
     // Sub-matrix accessors
@@ -1426,25 +1451,30 @@ public:
         if constexpr ((BlockRows == OtherDerived::Rows)
                       && (BlockCols == OtherDerived::Cols)) {
             // Efficient static-sized version
-            for (Index col = startCol; col < startCol + BlockCols; ++col) {
-                for (Index row = startRow; row < startRow + BlockRows; ++row) {
-                    coeffRef(row, col) = other.coeff(row, col);
+            for (Index col = 0; col < BlockCols; ++col) {
+                for (Index row = 0; row < BlockRows; ++row) {
+                    coeffRef(row + startRow, col + startCol) =
+                        other.coeff(row, col);
                 }
             }
         } else {
-            // Leave error reporting to Eigen
+            // Leave error reporting and dynamic-sized inputs to Eigen
             derivedInner().template block<BlockRows, BlockCols>(startRow,
                                                                 startCol)
                 = other.derivedInner();
         }
     }
-    template <typename OtherDerived>
-    void setCol(Index j, const MatrixBase<OtherDerived>& other) {
-        setBlock<Rows, 1, OtherDerived>(0, j, other);
+    template <int BlockRows, int BlockCols, typename OtherDerived>
+    void setTopLeftCorner(const MatrixBase<OtherDerived>& other) {
+        setBlock<BlockRows, BlockCols>(0, 0, other);
     }
     template <typename OtherDerived>
     void setRow(Index i, const MatrixBase<OtherDerived>& other) {
         setBlock<1, Cols, OtherDerived>(i, 0, other);
+    }
+    template <typename OtherDerived>
+    void setCol(Index j, const MatrixBase<OtherDerived>& other) {
+        setBlock<Rows, 1, OtherDerived>(0, j, other);
     }
 
 
