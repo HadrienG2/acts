@@ -964,15 +964,19 @@ public:
     using SubVector = Vector<Scalar, Length>;
     template <int n>
     SubVector<n> extractHead() const {
-        return SubVector<n>(derivedInner().template head<n>());
+        return extractSegment<n>(0);
     }
     template <int n>
     SubVector<n> extractTail() const {
-        return SubVector<n>(derivedInner().template tail<n>());
+        return extractSegment<n>(size() - n);
     }
     template <int n>
     SubVector<n> extractSegment(Index pos) const {
-        return SubVector<n>(derivedInner().template segment<n>(pos));
+        SubVector<n> result;
+        for (Index i = 0; i < n; ++i) {
+            result.coeffRef(i) = coeff(i + pos);
+        }
+        return result;
     }
 
     // Sub-matrix accessors
@@ -1232,19 +1236,33 @@ public:
     template <int BlockRows, int BlockCols>
     SubMatrix<BlockRows, BlockCols> extractBlock(Index startRow,
                                                  Index startCol) const {
-        return SubMatrix<BlockRows, BlockCols>(
-            derivedInner().template block<BlockRows, BlockCols>(startRow,
-                                                                startCol)
-        );
+        if constexpr ((Rows != Dynamic) && (Cols != Dynamic)) {
+            // Efficient static-sized version
+            SubMatrix<BlockRows, BlockCols> result;
+            for (Index col = 0; col < BlockCols; ++col) {
+                for (Index row = 0; row < BlockRows; ++row) {
+                    result.coeffRef(row, col) = coeff(row + startRow,
+                                                      col + startCol);
+                }
+            }
+            return result;
+        } else {
+            // Leave dynamic-sized matrices to Eigen
+            return SubMatrix<BlockRows, BlockCols>(
+                derivedInner().template block<BlockRows, BlockCols>(startRow,
+                                                                    startCol)
+            );
+        }
     }
     template <int BlockRows, int BlockCols>
     SubMatrix<BlockRows, BlockCols> extractTopLeftCorner() const {
-        return SubMatrix<BlockRows, BlockCols>(
-            derivedInner().template topLeftCorner<BlockRows, BlockCols>()
-        );
+        return extractBlock<BlockRows, BlockCols>(0, 0);
     }
-    SubMatrix<Rows, 1> extractCol(Index j) const {
-        return SubMatrix<Rows, 1>(derivedInner().col(j));
+    RowVector<Scalar, Cols> extractRow(Index i) const {
+        return extractBlock<1, Cols>(i, 0);
+    }
+    Vector<Scalar, Rows> extractCol(Index j) const {
+        return extractBlock<Rows, 1>(0, j);
     }
 
     // /!\ UNDOCUMENTED /!\ Scalar cast
