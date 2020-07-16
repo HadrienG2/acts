@@ -89,13 +89,13 @@ void Acts::KalmanVertexTrackUpdater::update(TrackAtVertex<input_track_t>& track,
   // Not yet 4d ready. This can be removed together will all extractHead<>
   // statements, once time is consistently introduced to vertexing
   ActsMatrixD<4, 3> newFullTrkCov(ActsMatrixD<4, 3>::Zero());
-  newFullTrkCov.block<3, 3>(0, 0) = newTrkCov;
+  newFullTrkCov.setBlock<3, 3>(0, 0, newTrkCov);
 
   SymMatrix4D vtxFullWeight(SymMatrix4D::Zero());
-  vtxFullWeight.block<3, 3>(0, 0) = vtxWeight;
+  vtxFullWeight.setBlock<3, 3>(0, 0, vtxWeight);
 
   SymMatrix4D vtxFullCov(SymMatrix4D::Zero());
-  vtxFullCov.block<3, 3>(0, 0) = vtxCov;
+  vtxFullCov.setBlock<3, 3>(0, 0, vtxCov);
 
   const Acts::BoundMatrix fullPerTrackCov = detail::createFullTrackCovariance(
       sMat, newFullTrkCov, vtxFullWeight, vtxFullCov, newTrkParams);
@@ -130,11 +130,11 @@ Acts::KalmanVertexTrackUpdater::detail::createFullTrackCovariance(
   // To be made 7d again after switching to (x,y,z,phi, theta, q/p, t)
   ActsSymMatrixD<6> fullTrkCov(ActsSymMatrixD<6>::Zero());
 
-  fullTrkCov.block<3, 3>(0, 0) = vtxCov.extractBlock<3, 3>(0, 0);
-  fullTrkCov.block<3, 3>(0, 3) = newTrkCov.extractBlock<3, 3>(0, 0);
-  fullTrkCov.block<3, 3>(3, 0) =
-      (newTrkCov.extractBlock<3, 3>(0, 0)).transpose();
-  fullTrkCov.block<3, 3>(3, 3) = momCov;
+  fullTrkCov.setBlock<3, 3>(0, 0, vtxCov.extractBlock<3, 3>(0, 0));
+  fullTrkCov.setBlock<3, 3>(0, 3, newTrkCov.extractBlock<3, 3>(0, 0));
+  fullTrkCov.setBlock<3, 3>(
+      3, 0, (newTrkCov.extractBlock<3, 3>(0, 0)).transpose());
+  fullTrkCov.setBlock<3, 3>(3, 3, momCov);
 
   // Combined track jacobian
   ActsMatrixD<5, 6> trkJac(ActsMatrixD<5, 6>::Zero());
@@ -149,12 +149,12 @@ Acts::KalmanVertexTrackUpdater::detail::createFullTrackCovariance(
   trkJac(1, 0) = -trkJac(0, 1) / tanTheta;
   trkJac(1, 1) = trkJac(0, 0) / tanTheta;
 
-  trkJac.block<4, 4>(1, 2) = ActsSymMatrixD<4>::Identity();
+  trkJac.setBlock<4, 4>(1, 2, ActsSymMatrixD<4>::Identity());
 
   // Full perigee track covariance
   BoundMatrix fullPerTrackCov(BoundMatrix::Identity());
-  fullPerTrackCov.block<5, 5>(0, 0) =
-      (trkJac * (fullTrkCov * trkJac.transpose()));
+  fullPerTrackCov.setBlock<5, 5>(
+      0, 0, (trkJac * (fullTrkCov * trkJac.transpose())));
 
   return fullPerTrackCov;
 }

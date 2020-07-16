@@ -258,9 +258,9 @@ void Acts::GeometryView3D::drawSegmentBase(IVisualization3D& helper,
 
   auto unitVectors = makeCurvilinearUnitVectors(direction);
   RotationMatrix3D lrotation;
-  lrotation.col(0) = unitVectors.first;
-  lrotation.col(1) = unitVectors.second;
-  lrotation.col(2) = direction;
+  lrotation.setCol(0, unitVectors.first);
+  lrotation.setCol(1, unitVectors.second);
+  lrotation.setCol(2, direction);
 
   Vector3D lcenter = 0.5 * (start + end);
   double alength = (thickness > 0.) ? arrowLength * thickness : 2.;

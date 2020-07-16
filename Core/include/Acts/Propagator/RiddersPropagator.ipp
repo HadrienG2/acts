@@ -205,12 +205,12 @@ auto Acts::RiddersPropagator<propagator_t>::calculateCovariance(
     const std::vector<double>& deviations) const -> const Covariance {
   Jacobian jacobian;
   jacobian.setIdentity();
-  jacobian.col(eLOC_0) = fitLinear(derivatives[eLOC_0], deviations);
-  jacobian.col(eLOC_1) = fitLinear(derivatives[eLOC_1], deviations);
-  jacobian.col(ePHI) = fitLinear(derivatives[ePHI], deviations);
-  jacobian.col(eTHETA) = fitLinear(derivatives[eTHETA], deviations);
-  jacobian.col(eQOP) = fitLinear(derivatives[eQOP], deviations);
-  jacobian.col(eT) = fitLinear(derivatives[eT], deviations);
+  jacobian.setCol(eLOC_0, fitLinear(derivatives[eLOC_0], deviations));
+  jacobian.setCol(eLOC_1, fitLinear(derivatives[eLOC_1], deviations));
+  jacobian.setCol(ePHI, fitLinear(derivatives[ePHI], deviations));
+  jacobian.setCol(eTHETA, fitLinear(derivatives[eTHETA], deviations));
+  jacobian.setCol(eQOP, fitLinear(derivatives[eQOP], deviations));
+  jacobian.setCol(eT, fitLinear(derivatives[eT], deviations));
   return jacobian * startCov * jacobian.transpose();
 }
 

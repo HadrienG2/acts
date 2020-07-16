@@ -115,9 +115,9 @@ static inline std::string testMultiTrajectory(IVisualization3D& helper) {
   Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
   Vector3D yPos(0., 1., 0.);
   Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-  rotation.col(0) = xPos;
-  rotation.col(1) = yPos;
-  rotation.col(2) = zPos;
+  rotation.setCol(0, xPos);
+  rotation.setCol(1, yPos);
+  rotation.setCol(2, zPos);
 
   // Boundaries of the surfaces
   const auto rBounds =

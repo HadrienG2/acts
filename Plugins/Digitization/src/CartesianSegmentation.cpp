@@ -124,9 +124,9 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
 
   // now the rotation matrix for the xBins
   RotationMatrix3D xBinRotationMatrix;
-  xBinRotationMatrix.col(0) = Vector3D::UnitY();
-  xBinRotationMatrix.col(1) = Vector3D::UnitZ();
-  xBinRotationMatrix.col(2) = Vector3D::UnitX();
+  xBinRotationMatrix.setCol(0, Vector3D::UnitY());
+  xBinRotationMatrix.setCol(1, Vector3D::UnitZ());
+  xBinRotationMatrix.setCol(2, Vector3D::UnitX());
   // now the lorentz plane rotation should be the xBin rotation, rotated by the
   // lorentz angle around y
   RotationMatrix3D lorentzPlaneRotationMatrix =
@@ -187,9 +187,9 @@ void Acts::CartesianSegmentation::createSegmentationSurfaces(
   // -----------------------------------------------------------
   // now the rotation matrix for the yBins - anticyclic
   RotationMatrix3D yBinRotationMatrix;
-  yBinRotationMatrix.col(0) = Vector3D::UnitX();
-  yBinRotationMatrix.col(1) = Vector3D::UnitZ();
-  yBinRotationMatrix.col(2) = Vector3D(0., -1., 0.);
+  yBinRotationMatrix.setCol(0, Vector3D::UnitX());
+  yBinRotationMatrix.setCol(1, Vector3D::UnitZ());
+  yBinRotationMatrix.setCol(2, Vector3D(0., -1., 0.));
   // easy stuff first, constant pitch in Y
   double pitchY =
       2. * m_activeBounds->boundingBox().halfLengthY() / m_binUtility->bins(1);

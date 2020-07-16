@@ -71,8 +71,9 @@ globalTrackParametersCovariance(
     const size_t iRow = fullGlobalTrackParamsCov.rows() -
                         eBoundParametersSize * (nProcessed + 1);
     // Fill the covariance of this state
-    fullGlobalTrackParamsCov.block<eBoundParametersSize, eBoundParametersSize>(
-        iRow, iRow) = ts.smoothedCovariance();
+    fullGlobalTrackParamsCov.setBlock<eBoundParametersSize,
+                                      eBoundParametersSize>(
+        iRow, iRow, ts.smoothedCovariance());
     // Fill the correlation between this state (indexed by i-1) and
     // beforehand smoothed states (indexed by j): C^n_{i-1, j}= G_{i-1} *
     // C^n_{i, j} for i <= j
@@ -89,11 +90,11 @@ globalTrackParametersCovariance(
                     iRow + eBoundParametersSize, iCol);
         CovMatrix correlation = G * prev_correlation;
         fullGlobalTrackParamsCov
-            .block<eBoundParametersSize, eBoundParametersSize>(iRow, iCol) =
-            correlation;
+            .setBlock<eBoundParametersSize, eBoundParametersSize>(
+                iRow, iCol, correlation);
         fullGlobalTrackParamsCov
-            .block<eBoundParametersSize, eBoundParametersSize>(iCol, iRow) =
-            correlation.transpose();
+            .setBlock<eBoundParametersSize, eBoundParametersSize>(
+                iCol, iRow, correlation.transpose());
       }
     }
     stateRowIndices.emplace(ts.index(), iRow);

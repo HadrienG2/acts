@@ -72,7 +72,7 @@ class Particle {
   }
   /// Set the space-time position four-vector from three-position and time.
   Particle &setPosition4(const Vector3 &position, Scalar time) {
-    m_position4.segment<3>(Acts::ePos0) = position;
+    m_position4.setSegment<3>(Acts::ePos0, position);
     m_position4[Acts::eTime] = time;
     return *this;
   }

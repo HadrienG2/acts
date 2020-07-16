@@ -971,9 +971,9 @@ BOOST_AUTO_TEST_CASE(step_extension_trackercalomdt_test) {
   CuboidVolumeBuilder cvb;
   CuboidVolumeBuilder::SurfaceConfig sConf1;
   sConf1.position = Vector3D(0.3_m, 0., 0.);
-  sConf1.rotation.col(0) = xPos;
-  sConf1.rotation.col(1) = yPos;
-  sConf1.rotation.col(2) = zPos;
+  sConf1.rotation.setCol(0, xPos);
+  sConf1.rotation.setCol(1, yPos);
+  sConf1.rotation.setCol(2, zPos);
   sConf1.rBounds =
       std::make_shared<const RectangleBounds>(RectangleBounds(0.5_m, 0.5_m));
   sConf1.surMat = std::shared_ptr<const ISurfaceMaterial>(
@@ -984,9 +984,9 @@ BOOST_AUTO_TEST_CASE(step_extension_trackercalomdt_test) {
 
   CuboidVolumeBuilder::SurfaceConfig sConf2;
   sConf2.position = Vector3D(0.6_m, 0., 0.);
-  sConf2.rotation.col(0) = xPos;
-  sConf2.rotation.col(1) = yPos;
-  sConf2.rotation.col(2) = zPos;
+  sConf2.rotation.setCol(0, xPos);
+  sConf2.rotation.setCol(1, yPos);
+  sConf2.rotation.setCol(2, zPos);
   sConf2.rBounds =
       std::make_shared<const RectangleBounds>(RectangleBounds(0.5_m, 0.5_m));
   sConf2.surMat = std::shared_ptr<const ISurfaceMaterial>(

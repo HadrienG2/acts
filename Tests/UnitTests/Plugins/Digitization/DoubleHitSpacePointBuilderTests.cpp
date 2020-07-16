@@ -62,9 +62,9 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   Vector3D xPos(cos(rotation), sin(rotation), 0.);
   Vector3D yPos(-sin(rotation), cos(rotation), 0.);
   Vector3D zPos(0., 0., 1.);
-  rotationPos.col(0) = xPos;
-  rotationPos.col(1) = yPos;
-  rotationPos.col(2) = zPos;
+  rotationPos.setCol(0, xPos);
+  rotationPos.setCol(1, yPos);
+  rotationPos.setCol(2, zPos);
   Transform3D t3d(Transform3D::Identity() * rotationPos);
   t3d.translation() = Vector3D(0., 0., 10_m);
 
@@ -90,9 +90,9 @@ BOOST_DATA_TEST_CASE(DoubleHitsSpacePointBuilder_basic, bdata::xrange(1),
   Vector3D xNeg(cos(rotation2), sin(rotation2), 0.);
   Vector3D yNeg(-sin(rotation2), cos(rotation2), 0.);
   Vector3D zNeg(0., 0., 1.);
-  rotationNeg.col(0) = xNeg;
-  rotationNeg.col(1) = yNeg;
-  rotationNeg.col(2) = zNeg;
+  rotationNeg.setCol(0, xNeg);
+  rotationNeg.setCol(1, yNeg);
+  rotationNeg.setCol(2, zNeg);
   Transform3D t3d2(Transform3D::Identity() * rotationNeg);
   t3d2.translation() = Vector3D(0., 0., 10.005_m);
 

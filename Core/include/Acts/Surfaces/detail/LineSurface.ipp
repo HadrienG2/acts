@@ -56,9 +56,9 @@ inline const RotationMatrix3D LineSurface::referenceFrame(
   Vector3D measX(measY.cross(momentum).normalized());
   Vector3D measDepth(measX.cross(measY));
   // assign the columnes
-  mFrame.col(0) = measX;
-  mFrame.col(1) = measY;
-  mFrame.col(2) = measDepth;
+  mFrame.setCol(0, measX);
+  mFrame.setCol(1, measY);
+  mFrame.setCol(2, measDepth);
   // return the rotation matrix
   return mFrame;
 }
@@ -156,7 +156,7 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
   // retrieve the reference frame
   const auto rframe = referenceFrame(gctx, position, direction);
   // the local error components - given by the reference frame
-  jacobian.topLeftCorner<3, 2>() = rframe.extractTopLeftCorner<3, 2>();
+  jacobian.setTopLeftCorner<3, 2>(rframe.extractTopLeftCorner<3, 2>());
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -185,8 +185,8 @@ inline void LineSurface::initJacobianToGlobal(const GeometryContext& gctx,
       rframe.extractBlock<3, 1>(0, 0)
         * (rframe.extractBlock<3, 1>(0, 0).dot(dDThetaY));
   // set the jacobian components for global d/ phi/Theta
-  jacobian.block<3, 1>(0, ePHI) = dDPhiY * pars[eLOC_0] * ipdn;
-  jacobian.block<3, 1>(0, eTHETA) = dDThetaY * pars[eLOC_0] * ipdn;
+  jacobian.setBlock<3, 1>(0, ePHI, dDPhiY * pars[eLOC_0] * ipdn);
+  jacobian.setBlock<3, 1>(0, eTHETA, dDThetaY * pars[eLOC_0] * ipdn);
 }
 
 inline const BoundRowVector LineSurface::derivativeFactors(
@@ -241,11 +241,13 @@ inline const AlignmentRowVector LineSurface::alignmentToPathDerivative(
   // Initialize the derivative of propagation path w.r.t. local frame
   // translation (origin) and rotation
   AlignmentRowVector alignToPath = AlignmentRowVector::Zero();
-  alignToPath.segment<3>(eAlignmentCenter0) =
-      norm * (direction.transpose() - dirZ * localZAxis.transpose());
-  alignToPath.segment<3>(eAlignmentRotation0) =
+  alignToPath.setSegment<3>(
+      eAlignmentCenter0,
+      norm * (direction.transpose() - dirZ * localZAxis.transpose()));
+  alignToPath.setSegment<3>(
+      eAlignmentRotation0,
       norm * (dirZ * pcRowVec + localZ * direction.transpose()) *
-      rotToLocalZAxis;
+          rotToLocalZAxis);
 
   return alignToPath;
 }

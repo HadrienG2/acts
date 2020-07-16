@@ -164,9 +164,9 @@ struct CylindricalTrackingGeometry {
                             cos(modulePhi + moduleTiltPhi), 0.);
       // Create the RotationMatrix
       RotationMatrix3D moduleRotation;
-      moduleRotation.col(0) = moduleLocalX;
-      moduleRotation.col(1) = moduleLocalY;
-      moduleRotation.col(2) = moduleLocalZ;
+      moduleRotation.setCol(0, moduleLocalX);
+      moduleRotation.setCol(1, moduleLocalY);
+      moduleRotation.setCol(2, moduleLocalZ);
       // Get the moduleTransform
       std::shared_ptr<Transform3D> mModuleTransform =
           std::make_shared<Transform3D>(Translation3D(mCenter) *

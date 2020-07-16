@@ -178,7 +178,7 @@ Acts::Result<Acts::LinearizedTrack> Acts::
       (parCovarianceAtPCA.extractBlock<5, 5>(0, 0)).inverse();
 
   BoundSymMatrix weightAtPCA{BoundSymMatrix::Identity()};
-  weightAtPCA.block<5, 5>(0, 0) = parWeight;
+  weightAtPCA.setBlock<5, 5>(0, 0, parWeight);
 
   return LinearizedTrack(paramsAtPCA, parCovarianceAtPCA, weightAtPCA, linPoint,
                          positionJacobian, momentumJacobian, positionAtPCA,

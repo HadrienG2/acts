@@ -63,11 +63,11 @@ Acts::ImpactPointEstimator<input_track_t, propagator_t, propagator_options_t>::
 
   Transform3D thePlane;
   // rotation matrix
-  thePlane.matrix().block(0, 0, 3, 1) = corrDeltaR;
-  thePlane.matrix().block(0, 1, 3, 1) = perpDir;
-  thePlane.matrix().block(0, 2, 3, 1) = momDir;
+  thePlane.matrix().template setBlock<3, 1>(0, 0, corrDeltaR);
+  thePlane.matrix().template setBlock<3, 1>(0, 1, perpDir);
+  thePlane.matrix().template setBlock<3, 1>(0, 2, momDir);
   // translation
-  thePlane.matrix().block(0, 3, 3, 1) = vtxPos;
+  thePlane.matrix().template setBlock<3, 1>(0, 3, vtxPos);
 
   std::shared_ptr<PlaneSurface> planeSurface =
       Surface::makeShared<PlaneSurface>(

@@ -49,12 +49,16 @@ inline void DiscSurface::initJacobianToGlobal(const GeometryContext& gctx,
   double lcos_phi = cos(lphi);
   double lsin_phi = sin(lphi);
   // the local error components - rotated from reference frame
-  jacobian.block<3, 1>(0, eLOC_0) =
+  jacobian.setBlock<3, 1>(
+      0,
+      eLOC_0,
       lcos_phi * rframe.extractBlock<3, 1>(0, 0) +
-          lsin_phi * rframe.extractBlock<3, 1>(0, 1);
-  jacobian.block<3, 1>(0, eLOC_1) =
+          lsin_phi * rframe.extractBlock<3, 1>(0, 1));
+  jacobian.setBlock<3, 1>(
+      0,
+      eLOC_1,
       lrad * (lcos_phi * rframe.extractBlock<3, 1>(0, 1) -
-              lsin_phi * rframe.extractBlock<3, 1>(0, 0));
+              lsin_phi * rframe.extractBlock<3, 1>(0, 0)));
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -93,8 +97,8 @@ inline const RotationMatrix3D DiscSurface::initJacobianToLocal(
   // rotate into the polar coorindates
   auto lx = rframeT.extractBlock<1, 3>(0, 0);
   auto ly = rframeT.extractBlock<1, 3>(1, 0);
-  jacobian.block<1, 3>(0, 0) = lcphi * lx + lsphi * ly;
-  jacobian.block<1, 3>(1, 0) = (lcphi * ly - lsphi * lx) / lr;
+  jacobian.setBlock<1, 3>(0, 0, lcphi * lx + lsphi * ly);
+  jacobian.setBlock<1, 3>(1, 0, (lcphi * ly - lsphi * lx) / lr);
   // Time element
   jacobian(eT, 3) = 1;
   // Directional and momentum elements for reference frame surface

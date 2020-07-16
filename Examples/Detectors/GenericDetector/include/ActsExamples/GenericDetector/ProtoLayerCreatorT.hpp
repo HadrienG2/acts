@@ -298,9 +298,9 @@ ProtoLayerCreatorT<detector_element_t>::centralProtoLayers(
                                     cos(modulePhi + modulePhiTilt), 0.);
         // create the RotationMatrix
         Acts::RotationMatrix3D moduleRotation;
-        moduleRotation.col(0) = moduleLocalX;
-        moduleRotation.col(1) = moduleLocalY;
-        moduleRotation.col(2) = moduleLocalZ;
+        moduleRotation.setCol(0, moduleLocalX);
+        moduleRotation.setCol(1, moduleLocalY);
+        moduleRotation.setCol(2, moduleLocalZ);
         // get the moduleTransform
         std::shared_ptr<Acts::Transform3D> mutableModuleTransform =
             std::make_shared<Acts::Transform3D>(
@@ -495,9 +495,9 @@ ProtoLayerCreatorT<detector_element_t>::createProtoLayers(
           // local rotation matrices
           // create the RotationMatrix - negative side
           Acts::RotationMatrix3D moduleRotation;
-          moduleRotation.col(0) = moduleLocalX;
-          moduleRotation.col(1) = moduleLocalY;
-          moduleRotation.col(2) = moduleLocalZ;
+          moduleRotation.setCol(0, moduleLocalX);
+          moduleRotation.setCol(1, moduleLocalY);
+          moduleRotation.setCol(2, moduleLocalZ);
           // the transforms for the two modules
           std::shared_ptr<const Acts::Transform3D> moduleTransform =
               std::make_shared<const Acts::Transform3D>(

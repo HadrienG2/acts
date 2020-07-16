@@ -27,23 +27,29 @@ Acts::detail::RotationToAxes Acts::detail::rotationToLocalAxesDerivative(
 
   // Derivative of local x axis w.r.t. (rotX, rotY, rotZ)
   RotationMatrix3D rotToLocalXAxis = RotationMatrix3D::Zero();
-  rotToLocalXAxis.col(0) = Vector3D(0, 0, 0);
-  rotToLocalXAxis.col(1) = Vector3D(-cz * sy, -sz * sy, -cy);
-  rotToLocalXAxis.col(2) = Vector3D(-sz * cy, cz * cy, 0);
+  rotToLocalXAxis.setCol(0, Vector3D(0, 0, 0));
+  rotToLocalXAxis.setCol(1, Vector3D(-cz * sy, -sz * sy, -cy));
+  rotToLocalXAxis.setCol(2, Vector3D(-sz * cy, cz * cy, 0));
   // Derivative of local y axis w.r.t. (rotX, rotY, rotZ)
   RotationMatrix3D rotToLocalYAxis = RotationMatrix3D::Zero();
-  rotToLocalYAxis.col(0) =
-      Vector3D(cz * sy * cx + sz * sx, sz * sy * cx - cz * sx, cy * cx);
-  rotToLocalYAxis.col(1) = Vector3D(cz * cy * sx, sz * cy * sx, -sy * sx);
-  rotToLocalYAxis.col(2) =
-      Vector3D(-sz * sy * sx - cz * cx, cz * sy * sx - sz * cx, 0);
+  rotToLocalYAxis.setCol(0, Vector3D(cz * sy * cx + sz * sx,
+                                     sz * sy * cx - cz * sx,
+                                     cy * cx));
+  rotToLocalYAxis.setCol(1, Vector3D(cz * cy * sx,
+                                     sz * cy * sx,
+                                     -sy * sx));
+  rotToLocalYAxis.setCol(2, Vector3D(-sz * sy * sx - cz * cx,
+                                     cz * sy * sx - sz * cx,
+                                     0));
   // Derivative of local z axis w.r.t. (rotX, rotY, rotZ)
   RotationMatrix3D rotToLocalZAxis = RotationMatrix3D::Zero();
-  rotToLocalZAxis.col(0) =
-      Vector3D(sz * cx - cz * sy * sx, -sz * sy * sx - cz * cx, -cy * sx);
-  rotToLocalZAxis.col(1) = Vector3D(cz * cy * cx, sz * cy * cx, -sy * cx);
-  rotToLocalZAxis.col(2) =
-      Vector3D(cz * sx - sz * sy * cx, cz * sy * cx + sz * sx, 0);
+  rotToLocalZAxis.setCol(0, Vector3D(sz * cx - cz * sy * sx,
+                                     -sz * sy * sx - cz * cx,
+                                     -cy * sx));
+  rotToLocalZAxis.setCol(1, Vector3D(cz * cy * cx, sz * cy * cx, -sy * cx));
+  rotToLocalZAxis.setCol(2, Vector3D(cz * sx - sz * sy * cx,
+                                     cz * sy * cx + sz * sx,
+                                     0));
 
   return std::make_tuple(std::move(rotToLocalXAxis), std::move(rotToLocalYAxis),
                          std::move(rotToLocalZAxis));

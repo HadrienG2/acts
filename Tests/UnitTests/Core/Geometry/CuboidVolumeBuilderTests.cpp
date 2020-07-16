@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest) {
     Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
     Vector3D yPos(0., 1., 0.);
     Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-    cfg.rotation.col(0) = xPos;
-    cfg.rotation.col(1) = yPos;
-    cfg.rotation.col(2) = zPos;
+    cfg.rotation.setCol(0, xPos);
+    cfg.rotation.setCol(1, yPos);
+    cfg.rotation.setCol(2, zPos);
 
     // Boundaries of the surfaces
     cfg.rBounds =
@@ -199,9 +199,9 @@ BOOST_AUTO_TEST_CASE(CuboidVolumeBuilderTest) {
     Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
     Vector3D yPos(0., 1., 0.);
     Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-    cfg.rotation.col(0) = xPos;
-    cfg.rotation.col(1) = yPos;
-    cfg.rotation.col(2) = zPos;
+    cfg.rotation.setCol(0, xPos);
+    cfg.rotation.setCol(1, yPos);
+    cfg.rotation.setCol(2, zPos);
 
     // Boundaries of the surfaces
     cfg.rBounds =

@@ -25,7 +25,7 @@ Acts::Vertex<input_track_t>::Vertex(
   m_position[ePos0] = position[ePos0];
   m_position[ePos1] = position[ePos1];
   m_position[ePos2] = position[ePos2];
-  m_covariance.block<3, 3>(ePos0, ePos0) = covariance;
+  m_covariance.setBlock<3, 3>(ePos0, ePos0, covariance);
 }
 
 template <typename input_track_t>
@@ -95,7 +95,7 @@ void Acts::Vertex<input_track_t>::setTime(ParValue_t time) {
 template <typename input_track_t>
 void Acts::Vertex<input_track_t>::setCovariance(const SymMatrix3D& covariance) {
   m_covariance.setZero();
-  m_covariance.block<3, 3>(ePos0, ePos0) = covariance;
+  m_covariance.setBlock<3, 3>(ePos0, ePos0, covariance);
 }
 
 template <typename input_track_t>

@@ -141,9 +141,9 @@ Acts::OrientedSurfaces Acts::ConeVolumeBounds::orientedSurfaces(
 
   if (m_sectorBounds) {
     RotationMatrix3D sectorRotation;
-    sectorRotation.col(0) = Vector3D::UnitZ();
-    sectorRotation.col(1) = Vector3D::UnitX();
-    sectorRotation.col(2) = Vector3D::UnitY();
+    sectorRotation.setCol(0, Vector3D::UnitZ());
+    sectorRotation.setCol(1, Vector3D::UnitX());
+    sectorRotation.setCol(2, Vector3D::UnitY());
 
     Transform3D negSectorRelTrans{sectorRotation};
     negSectorRelTrans.prerotate(

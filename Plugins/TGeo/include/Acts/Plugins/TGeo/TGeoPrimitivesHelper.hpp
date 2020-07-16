@@ -29,10 +29,10 @@ struct TGeoPrimitivesHelper {
       const Vector3D& rotationMatrixCol2,
       const Vector3D& translation) {
     Transform3D trf;
-    trf.matrix().block(0, 0, 3, 1) = rotationMatrixCol0;
-    trf.matrix().block(0, 1, 3, 1) = rotationMatrixCol1;
-    trf.matrix().block(0, 2, 3, 1) = rotationMatrixCol2;
-    trf.matrix().block(0, 3, 3, 1) = translation;
+    trf.matrix().setBlock<3, 1>(0, 0, rotationMatrixCol0);
+    trf.matrix().setBlock<3, 1>(0, 1, rotationMatrixCol1);
+    trf.matrix().setBlock<3, 1>(0, 2, rotationMatrixCol2);
+    trf.matrix().setBlock<3, 1>(0, 3, translation);
     return trf;
   }
 

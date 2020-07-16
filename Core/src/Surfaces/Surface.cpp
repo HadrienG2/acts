@@ -73,15 +73,15 @@ const Acts::AlignmentToBoundMatrix Acts::Surface::alignmentToBoundDerivative(
   // alignment parameters (without path correction)
   AlignmentToLocalCartesianMatrix alignToLoc3D =
       AlignmentToLocalCartesianMatrix::Zero();
-  alignToLoc3D.block<1, 3>(eX, eAlignmentCenter0) = -localXAxis.transpose();
-  alignToLoc3D.block<1, 3>(eY, eAlignmentCenter0) = -localYAxis.transpose();
-  alignToLoc3D.block<1, 3>(eZ, eAlignmentCenter0) = -localZAxis.transpose();
-  alignToLoc3D.block<1, 3>(eX, eAlignmentRotation0) =
-      pcRowVec * rotToLocalXAxis;
-  alignToLoc3D.block<1, 3>(eY, eAlignmentRotation0) =
-      pcRowVec * rotToLocalYAxis;
-  alignToLoc3D.block<1, 3>(eZ, eAlignmentRotation0) =
-      pcRowVec * rotToLocalZAxis;
+  alignToLoc3D.setBlock<1, 3>(eX, eAlignmentCenter0, -localXAxis.transpose());
+  alignToLoc3D.setBlock<1, 3>(eY, eAlignmentCenter0, -localYAxis.transpose());
+  alignToLoc3D.setBlock<1, 3>(eZ, eAlignmentCenter0, -localZAxis.transpose());
+  alignToLoc3D.setBlock<1, 3>(
+      eX, eAlignmentRotation0, pcRowVec * rotToLocalXAxis);
+  alignToLoc3D.setBlock<1, 3>(
+      eY, eAlignmentRotation0, pcRowVec * rotToLocalYAxis);
+  alignToLoc3D.setBlock<1, 3>(
+      eZ, eAlignmentRotation0, pcRowVec * rotToLocalZAxis);
   // 3) Calculate the derivative of track position represented in
   // (local) bound track parameters (could be in non-Cartesian coordinates)
   // w.r.t. track position represented in local 3D Cartesian coordinates.
@@ -99,15 +99,19 @@ const Acts::AlignmentToBoundMatrix Acts::Surface::alignmentToBoundDerivative(
   // -> For bound track parameters eLOC_0, eLOC_1, it's
   // loc3DToLocBound*alignToLoc3D +
   // jacToLocal*derivatives*alignToPath
-  alignToBound.block<2, eAlignmentParametersSize>(eLOC_0, eAlignmentCenter0) =
+  alignToBound.setBlock<2, eAlignmentParametersSize>(
+      eLOC_0,
+      eAlignmentCenter0,
       loc3DToLocBound * alignToLoc3D +
-      jacToLocal.extractBlock<2, eFreeParametersSize>(eLOC_0, eFreePos0) *
-          derivatives * alignToPath;
+          jacToLocal.extractBlock<2, eFreeParametersSize>(eLOC_0, eFreePos0) *
+              derivatives * alignToPath);
   // -> For bound track parameters ePHI, eTHETA, eQOP, eT, it's
   // jacToLocal*derivatives*alignToPath
-  alignToBound.block<4, eAlignmentParametersSize>(ePHI, eAlignmentCenter0) =
+  alignToBound.setBlock<4, eAlignmentParametersSize>(
+      ePHI,
+      eAlignmentCenter0,
       jacToLocal.extractBlock<4, eFreeParametersSize>(ePHI, eFreePos0)
-          * derivatives * alignToPath;
+          * derivatives * alignToPath);
 
   return alignToBound;
 }
@@ -128,9 +132,9 @@ const Acts::AlignmentRowVector Acts::Surface::alignmentToPathDerivative(
   // Initialize the derivative of propagation path w.r.t. local frame
   // translation (origin) and rotation
   AlignmentRowVector alignToPath = AlignmentRowVector::Zero();
-  alignToPath.segment<3>(eAlignmentCenter0) = localZAxis.transpose() / dirZ;
-  alignToPath.segment<3>(eAlignmentRotation0) =
-      -pcRowVec * rotToLocalZAxis / dirZ;
+  alignToPath.setSegment<3>(eAlignmentCenter0, localZAxis.transpose() / dirZ);
+  alignToPath.setSegment<3>(
+      eAlignmentRotation0, -pcRowVec * rotToLocalZAxis / dirZ);
 
   return alignToPath;
 }

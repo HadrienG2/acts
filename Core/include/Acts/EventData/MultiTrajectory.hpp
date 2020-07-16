@@ -370,7 +370,7 @@ class TrackStateProxy {
 
     // assign (potentially) smaller actual projector to matrix, preserving
     // zeroes outside of smaller matrix block.
-    fullProjector.template topLeftCorner<rows, cols>() = projector;
+    fullProjector.template setTopLeftCorner<rows, cols>(projector);
 
     // convert to bitset before storing
     m_traj->m_projectors[dataref.iprojector] = matrixToBitset(fullProjector);
@@ -462,11 +462,11 @@ class TrackStateProxy {
 
     assert(hasCalibrated());
     calibrated().setZero();
-    calibrated().template head<measdim>() = meas.parameters();
+    calibrated().template setHead<measdim>(meas.parameters());
 
     calibratedCovariance().setZero();
-    calibratedCovariance().template topLeftCorner<measdim, measdim>() =
-        meas.covariance();
+    calibratedCovariance().template setTopLeftCorner<measdim, measdim>(
+        meas.covariance());
 
     setProjector(meas.projector());
 

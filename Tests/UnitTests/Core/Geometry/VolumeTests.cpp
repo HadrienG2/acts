@@ -35,9 +35,9 @@ BOOST_AUTO_TEST_CASE(VolumeTest) {
   Vector3D xPos(cos(rotationAngle), 0., sin(rotationAngle));
   Vector3D yPos(0., 1., 0.);
   Vector3D zPos(-sin(rotationAngle), 0., cos(rotationAngle));
-  rotation.col(0) = xPos;
-  rotation.col(1) = yPos;
-  rotation.col(2) = zPos;
+  rotation.setCol(0, xPos);
+  rotation.setCol(1, yPos);
+  rotation.setCol(2, zPos);
 
   // Build a transform
   Transform3D transform(Transform3D::Identity() * rotation);

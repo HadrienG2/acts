@@ -95,9 +95,9 @@ const Acts::RotationMatrix3D Acts::ConeSurface::referenceFrame(
   // measured X is what comoes out of it
   Acts::Vector3D measX(measY.cross(measDepth).normalized());
   // the columnes
-  mFrame.col(0) = measX;
-  mFrame.col(1) = measY;
-  mFrame.col(2) = measDepth;
+  mFrame.setCol(0, measX);
+  mFrame.setCol(1, measY);
+  mFrame.setCol(2, measDepth);
   // return the rotation matrix
   //!< @todo fold in alpha
   // return it

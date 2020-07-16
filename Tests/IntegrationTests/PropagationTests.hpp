@@ -173,9 +173,9 @@ inline std::shared_ptr<Acts::Transform3D> makeCurvilinearTransform(
   auto [unitU, unitV] = Acts::makeCurvilinearUnitVectors(unitW);
 
   Acts::RotationMatrix3D rotation = Acts::RotationMatrix3D::Zero();
-  rotation.col(0) = unitU;
-  rotation.col(1) = unitV;
-  rotation.col(2) = unitW;
+  rotation.setCol(0, unitU);
+  rotation.setCol(1, unitV);
+  rotation.setCol(2, unitW);
   Acts::Translation3D offset(params.position(geoCtx));
   Acts::Transform3D toGlobal = offset * rotation;
 

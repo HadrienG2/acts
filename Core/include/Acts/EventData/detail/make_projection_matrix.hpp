@@ -39,9 +39,9 @@ struct make_projection_matrix<columns, i, N...> {
     v(i) = 1;
 
     ActsMatrixD<sizeof...(N) + 1, columns> m;
-    m.row(0) << v;
-    m.block(1, 0, sizeof...(N), columns)
-        << make_projection_matrix<columns, N...>::init();
+    m.setRow(0, v);
+    m.template setBlock<sizeof...(N), columns>(
+        1, 0, make_projection_matrix<columns, N...>::init());
 
     return m;
   }

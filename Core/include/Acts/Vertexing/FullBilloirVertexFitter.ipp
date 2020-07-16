@@ -254,11 +254,11 @@ Acts::FullBilloirVertexFitter<input_track_t, linearizer_t>::fit(
 
       ActsSymMatrixD<7> covMat;
       covMat.setZero();
-      covMat.block<4, 4>(0, 0) = VVmat;
-      covMat.block<4, 3>(0, 4) = VPmat;
-      covMat.block<3, 4>(4, 0) = VPmat.transpose();
+      covMat.setBlock<4, 4>(0, 0, VVmat);
+      covMat.setBlock<4, 3>(0, 4, VPmat);
+      covMat.setBlock<3, 4>(4, 0, VPmat.transpose());
 
-      covMat.block<3, 3>(4, 4) = PPmat;
+      covMat.setBlock<3, 3>(4, 4, PPmat);
 
       // covdelta_P calculation
       covDeltaPmat[iTrack] = transMat * covMat * transMat.transpose();

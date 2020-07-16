@@ -106,9 +106,9 @@ std::shared_ptr<Acts::TrackingVolume> Acts::CuboidVolumeBuilder::buildVolume(
     Vector3D xPos(0., 0., 1.);
     Vector3D yPos(0., 1., 0.);
     Vector3D zPos(-1., 0., 0.);
-    sCfg.rotation.col(0) = xPos;
-    sCfg.rotation.col(1) = yPos;
-    sCfg.rotation.col(2) = zPos;
+    sCfg.rotation.setCol(0, xPos);
+    sCfg.rotation.setCol(1, yPos);
+    sCfg.rotation.setCol(2, zPos);
     // Bounds
     sCfg.rBounds = std::make_shared<const RectangleBounds>(
         RectangleBounds(cfg.length.y() * 0.5, cfg.length.z() * 0.5));

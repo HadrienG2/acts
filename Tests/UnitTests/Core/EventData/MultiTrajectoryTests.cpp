@@ -534,12 +534,12 @@ BOOST_AUTO_TEST_CASE(trackstate_reassignment) {
   // check if overallocated part is zeroed correctly
   ActsVectorD<maxmeasdim> mParFull;
   mParFull.setZero();
-  mParFull.head(2) = mPar;
+  mParFull.setHead<2>(mPar);
   BOOST_CHECK_EQUAL(ts.calibrated(), mParFull);
 
   BoundSymMatrix mCovFull;
   mCovFull.setZero();
-  mCovFull.topLeftCorner(2, 2) = mCov;
+  mCovFull.setTopLeftCorner<2, 2>(mCov);
   BOOST_CHECK_EQUAL(ts.calibratedCovariance(), mCovFull);
 
   ActsMatrixD<maxmeasdim, eBoundParametersSize> projFull;

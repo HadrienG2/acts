@@ -63,7 +63,7 @@ inline void Surface::initJacobianToGlobal(const GeometryContext& gctx,
   // retrieve the reference frame
   const auto rframe = referenceFrame(gctx, position, direction);
   // the local error components - given by reference frame
-  jacobian.topLeftCorner<3, 2>() = rframe.extractTopLeftCorner<3, 2>();
+  jacobian.setTopLeftCorner<3, 2>(rframe.extractTopLeftCorner<3, 2>());
   // the time component
   jacobian(3, eT) = 1;
   // the momentum components
@@ -92,7 +92,7 @@ inline const RotationMatrix3D Surface::initJacobianToLocal(
   RotationMatrix3D rframeT =
       referenceFrame(gctx, position, direction).transpose();
   // given by the refernece frame
-  jacobian.block<2, 3>(0, 0) = rframeT.extractBlock<2, 3>(0, 0);
+  jacobian.setBlock<2, 3>(0, 0, rframeT.extractBlock<2, 3>(0, 0));
   // Time component
   jacobian(eT, 3) = 1;
   // Directional and momentum elements for reference frame surface

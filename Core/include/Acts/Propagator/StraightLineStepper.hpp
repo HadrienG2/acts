@@ -336,7 +336,7 @@ class StraightLineStepper {
     if (state.stepping.covTransport) {
       // The step transport matrix in global coordinates
       FreeMatrix D = FreeMatrix::Identity();
-      D.block<3, 3>(0, 4) = ActsSymMatrixD<3>::Identity() * h;
+      D.setBlock<3, 3>(0, 4, ActsSymMatrixD<3>::Identity() * h);
       // Extend the calculation by the time propagation
       // Evaluate dt/dlambda
       D(3, 7) = h * state.options.mass * state.options.mass *
@@ -346,7 +346,7 @@ class StraightLineStepper {
       state.stepping.derivative(3) = dtds;
       // Update jacobian and derivative
       state.stepping.jacTransport = D * state.stepping.jacTransport;
-      state.stepping.derivative.template head<3>() = state.stepping.dir;
+      state.stepping.derivative.template setHead<3>(state.stepping.dir);
     }
     // state the path length
     state.stepping.pathAccumulated += h;

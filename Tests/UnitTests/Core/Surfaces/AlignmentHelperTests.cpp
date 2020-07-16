@@ -44,33 +44,39 @@ BOOST_AUTO_TEST_CASE(alignment_helper_test) {
   // [ cy*sz  cz*cx+sz*sy*sx  cx*sz*sy-cz*sx ]
   // [ -sy    cy*sx           cy*cx          ]
   RotationMatrix3D expRot = RotationMatrix3D::Zero();
-  expRot.col(0) = Vector3D(cz * cy, cy * sz, -sy);
-  expRot.col(1) =
-      Vector3D(cz * sy * sx - cx * sz, cz * cx + sz * sy * sx, cy * sx);
-  expRot.col(2) =
-      Vector3D(sz * sx + cz * cx * sy, cx * sz * sy - cz * sx, cy * cx);
+  expRot.setCol(0, Vector3D(cz * cy, cy * sz, -sy));
+  expRot.setCol(1, Vector3D(cz * sy * sx - cx * sz,
+                            cz * cx + sz * sy * sx,
+                            cy * sx));
+  expRot.setCol(2, Vector3D(sz * sx + cz * cx * sy,
+                            cx * sz * sy - cz * sx,
+                            cy * cx));
 
   // Calculate the expected derivative of local x axis to its rotation
   RotationMatrix3D expRotToXAxis = RotationMatrix3D::Zero();
-  expRotToXAxis.col(0) = Vector3D(0, 0, 0);
-  expRotToXAxis.col(1) = Vector3D(-cz * sy, -sz * sy, -cy);
-  expRotToXAxis.col(2) = Vector3D(-sz * cy, cz * cy, 0);
+  expRotToXAxis.setCol(0, Vector3D(0, 0, 0));
+  expRotToXAxis.setCol(1, Vector3D(-cz * sy, -sz * sy, -cy));
+  expRotToXAxis.setCol(2, Vector3D(-sz * cy, cz * cy, 0));
 
   // Calculate the expected derivative of local y axis to its rotation
   RotationMatrix3D expRotToYAxis = RotationMatrix3D::Zero();
-  expRotToYAxis.col(0) =
-      Vector3D(cz * sy * cx + sz * sx, sz * sy * cx - cz * sx, cy * cx);
-  expRotToYAxis.col(1) = Vector3D(cz * cy * sx, sz * cy * sx, -sy * sx);
-  expRotToYAxis.col(2) =
-      Vector3D(-sz * sy * sx - cz * cx, cz * sy * sx - sz * cx, 0);
+  expRotToYAxis.setCol(0, Vector3D(cz * sy * cx + sz * sx,
+                                   sz * sy * cx - cz * sx,
+                                   cy * cx));
+  expRotToYAxis.setCol(1, Vector3D(cz * cy * sx, sz * cy * sx, -sy * sx));
+  expRotToYAxis.setCol(2, Vector3D(-sz * sy * sx - cz * cx,
+                                   cz * sy * sx - sz * cx,
+                                   0));
 
   // Calculate the expected derivative of local z axis to its rotation
   RotationMatrix3D expRotToZAxis = RotationMatrix3D::Zero();
-  expRotToZAxis.col(0) =
-      Vector3D(sz * cx - cz * sy * sx, -sz * sy * sx - cz * cx, -cy * sx);
-  expRotToZAxis.col(1) = Vector3D(cz * cy * cx, sz * cy * cx, -sy * cx);
-  expRotToZAxis.col(2) =
-      Vector3D(cz * sx - sz * sy * cx, cz * sy * cx + sz * sx, 0);
+  expRotToZAxis.setCol(0, Vector3D(sz * cx - cz * sy * sx,
+                                   -sz * sy * sx - cz * cx,
+                                   -cy * sx));
+  expRotToZAxis.setCol(1, Vector3D(cz * cy * cx, sz * cy * cx, -sy * cx));
+  expRotToZAxis.setCol(2, Vector3D(cz * sx - sz * sy * cx,
+                                   cz * sy * cx + sz * sx,
+                                   0));
 
   // Construct a transform
   Vector3D translation(0., 0., 0.);
