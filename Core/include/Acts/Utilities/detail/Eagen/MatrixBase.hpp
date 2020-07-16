@@ -1442,6 +1442,10 @@ public:
     void setCol(Index j, const MatrixBase<OtherDerived>& other) {
         setBlock<Rows, 1, OtherDerived>(0, j, other);
     }
+    template <typename OtherDerived>
+    void setRow(Index i, const MatrixBase<OtherDerived>& other) {
+        setBlock<1, Cols, OtherDerived>(i, 0, other);
+    }
 
 
     // /!\ UNDOCUMENTED /!\ Scalar cast
