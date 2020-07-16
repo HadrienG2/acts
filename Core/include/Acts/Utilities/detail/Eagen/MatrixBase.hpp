@@ -1265,6 +1265,37 @@ public:
         return extractBlock<Rows, 1>(0, j);
     }
 
+    // Sub-block setters (/!\ EAGEN EXTENSION /!\)
+    //
+    // Like sub-block extractors, but the other way around.
+    //
+    // TODO: If this works out, extend to other operations
+    //
+    template <int BlockRows, int BlockCols, typename OtherDerived>
+    void setBlock(Index startRow,
+                  Index startCol,
+                  const MatrixBase<OtherDerived>& other) {
+        if constexpr ((BlockRows == OtherDerived::Rows)
+                      && (BlockCols == OtherDerived::Cols)) {
+            // Efficient static-sized version
+            for (Index col = startCol; col < startCol + BlockCols; ++col) {
+                for (Index row = startRow; row < startRow + BlockRows; ++row) {
+                    coeffRef(row, col) = other.coeff(row, col);
+                }
+            }
+        } else {
+            // Leave error reporting to Eigen
+            derivedInner().template block<BlockRows, BlockCols>(startRow,
+                                                                startCol)
+                = other.derivedInner();
+        }
+    }
+    template <typename OtherDerived>
+    void setCol(Index j, const MatrixBase<OtherDerived>& other) {
+        setBlock<Rows, 1, OtherDerived>(0, j, other);
+    }
+
+
     // /!\ UNDOCUMENTED /!\ Scalar cast
     template <typename NewScalarType>
     Matrix<NewScalarType, Rows, Cols> cast() const {
