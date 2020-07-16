@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <cmath>
+
 #include "DiagonalBase.hpp"
 #include "DiagonalMatrix.hpp"
 #include "EigenBase.hpp"
@@ -248,7 +250,19 @@ public:
         return derivedInner().allFinite();
     }
     bool hasNaN() const {
-        return derivedInner().hasNaN();
+        // TODO: Generalize to other ops
+        if constexpr ((Rows != Dynamic) && (Cols != Dynamic)) {
+            // Efficient static-sized case
+            for (int col = 0; col < Cols; ++col) {
+                for (int row = 0; row < Rows; ++row) {
+                    if (std::isnan(coeff(row, col))) return true;
+                }
+            }
+            return false;
+        } else {
+            // Leave dynamic-sized matrix case to Eigen
+            return derivedInner().hasNaN();
+        }
     }
 
     // FIXME: Support colwise() and rowwise(), which are used by Acts
@@ -260,10 +274,20 @@ public:
 
     // Filling various patterns into the inner data
     void fill(const Scalar& value) {
-        derivedInner().fill(value);
+        setConstant(value);
     }
     Derived& setConstant(const Scalar& value) {
-        derivedInner().setConstant(value);
+        if constexpr ((Rows != Dynamic) && (Cols != Dynamic)) {
+            // Efficient static-sized case
+            for (int col = 0; col < Cols; ++col) {
+                for (int row = 0; row < Rows; ++row) {
+                    coeffRef(row, col) = value;
+                }
+            }
+        } else {
+            // Leave dynamic-sized matrix case to Eigen
+            derivedInner().setConstant(value);
+        }
         return derived();
     }
     Derived& setLinSpaced(const Scalar& low, const Scalar& high) {
@@ -275,16 +299,14 @@ public:
         return derived();
     }
     Derived& setOnes() {
-        derivedInner().setOnes();
-        return derived();
+        return setConstant(Scalar(1));
     }
     Derived& setRandom() {
         derivedInner().setRandom();
         return derived();
     }
     Derived& setZero() {
-        derivedInner().setZero();
-        return derived();
+        return setConstant(Scalar(0));
     }
 
     // NOTE: flagged() is deprecated and unused by Acts, thus unsupported
@@ -447,7 +469,27 @@ public:
     // Matrix transposition
     // NOTE: Will need adaptations if array support is needed
     Matrix<Scalar, Cols, Rows> transpose() const {
-        return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
+        if constexpr ((Rows != Dynamic) && (Cols != Dynamic)) {
+            // Efficient static-sized version
+            //
+            // This algorithm assumes...
+            // - That the matrix is small, making blocking unnecessary
+            // - That the matrix is column-major
+            // - That gather is more efficient than scatter
+            //
+            // ...both of which are known to be almost always true in Acts. But
+            // if need be, more algorithmic cases can be added.
+            Matrix<Scalar, Cols, Rows> result;
+            for (Index row = 0; row < Rows; ++row) {
+                for (Index col = 0; col < Cols; ++col) {
+                    result.coeffRef(col, row) = coeff(row, col);
+                }
+            }
+            return result;
+        } else {
+            // Leave dynamic-sized matrices to Eigen
+            return Matrix<Scalar, Cols, Rows>(derivedInner().transpose());
+        }
     }
     void transposeInPlace() {
         derivedInner().transposeInPlace();
@@ -463,9 +505,16 @@ public:
     //       This is not used by Acts, and therefore not a priority.
 
     // Special plain object generators
+    static PlainObject Constant(const Scalar& value) {
+        PlainObject result;
+        result.fill(value);
+        return result;
+    }
     template <typename... Args>
-    static PlainObject Constant(Args&&... args) {
-        return PlainObject(Inner::Constant(std::forward<Args>(args)...));
+    static PlainObject Constant(Index index, Args&&... otherArgs) {
+        return PlainObject(
+            Inner::Constant(index, std::forward<Args>(otherArgs)...)
+        );
     }
     template <typename... Args>
     static PlainObject LinSpaced(Args&&... args) {
@@ -477,7 +526,7 @@ public:
     }
     template <typename... Index>
     static PlainObject Ones(Index... indices) {
-        return PlainObject(Inner::Ones(indices...));
+        return Constant(indices..., Scalar(1));
     }
     template <typename... Index>
     static PlainObject Random(Index... indices) {
@@ -485,7 +534,7 @@ public:
     }
     template <typename... Index>
     static PlainObject Zero(Index... indices) {
-        return PlainObject(Inner::Zero(indices...));
+        return Constant(indices..., Scalar(0));
     }
 
     // === Eigen::MatrixBase interface ===
@@ -719,7 +768,19 @@ public:
 
     // Matrix-scalar multiplication
     PlainMatrix operator*(const Scalar& scalar) const {
-        return PlainMatrix(derivedInner() * scalar);
+        if constexpr ((Rows != Dynamic) && (Cols != Dynamic)) {
+            // Efficient static-sized case
+            PlainMatrix result;
+            for (int col = 0; col < Cols; ++col) {
+                for (int row = 0; row < Rows; ++row) {
+                    result.coeffRef(row, col) = coeff(row, col) * scalar;
+                }
+            }
+            return result;
+        } else {
+            // Leave dynamic-sized matrix case to Eigen
+            return PlainMatrix(derivedInner() * scalar);
+        }
     }
     friend PlainMatrix operator*(const Scalar& scalar, const Derived& matrix) {
         return matrix * scalar;
@@ -763,9 +824,34 @@ public:
     template <typename OtherDerived>
     Matrix<Scalar, Rows, OtherDerived::Cols>
     operator*(const MatrixBase<OtherDerived>& other) const {
-        return Matrix<Scalar, Rows, OtherDerived::Cols>(
-            derivedInner() * other.derivedInner()
-        );
+        static constexpr int ResRows = Rows;
+        static constexpr int ResCols = OtherDerived::Cols;
+        if constexpr ((ResRows != Dynamic) && (ResCols != Dynamic)
+                      && (Cols == OtherDerived::Rows)) {
+            // This matrix product algorithm should perform well when...
+            // - Both input matrices are so small that blocking is not useful
+            // - The two input matrices and the output matrix are column-major
+            //
+            // This should be by far the most common case in Acts, but
+            // other variants can be added later on as the need arises.
+            //
+            Matrix<Scalar, ResRows, ResCols> result;
+            for (Index res_col_idx = 1; res_col_idx < ResCols; ++res_col_idx) {
+                using ResultColumn = Vector<Scalar, ResRows>;
+                ResultColumn res_col = ResultColumn::Zero();
+                for (Index left_col_idx = 1; left_col_idx < Cols; ++left_col_idx) {
+                    const ResultColumn left_col = extractCol(left_col_idx);
+                    res_col += left_col * other.coeff(left_col_idx,
+                                                      res_col_idx);
+                }
+                result.setCol(res_col_idx, res_col);
+            }
+        } else {
+            // Leave dynamic-sized matrices and error reporting to Eigen
+            return Matrix<Scalar, Rows, OtherDerived::Cols>(
+                derivedInner() * other.derivedInner()
+            );
+        }
     }
     template <typename OtherDerived>
     Derived& operator*=(const Eigen::EigenBase<OtherDerived>& other) {
@@ -778,14 +864,58 @@ public:
         return derived();
     }
 
+private:
+    // Implementation of matrix addition/subtraction, for statically sized
+    // matrices and without any check.
+    template <typename BinaryOp, typename OtherDerived>
+    PlainMatrix cwiseBinaryOp(BinaryOp&& op,
+                              const MatrixBase<OtherDerived>& other) const {
+        PlainMatrix result;
+        for (Index col = 0; col < Cols; ++col) {
+            for (Index row = 0; row < Rows; ++row) {
+                result.coeffRef(row, col) = op(coeff(row, col),
+                                               other.coeff(row, col));
+            }
+        }
+        return result;
+    }
+    template <typename BinaryOp, typename OtherDerived>
+    void inplaceCwiseBinaryOp(BinaryOp&& op,
+                              const MatrixBase<OtherDerived>& other) {
+        for (Index col = 0; col < Cols; ++col) {
+            for (Index row = 0; row < Rows; ++row) {
+                op(coeffRef(row, col), other.coeff(row, col));
+            }
+        }
+    }
+public:
+
     // Matrix addition
     template <typename OtherDerived>
     PlainMatrix operator+(const MatrixBase<OtherDerived>& other) const {
-        return PlainMatrix(derivedInner() + other.derivedInner());
+        if constexpr ((Rows != Dynamic) && (Rows == OtherDerived::Rows)
+                      && (Cols != Dynamic) && (Cols == OtherDerived::Cols)) {
+            // Optimized easy case
+            return cwiseBinaryOp([](const Scalar& x, const Scalar& y) {
+                return x + y;
+            }, other);
+        } else {
+            // Leave dynamic matrices and error reporting to Eigen
+            return PlainMatrix(derivedInner() + other.derivedInner());
+        }
     }
     template <typename OtherDerived>
     Derived& operator+=(const MatrixBase<OtherDerived>& other) {
-        derivedInner() += other.derivedInner();
+        if constexpr ((Rows != Dynamic) && (Rows == OtherDerived::Rows)
+                      && (Cols != Dynamic) && (Cols == OtherDerived::Cols)) {
+            // Optimized easy case
+            inplaceCwiseBinaryOp([](Scalar& x, const Scalar& y) {
+                x += y;
+            }, other);
+        } else {
+            // Leave dynamic matrices and error reporting to Eigen
+            derivedInner() += other.derivedInner();
+        }
         return derived();
     }
 
@@ -801,11 +931,29 @@ public:
     // Matrix subtraction
     template <typename OtherDerived>
     PlainMatrix operator-(const MatrixBase<OtherDerived>& other) const {
-        return PlainMatrix(derivedInner() - other.derivedInner());
+        if constexpr ((Rows != Dynamic) && (Rows == OtherDerived::Rows)
+                      && (Cols != Dynamic) && (Cols == OtherDerived::Cols)) {
+            // Optimized easy case
+            return cwiseBinaryOp([](const Scalar& x, const Scalar& y) {
+                return x - y;
+            }, other);
+        } else {
+            // Leave dynamic matrices and error reporting to Eigen
+            return PlainMatrix(derivedInner() - other.derivedInner());
+        }
     }
     template <typename OtherDerived>
     Derived& operator-=(const MatrixBase<OtherDerived>& other) {
-        derivedInner() -= other.derivedInner();
+        if constexpr ((Rows != Dynamic) && (Rows == OtherDerived::Rows)
+                      && (Cols != Dynamic) && (Cols == OtherDerived::Cols)) {
+            // Optimized easy case
+            inplaceCwiseBinaryOp([](Scalar& x, const Scalar& y) {
+                x -= y;
+            }, other);
+        } else {
+            // Leave dynamic matrices and error reporting to Eigen
+            derivedInner() -= other.derivedInner();
+        }
         return derived();
     }
 
