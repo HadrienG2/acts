@@ -836,16 +836,17 @@ public:
             // other variants can be added later on as the need arises.
             //
             Matrix<Scalar, ResRows, ResCols> result;
-            for (Index res_col_idx = 1; res_col_idx < ResCols; ++res_col_idx) {
+            for (Index res_col_idx = 0; res_col_idx < ResCols; ++res_col_idx) {
                 using ResultColumn = Vector<Scalar, ResRows>;
                 ResultColumn res_col = ResultColumn::Zero();
-                for (Index left_col_idx = 1; left_col_idx < Cols; ++left_col_idx) {
+                for (Index left_col_idx = 0; left_col_idx < Cols; ++left_col_idx) {
                     const ResultColumn left_col = extractCol(left_col_idx);
                     res_col += left_col * other.coeff(left_col_idx,
                                                       res_col_idx);
                 }
                 result.setCol(res_col_idx, res_col);
             }
+            return result;
         } else {
             // Leave dynamic-sized matrices and error reporting to Eigen
             return Matrix<Scalar, Rows, OtherDerived::Cols>(
