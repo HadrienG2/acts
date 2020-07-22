@@ -59,7 +59,7 @@ public:
 
     // Constructor from a matrix + dynamic diagonal index
     explicit Diagonal(MatrixType& matrix, Index a_index = DiagIndex)
-        : m_inner(matrix.getInner())
+        : m_inner(matrix.getInner(), a_index)
     {}
 
 private:
