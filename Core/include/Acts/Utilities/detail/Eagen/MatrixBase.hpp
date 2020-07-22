@@ -294,8 +294,8 @@ public:
         derivedInner().setLinSpaced(low, high);
         return derived();
     }
-    Derived& setLinSpaced(Index size, const Scalar& low, const Scalar& high) {
-        derivedInner().setLinSpaced(size, low, high);
+    Derived& setLinSpaced(Index size_, const Scalar& low, const Scalar& high) {
+        derivedInner().setLinSpaced(size_, low, high);
         return derived();
     }
     Derived& setOnes() {
@@ -441,8 +441,8 @@ public:
     void resize(Index newSize) {
         derivedInner().resize(newSize);
     }
-    void resize(Index rows, Index cols) {
-        derivedInner().resize(rows, cols);
+    void resize(Index rows_, Index cols_) {
+        derivedInner().resize(rows_, cols_);
     }
 
     // TODO: Support reverse(InPlace)?()
