@@ -318,8 +318,8 @@ public:
         m_inner.prescale(other.derivedInner());
         return *this;
     }
-    Transform& prescale(const Scalar& s) {
-        m_inner.prescale(s);
+    Transform& prescale(const Scalar& s_) {
+        m_inner.prescale(s_);
         return *this;
     }
     Transform& preshear(const Scalar& sx, const Scalar& sy) {
@@ -343,8 +343,8 @@ public:
         m_inner.scale(other.derivedInner());
         return *this;
     }
-    Transform& scale(const Scalar& s) {
-        m_inner.scale(s);
+    Transform& scale(const Scalar& s_) {
+        m_inner.scale(s_);
         return *this;
     }
     Transform& shear(const Scalar& sx, const Scalar& sy) {

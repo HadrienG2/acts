@@ -418,8 +418,8 @@ public:
     operator<<(const Eigen::DenseBase<OtherDerived>& other) {
         return CommaInitializer(derived(), other);
     }
-    CommaInitializer<Derived> operator<<(const Scalar& s) {
-        return CommaInitializer(derived(), s);
+    CommaInitializer<Derived> operator<<(const Scalar& s_) {
+        return CommaInitializer(derived(), s_);
     }
 
     // Assignment operator
@@ -921,11 +921,11 @@ public:
     }
 
     // Edge case of summing a 1x1 matrix with a scalar
-    Scalar operator+(const Scalar& s) const {
-        return derivedInner().value() + s;
+    Scalar operator+(const Scalar& s_) const {
+        return derivedInner().value() + s_;
     }
-    Derived& operator+=(const Scalar& s) {
-        derivedInner() += Eigen::Matrix<Scalar, 1, 1>(s);
+    Derived& operator+=(const Scalar& s_) {
+        derivedInner() += Eigen::Matrix<Scalar, 1, 1>(s_);
         return derived();
     }
 

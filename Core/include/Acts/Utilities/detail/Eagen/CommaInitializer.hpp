@@ -53,9 +53,9 @@ public:
     using Scalar = typename DerivedTraits::Scalar;
 
     // Constructor from (expression, scalar) pair
-    CommaInitializer(Derived& derived, const Scalar& s)
+    CommaInitializer(Derived& derived, const Scalar& s_)
         : m_derived(derived)
-        , m_inner(derived.getInner(), s)
+        , m_inner(derived.getInner(), s_)
     {}
 
     // Constructor from (expression, expression) pair
@@ -84,8 +84,8 @@ public:
     {}
 
     // Scalar insertion
-    CommaInitializer& operator,(const Scalar& s) {
-        m_inner, s;
+    CommaInitializer& operator,(const Scalar& s_) {
+        m_inner, s_;
         return *this;
     }
 

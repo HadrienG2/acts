@@ -63,7 +63,7 @@ public:
     {}
 
     // Construct from a scalar
-    explicit UniformScaling(const Scalar& s) : m_inner(s) {}
+    explicit UniformScaling(const Scalar& s_) : m_inner(s) {}
 
     // Construct from another uniform scaling
     template<typename OtherScalarType>
