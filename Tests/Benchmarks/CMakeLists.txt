@@ -22,6 +22,7 @@ endmacro()
 
 add_benchmark(AtlasStepper AtlasStepperBenchmark.cpp)
 add_benchmark(BoundaryCheck BoundaryCheckBenchmark.cpp)
+add_benchmark(Eagen EagenBenchmark.cpp)
 add_benchmark(EigenStepper EigenStepperBenchmark.cpp)
 add_benchmark(SolenoidField SolenoidFieldBenchmark.cpp)
 add_benchmark(SurfaceIntersection SurfaceIntersectionBenchmark.cpp)
