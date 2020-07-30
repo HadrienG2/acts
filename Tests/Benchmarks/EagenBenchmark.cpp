@@ -17,6 +17,7 @@ using namespace Acts::Test;
 namespace Eagen = Acts::detail::Eagen;
 using Index = Eigen::Index;
 
+// Benchmark matrices of size ROWSxCOLS
 template <Index ROWS, Index COLS>
 void matrixBenchmark() {
     std::cout << "=== " << ROWS << 'x' << COLS << " matrices ===" << std::endl
@@ -70,6 +71,7 @@ void matrixBenchmark() {
 
     constexpr int ITERS_PER_ELEM = 60000;
     constexpr int ITERS_LINEAR = ITERS_PER_ELEM / (ROWS * COLS);
+    constexpr int ITERS_QUADRATIC = ITERS_LINEAR / (ROWS * COLS);
     constexpr int ITERS_PER_FILL = 10000;
 
     bench_unary("hasNaN",   
@@ -127,12 +129,19 @@ void matrixBenchmark() {
 
     bench_unary_lazy("True M.Mt",
                      [](const auto& m) { return m * m.transpose().eval(); },
-                     ITERS_LINEAR);
+                     ITERS_QUADRATIC);
     bench_unary_lazy("Lazy M.Mt",
                      [](const auto& m) { return m * m.transpose(); },
-                     ITERS_LINEAR);
+                     ITERS_QUADRATIC);
+    bench_unary_lazy("True Mt.M",
+                     [](const auto& m) { return m.transpose().eval() * m; },
+                     ITERS_QUADRATIC);
+    bench_unary_lazy("Lazy Mt.M",
+                     [](const auto& m) { return m.transpose() * m; },
+                     ITERS_QUADRATIC);
 }
 
+// Benchmark matrices of all size from 1x1 to MAX_DIM x MAX_DIM
 template <Index MAX_DIM, Index ROWS=1, Index COLS=1>
 void matrixBenchmarkLoop() {
     matrixBenchmark<ROWS, COLS>();
@@ -146,5 +155,7 @@ void matrixBenchmarkLoop() {
 int main(int /*argc*/, char** /*argv[]*/) {
     std::cout << "### Eagen vs Eigen comparative benchmarks ###" << std::endl
               << std::endl;
-    matrixBenchmarkLoop<4>();
+    // FIXME: Cutting the loop for now to save on build and running time
+    /* matrixBenchmarkLoop<4>(); */
+    matrixBenchmark<8, 8>();
 }
