@@ -139,6 +139,147 @@ void matrixBenchmark() {
     bench_unary_lazy("Lazy Mt.M",
                      [](const auto& m) { return m.transpose() * m; },
                      ITERS_QUADRATIC);
+
+    // TODO: Should test row vectors and "middle segment" scenario as well
+    if constexpr ((ROWS > 1) && (COLS == 1)) {
+        bench("extractHead",
+              [&] { return eagenMat.template extractHead<ROWS-1>(); },
+              [&] { return eigenMat.template head<ROWS-1>().eval(); },
+              ITERS_LINEAR);
+        bench("extractTail",
+              [&] { return eagenMat.template extractTail<ROWS-1>(); },
+              [&] { return eigenMat.template tail<ROWS-1>().eval(); },
+              ITERS_LINEAR);
+
+        using EagenSegment = Eagen::Vector<double, ROWS-1>;
+        bench("zeroHead",
+              [&] { eagenMat.template setHead<ROWS-1>(EagenSegment::Zero()); },
+              [&] { eigenMat.template head<ROWS-1>().setZero(); },
+              ITERS_LINEAR);
+        bench("zeroTail",
+              [&] { eagenMat.template setTail<ROWS-1>(EagenSegment::Zero()); },
+              [&] { eigenMat.template tail<ROWS-1>().setZero(); },
+              ITERS_LINEAR);
+
+        bench("transferHead",
+              [&] {
+                  eagenMat.template setHead<ROWS-1>(
+                      eagenMat2.template extractHead<ROWS-1>()
+                  );
+              },
+              [&] {
+                  eigenMat.template head<ROWS-1>() =
+                      eigenMat2.template head<ROWS-1>();
+              },
+              ITERS_LINEAR);
+        bench("transferTail",
+              [&] {
+                  eagenMat.template setTail<ROWS-1>(
+                      eagenMat2.template extractTail<ROWS-1>()
+                  );
+              },
+              [&] {
+                  eigenMat.template tail<ROWS-1>() =
+                      eigenMat2.template tail<ROWS-1>();
+              },
+              ITERS_LINEAR);
+    }
+
+    if constexpr ((ROWS > 1) && (COLS > 1)) {
+        bench("extractTopLeftCorner",
+              [&] { return eagenMat.template extractTopLeftCorner<ROWS-1,
+                                                                  COLS-1>(); },
+              [&] { return eigenMat.template topLeftCorner<ROWS-1,
+                                                           COLS-1>().eval(); },
+              ITERS_LINEAR);
+
+        using EagenCorner = Eagen::Matrix<double, ROWS-1, COLS-1>;
+        bench("zeroTopLeftCorner",
+              [&] {
+                  eagenMat.template setTopLeftCorner<ROWS-1, COLS-1>(
+                      EagenCorner::Zero()
+                  );
+              },
+              [&] {
+                  eigenMat.template topLeftCorner<ROWS-1, COLS-1>()
+                          .setZero();
+              },
+              ITERS_LINEAR);
+
+        bench("transferTopLeftCorner",
+              [&] {
+                  eagenMat.template setTopLeftCorner<ROWS-1, COLS-1>(
+                      eagenMat2.template extractTopLeftCorner<ROWS-1, COLS-1>()
+                  );
+              },
+              [&] {
+                  eigenMat.template topLeftCorner<ROWS-1, COLS-1>() =
+                      eigenMat2.template topLeftCorner<ROWS-1, COLS-1>();
+              },
+              ITERS_LINEAR);
+    }
+
+    if constexpr (ROWS > 1) {
+        bench("extractFirstRow",
+              [&] { return eagenMat.extractRow(0); },
+              [&] { return eigenMat.row(0).eval(); },
+              ITERS_LINEAR);
+        bench("extractLastRow",
+              [&] { return eagenMat.extractRow(ROWS-1); },
+              [&] { return eigenMat.row(ROWS-1).eval(); },
+              ITERS_LINEAR);
+
+        using EagenRow = Eagen::RowVector<double, COLS>;
+        bench("zeroFirstRow",
+              [&] { eagenMat.setRow(0, EagenRow::Zero()); },
+              [&] { eigenMat.row(0).setZero(); },
+              ITERS_LINEAR);
+        bench("zeroLastRow",
+              [&] { eagenMat.setRow(ROWS-1, EagenRow::Zero()); },
+              [&] { eigenMat.row(ROWS-1).setZero(); },
+              ITERS_LINEAR);
+
+        bench("transferFirstRow",
+              [&] { eagenMat.setRow(0, eagenMat2.extractRow(0)); },
+              [&] { eigenMat.row(0) = eigenMat2.row(0); },
+              ITERS_LINEAR);
+        bench("transferLastRow",
+              [&] { eagenMat.setRow(ROWS-1, eagenMat2.extractRow(ROWS-1)); },
+              [&] { eigenMat.row(ROWS-1) = eigenMat2.row(ROWS-1); },
+              ITERS_LINEAR);
+    }
+
+    if constexpr (COLS > 1) {
+        bench("extractFirstCol",
+              [&] { return eagenMat.extractCol(0); },
+              [&] { return eigenMat.col(0).eval(); },
+              ITERS_LINEAR);
+        bench("extractLastCol",
+              [&] { return eagenMat.extractCol(COLS-1); },
+              [&] { return eigenMat.col(COLS-1).eval(); },
+              ITERS_LINEAR);
+
+        using EagenCol = Eagen::Vector<double, ROWS>;
+        bench("zeroFirstCol",
+              [&] { eagenMat.setCol(0, EagenCol::Zero()); },
+              [&] { eigenMat.col(0).setZero(); },
+              ITERS_LINEAR);
+        bench("zeroLastCol",
+              [&] { eagenMat.setCol(COLS-1, EagenCol::Zero()); },
+              [&] { eigenMat.col(COLS-1).setZero(); },
+              ITERS_LINEAR);
+
+        bench("transferFirstCol",
+              [&] { eagenMat.setCol(0, eagenMat2.extractCol(0)); },
+              [&] { eigenMat.col(0) = eigenMat2.col(0); },
+              ITERS_LINEAR);
+        bench("transferLastCol",
+              [&] { eagenMat.setCol(COLS-1, eagenMat2.extractCol(COLS-1)); },
+              [&] { eigenMat.col(COLS-1) = eigenMat2.col(COLS-1); },
+              ITERS_LINEAR);
+    }
+
+    // TODO: Should test "middle blocks" as well
 }
 
 // Benchmark matrices of all size from 1x1 to MAX_DIM x MAX_DIM
@@ -156,6 +297,7 @@ int main(int /*argc*/, char** /*argv[]*/) {
     std::cout << "### Eagen vs Eigen comparative benchmarks ###" << std::endl
               << std::endl;
     // FIXME: Cutting the loop for now to save on build and running time
-    /* matrixBenchmarkLoop<4>(); */
+    /* matrixBenchmarkLoop<8>(); */
+    matrixBenchmark<8, 1>();
     matrixBenchmark<8, 8>();
 }
