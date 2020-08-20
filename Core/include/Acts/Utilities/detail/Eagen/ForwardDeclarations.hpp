@@ -51,6 +51,8 @@ template <typename Scalar, int Rows, int Cols,
           int MaxCols = Cols>
 class Matrix;
 template <typename Derived> class MatrixBase;
+template <typename _Scalar, int _AmbientDim, int _Options = AutoAlign>
+class ParametrizedLine;
 template <typename Derived> class PlainMatrixBase;
 template <typename Scalar, int Options = AutoAlign> class Quaternion;
 template <typename Scalar> class Rotation2D;

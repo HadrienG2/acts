@@ -79,10 +79,9 @@ public:
     {}
 
     // Constructor from a parametrized line
-    // NOTE: No Eagen equivalent of this at this point in time
-    explicit Hyperplane(const Eigen::ParametrizedLine<Scalar,
-                                                      AmbientDim>& parametrized)
-        : m_inner(parametrized)
+    explicit Hyperplane(const ParametrizedLine<Scalar,
+                                               AmbientDim>& parametrized)
+        : m_inner(parametrized.getInner())
     {}
 
     // Constructor from a vector and a scalar

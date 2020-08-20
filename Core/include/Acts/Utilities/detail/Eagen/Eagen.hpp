@@ -26,6 +26,7 @@
 #include "Map.hpp"
 #include "Matrix.hpp"
 #include "MatrixBase.hpp"
+#include "ParametrizedLine.hpp"
 #include "PlainMatrixBase.hpp"
 #include "Quaternion.hpp"
 #include "QuaternionBase.hpp"
