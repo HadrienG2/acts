@@ -30,6 +30,8 @@ template <typename Derived> class DiagonalBase;
 template <typename Scalar, int Size, int MaxSize = Size>
 class DiagonalMatrix;
 template <typename DiagonalVectorType> class DiagonalWrapper;
+template <typename _Scalar, int _AmbientDim, int _Options = AutoAlign>
+class Hyperplane;
 template <typename _MatrixType,
           int _QRPreconditioner = ColPivHouseholderQRPreconditioner>
 class JacobiSVD;

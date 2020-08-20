@@ -24,7 +24,7 @@ namespace detail {
 namespace Eagen {
 
 // Wrapper of Eigen::Hyperplane
-template <typename _Scalar, int _AmbientDim, int _Options = AutoAlign>
+template <typename _Scalar, int _AmbientDim, int _Options>
 class Hyperplane {
 public:
     // === Eagen wrapper API ===
