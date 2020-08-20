@@ -16,7 +16,7 @@
 Acts::Intersection2D Acts::detail::IntersectionHelper2D::intersectSegment(
     const Vector2D& s0, const Vector2D& s1, const Vector2D& origin,
     const Vector2D& dir) {
-  using Line = Eigen::ParametrizedLine<double, 2>;
+  using Line = Acts::detail::Eagen::ParametrizedLine<double, 2>;
   using Plane = Acts::detail::Eagen::Hyperplane<double, 2>;
 
   Vector2D ldir(s1 - s0);
