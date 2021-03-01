@@ -22,7 +22,7 @@ if [[ $ARGC -lt 2 ]]; then
 fi
 
 # Compute the name of the example executable
-executable="$1 $2 --output-root true"
+executable="$1 $2 --output-root"
 echo ${executable}
 
 # Compute the output file names

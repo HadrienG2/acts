@@ -63,19 +63,30 @@ run_geometry_example Payload
 run_geometry_example Telescope
 # TODO: Add TGeo geometry example (needs an input file + knowhow)
 
-# Run propagation examples for all geometries
+# Run propagation examples for all geometries and make sure that they produce
+# identical results in multi-threaded mode and single-threaded mode
 #
 # In addition to the geometry examples, we also need one slightly more
 # complex example to run with all geometries because geometries with
 # conditions have code paths that are only exercised when the
 # Sequencer actually runs.
 #
-run_example ActsExamplePropagationAligned
-run_example ActsExamplePropagationDD4hep ${DD4HEP_INPUT}
+test_propagation_reproducibility() {
+    EXAMPLE=${BUILD_DIR}/bin/ActsExamplePropagation$1
+    shift
+    PARAMS="-n${NUM_EVENTS} --bf-constant-tesla=0:0:2 $*"
+    echo ${PARAMS}
+    cd ${SRC_DIR}/Examples/Scripts
+    ./testReproducibility.sh ${EXAMPLE} "${PARAMS}" propagation-steps
+    cd ${SRC_DIR}
+}
+test_propagation_reproducibility Aligned
+test_propagation_reproducibility DD4hep ${DD4HEP_INPUT}
 # FIXME: Disabled because of issue #710
-# run_example ActsExamplePropagationEmpty
-run_example ActsExamplePropagationGeneric
-run_example ActsExamplePropagationPayload
+# test_propagation_reproducibility Empty
+test_propagation_reproducibility Generic
+# FIXME: This is not reproducible and now we need to understand why
+test_propagation_reproducibility Payload
 # TODO: Add TGeo propagation example (needs an input file + knowhow)
 
 # Run event generation examples as suggested by the Fatras tutorial
