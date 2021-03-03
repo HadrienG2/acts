@@ -6,11 +6,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
 #include <TFile.h>
 #include <TList.h>
 #include <TObject.h>
@@ -43,29 +38,29 @@ std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
         treeReader, numEntries, std::move(branchProperties), branchName)
 
   #define TYPE_CASE(rootType, cppType) \
-    case rootType: INSTANTIATE(cppType)
+    case rootType: INSTANTIATE(cppType);
 
   switch (branchProperties.dataType) {
-    TYPE_CASE(kChar_t, char);
-    TYPE_CASE(kUChar_t, unsigned char);
-    TYPE_CASE(kShort_t, short);
-    TYPE_CASE(kUShort_t, unsigned short);
-    TYPE_CASE(kInt_t, int);
-    TYPE_CASE(kUInt_t, unsigned int);
-    TYPE_CASE(kLong_t, long);
-    TYPE_CASE(kULong_t, unsigned long);
-    TYPE_CASE(kULong64_t, unsigned long long);
-    TYPE_CASE(kFloat_t, float);
-    TYPE_CASE(kDouble_t, double);
-    TYPE_CASE(kBool_t, bool);
+    TYPE_CASE(kChar_t, char)
+    TYPE_CASE(kUChar_t, unsigned char)
+    TYPE_CASE(kShort_t, short)
+    TYPE_CASE(kUShort_t, unsigned short)
+    TYPE_CASE(kInt_t, int)
+    TYPE_CASE(kUInt_t, unsigned int)
+    TYPE_CASE(kLong_t, long)
+    TYPE_CASE(kULong_t, unsigned long)
+    TYPE_CASE(kULong64_t, unsigned long long)
+    TYPE_CASE(kFloat_t, float)
+    TYPE_CASE(kDouble_t, double)
+    TYPE_CASE(kBool_t, bool)
     case kOther_t:
       if (className.substr(0, 6) == "vector") {
         std::string elementType = className.substr(7, className.size() - 8);
 
         #define HANDLE_VECTOR(thisElementType) \
-          if (elementType == #thisElementType) { \
-            INSTANTIATE(std::vector<thisElementType>); \
-          } else
+          if (elementType == #thisElementType) \
+            INSTANTIATE(std::vector<thisElementType>) \
+          else
 
         #define HANDLE_INTEGER_VECTOR(intElementType) \
           HANDLE_VECTOR(signed intElementType) \
@@ -84,7 +79,7 @@ std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
         #undef HANDLE_INTEGER_VECTOR
         #undef HANDLE_VECTOR
       } else {
-        THROW("Unsupported branch class " << className);
+        THROW("Unsupported ROOT branch class " << className);
       }
     default:
       THROW("Unsupported ROOT branch type " << branchProperties.dataType);
