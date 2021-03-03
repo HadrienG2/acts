@@ -25,6 +25,9 @@
 /// IEEE-754 is more concerned about equality having no false positives, whereas
 /// in this program we are most concerned about it having no false negatives...
 ///
+/// Note that no guarantee is made in case the input data was not of the same
+/// type, or was not inserted in the same order!
+///
 class TupleKey {
 public:
   /// Set up key storage

@@ -1,7 +1,7 @@
 add_executable(
   ActsParallelReproducibilityTest
   ParallelReproducibilityTest.cpp
-  ReadRootFile.cpp)
+  RootData.cpp)
 target_link_libraries(
   ActsParallelReproducibilityTest
   PRIVATE ROOT::Core ROOT::RIO ROOT::Tree ROOT::TreePlayer)
