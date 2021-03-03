@@ -23,73 +23,6 @@ BranchProperties(TBranch& branch)
 }
 
 
-std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
-                                        size_t numEntries,
-                                        TBranch& branch) {
-  BranchProperties branchProperties{ branch };
-  const std::string& className = branchProperties.className;
-  const char* const branchName = branch.GetName();
-
-  // Unlike ROOT, we can't do runtime code generation, so we must define in
-  // advance what kind of ROOT branch types we're going to support and
-  // pre-instantiate TypedBranchDataReaders for all those types.
-  #define INSTANTIATE(cppType) \
-    return std::make_unique<TypedBranchDataReader<cppType>>( \
-        treeReader, numEntries, std::move(branchProperties), branchName)
-
-  #define TYPE_CASE(rootType, cppType) \
-    case rootType: INSTANTIATE(cppType);
-
-  switch (branchProperties.dataType) {
-    TYPE_CASE(kChar_t, char)
-    TYPE_CASE(kUChar_t, unsigned char)
-    TYPE_CASE(kShort_t, short)
-    TYPE_CASE(kUShort_t, unsigned short)
-    TYPE_CASE(kInt_t, int)
-    TYPE_CASE(kUInt_t, unsigned int)
-    TYPE_CASE(kLong_t, long)
-    TYPE_CASE(kULong_t, unsigned long)
-    TYPE_CASE(kULong64_t, unsigned long long)
-    TYPE_CASE(kFloat_t, float)
-    TYPE_CASE(kDouble_t, double)
-    TYPE_CASE(kBool_t, bool)
-    case kOther_t:
-      if (className.substr(0, 6) == "vector") {
-        std::string elementType = className.substr(7, className.size() - 8);
-
-        #define HANDLE_VECTOR(thisElementType) \
-          if (elementType == #thisElementType) \
-            INSTANTIATE(std::vector<thisElementType>) \
-          else
-
-        #define HANDLE_INTEGER_VECTOR(intElementType) \
-          HANDLE_VECTOR(signed intElementType) \
-          HANDLE_VECTOR(unsigned intElementType)
-
-        HANDLE_INTEGER_VECTOR(char)
-        HANDLE_INTEGER_VECTOR(short)
-        HANDLE_INTEGER_VECTOR(int)
-        HANDLE_INTEGER_VECTOR(long)
-        HANDLE_INTEGER_VECTOR(long long)
-        HANDLE_VECTOR(float)
-        HANDLE_VECTOR(double)
-        HANDLE_VECTOR(bool)
-        THROW("Unsupported std::vector element type " << elementType);
-
-        #undef HANDLE_INTEGER_VECTOR
-        #undef HANDLE_VECTOR
-      } else {
-        THROW("Unsupported ROOT branch class " << className);
-      }
-    default:
-      THROW("Unsupported ROOT branch type " << branchProperties.dataType);
-  }
-
-  #undef TYPE_CASE
-  #undef INSTANTIATE
-}
-
-
 TreeData::TreeData(TTree& tree)
   : numEntries(tree.GetEntries())
 {
@@ -190,4 +123,71 @@ FileData::FileData(const std::string& fileName) {
   for (const auto [keyName, keyCycle] : std::move(latestKeys)) {
     this->keys.emplace(keyName, *keyCycle->second);
   }
+}
+
+
+std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
+                                        size_t numEntries,
+                                        TBranch& branch) {
+  BranchProperties branchProperties{ branch };
+  const std::string& className = branchProperties.className;
+  const char* const branchName = branch.GetName();
+
+  // Unlike ROOT, we can't do runtime code generation, so we must define in
+  // advance what kind of ROOT branch types we're going to support and
+  // pre-instantiate TypedBranchDataReaders for all those types.
+  #define INSTANTIATE(cppType) \
+    return std::make_unique<TypedBranchDataReader<cppType>>( \
+        treeReader, numEntries, std::move(branchProperties), branchName)
+
+  #define TYPE_CASE(rootType, cppType) \
+    case rootType: INSTANTIATE(cppType);
+
+  switch (branchProperties.dataType) {
+    TYPE_CASE(kChar_t, char)
+    TYPE_CASE(kUChar_t, unsigned char)
+    TYPE_CASE(kShort_t, short)
+    TYPE_CASE(kUShort_t, unsigned short)
+    TYPE_CASE(kInt_t, int)
+    TYPE_CASE(kUInt_t, unsigned int)
+    TYPE_CASE(kLong_t, long)
+    TYPE_CASE(kULong_t, unsigned long)
+    TYPE_CASE(kULong64_t, unsigned long long)
+    TYPE_CASE(kFloat_t, float)
+    TYPE_CASE(kDouble_t, double)
+    TYPE_CASE(kBool_t, bool)
+    case kOther_t:
+      if (className.substr(0, 6) == "vector") {
+        std::string elementType = className.substr(7, className.size() - 8);
+
+        #define HANDLE_VECTOR(thisElementType) \
+          if (elementType == #thisElementType) \
+            INSTANTIATE(std::vector<thisElementType>) \
+          else
+
+        #define HANDLE_INTEGER_VECTOR(intElementType) \
+          HANDLE_VECTOR(signed intElementType) \
+          HANDLE_VECTOR(unsigned intElementType)
+
+        HANDLE_INTEGER_VECTOR(char)
+        HANDLE_INTEGER_VECTOR(short)
+        HANDLE_INTEGER_VECTOR(int)
+        HANDLE_INTEGER_VECTOR(long)
+        HANDLE_INTEGER_VECTOR(long long)
+        HANDLE_VECTOR(float)
+        HANDLE_VECTOR(double)
+        HANDLE_VECTOR(bool)
+        THROW("Unsupported std::vector element type " << elementType);
+
+        #undef HANDLE_INTEGER_VECTOR
+        #undef HANDLE_VECTOR
+      } else {
+        THROW("Unsupported ROOT branch class " << className);
+      }
+    default:
+      THROW("Unsupported ROOT branch type " << branchProperties.dataType);
+  }
+
+  #undef TYPE_CASE
+  #undef INSTANTIATE
 }
