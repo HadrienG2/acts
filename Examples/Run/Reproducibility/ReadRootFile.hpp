@@ -49,7 +49,7 @@ struct BranchData : BranchProperties {
   // TODO: More abstract interface to higher-level functionality
 };
 
-/// Concrete data that was extracted from a ROOT TTree's Branch
+/// Concrete data from a ROOT TTree's branch
 template <typename T>
 struct TypedBranchData : BranchData {
   std::vector<T> data;
@@ -76,36 +76,36 @@ struct TreeData {
   TreeData(TTree& tree);
 };
 
-/// This code currently only supports TTree data
-using KeyData = TreeData;
+/// This code currently only supports TTree objects
+using ObjectData = TreeData;
 
 /// Data from the latest cycle of a set of identically named ROOT TKeys
 ///
 /// ROOT files have an object versioning feature whose ergonomics are so bad
 /// that it is almost only used by accident. Following the example of Cling, we
 /// will therefore only consider the latest version of each named object...
-/// 
-struct LatestKeyCycleData {
+///
+struct KeyData {
   Int_t version;
   std::string className;
   std::string title;
-  KeyData data;
+  ObjectData data;
 
   /// Load data from a ROOT TKey
-  LatestKeyCycleData(TKey& key);
+  KeyData(TKey& key);
 }
 
 /// Data from a ROOT file
 struct FileData {
   Int_t version;
-  std::unordered_map<std::string, LatestKeyCycleData> keys;
+  std::unordered_map<std::string, KeyData> keys;
 
   /// Load data from a ROOT file
   FileData(const std::string& fileName);
 };
 
 
-// --- DATA READOUT MECHANISM ---
+// --- DATA READOUT PLUMBING ---
 
 /// Type-erased interface to TypedBranchDataReader
 class BranchDataReader {

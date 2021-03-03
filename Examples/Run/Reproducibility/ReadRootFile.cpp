@@ -136,7 +136,7 @@ TreeData::TreeData(TTree& tree)
 }
 
 
-LatestKeyCycleData::LatestKeyCycleData(TKey& key)
+KeyData::KeyData(TKey& key)
   : version(key.GetVersion())
   , className(key.GetClassName())
   , title(key.GetTitle())
