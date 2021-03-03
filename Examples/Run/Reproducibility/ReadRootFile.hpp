@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -20,6 +21,8 @@
 #include <TTree.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
+
+#include "TupleKey.hpp"
 
 
 // --- OUTPUT DATA ---
@@ -46,7 +49,8 @@ struct BranchData : BranchProperties {
     : BranchProperties{ std::move(properties) }
   {}
 
-  // TODO: More abstract interface to higher-level functionality
+  /// Add an entry of this branch to a TupleKey
+  virtual void addEntryToKey(TupleKey& key, size_t entry) const = 0;
 };
 
 /// Concrete data from a ROOT TTree's branch
@@ -61,19 +65,25 @@ struct TypedBranchData final : BranchData {
     data.reserve(numEntries);
   }
 
-  // TODO: Implementation of the abstract BranchData API as it comes in
+  void addEntryToKey(TupleKey& key, size_t entry) const override {
+    key.addColumn(data[entry]);
+  }
 };
 
 /// Data from a ROOT TTree
 struct TreeData {
   size_t numEntries = 0;
-  std::unordered_map<std::string, std::unique_ptr<BranchData>> branchData;
+  // Branch order matters, as it greatly simplifies comparisons
+  std::map<std::string, std::unique_ptr<BranchData>> branchData;
 
   /// Needed because constructors are evil
   TreeData() = default;
 
   /// Load data from a ROOT TTree
   TreeData(TTree& tree);
+
+  /// Fill a TupleKey from the data of a certain entry
+  void fillEntryKey(TupleKey& key, size_t entry) const;
 };
 
 /// This code currently only supports TTree objects

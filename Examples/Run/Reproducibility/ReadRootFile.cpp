@@ -67,6 +67,14 @@ TreeData::TreeData(TTree& tree)
 }
 
 
+void TreeData::fillEntryKey(TupleKey& key, size_t entry) const {
+  key.clear();
+  for (const auto& [_, branchDataPtr] : this->branchData) {
+    branchDataPtr->addEntryToKey(key, entry);
+  }
+}
+
+
 KeyData::KeyData(TKey& key)
   : version(key.GetVersion())
   , className(key.GetClassName())
