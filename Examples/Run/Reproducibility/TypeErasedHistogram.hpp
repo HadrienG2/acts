@@ -34,7 +34,7 @@ public:
 
   /// Clear key material so the underlying storage can be reused
   void clear() {
-    m_keyBytes.clear();
+    m_bytes.clear();
   }
 
   // TODO: Add whatever's needed to make this type suitable for use as an
@@ -65,5 +65,5 @@ private:
   /// Note that for the currently intended use case of TupleKey, one does _not_
   /// need to be able to go back from TupleKey to the input data.
   ///
-  std::vector<char> m_keyBytes;
+  std::vector<char> m_bytes;
 };
