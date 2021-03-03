@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include <RTypesCore.h>
 #include <TBranch.h>
 #include <TDictionary.h>
 #include <TKey.h>
@@ -93,7 +92,7 @@ struct KeyData {
 
   /// Load data from a ROOT TKey
   KeyData(TKey& key);
-}
+};
 
 /// Data from a ROOT file
 struct FileData {
@@ -142,7 +141,7 @@ public:
   {}
 
   void collectValue() final override {
-    m_data.data.push_back(*m_reader);
+    m_data->data.push_back(*m_reader);
   }
 
   std::unique_ptr<BranchData> finish() final override {
@@ -152,4 +151,4 @@ public:
 private:
   std::unique_ptr<TypedBranchData<T>> m_data;
   TTreeReaderValue<T> m_reader;
-}
+};

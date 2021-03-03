@@ -6,6 +6,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <cstring>
+
 #include <TFile.h>
 #include <TList.h>
 #include <TObject.h>
@@ -14,7 +16,7 @@
 #include "ReadRootFile.hpp"
 
 
-BranchProperties(TBranch& branch)
+BranchProperties::BranchProperties(TBranch& branch)
   : className(branch.GetClassName())
 {
   TClass* unused;
@@ -32,8 +34,8 @@ TreeData::TreeData(TTree& tree)
     const Int_t branchCount = tree.GetNbranches();
     branches.reserve(branchCount);
     TIter branchIter{tree.GetListOfBranches()};
-    for (int i = 0; i < t1BranchCount; ++i) {
-      branches.emplace_back(dynamic_cast<TBranch*>(branchIter()));
+    for (int i = 0; i < branchCount; ++i) {
+      branches.push_back(dynamic_cast<TBranch*>(branchIter()));
     }
   }
 
@@ -42,24 +44,25 @@ TreeData::TreeData(TTree& tree)
   std::unordered_map<std::string, std::unique_ptr<BranchDataReader>> branchReaders;
   branchReaders.reserve(branches.size());
   for (const auto branchPtr : std::move(branches)) {
-    branchReaders.push_back(
+    const auto [_, inserted] = branchReaders.insert({
       branchPtr->GetName(),
       BranchDataReader::setup(treeReader, this->numEntries, *branchPtr)
-    );
+    });
+    ASSERT(inserted, "There should be only one branch with a given name");
   }
 
   // Read event data
   for (size_t i = 0; i < this->numEntries; ++i) {
     treeReader.Next();
     for (auto& [_, branchReader] : branchReaders) {
-      branchReader.collectValue();
+      branchReader->collectValue();
     }
   }
 
   // Collect the event data
   this->branchData.reserve(branchReaders.size());
   for (auto&& [branchName, branchReader] : std::move(branchReaders)) {
-    this->branchData.insert(branchName, branchReader.finish());
+    this->branchData.insert({ std::move(branchName), branchReader->finish() });
   }
 }
 
@@ -70,8 +73,8 @@ KeyData::KeyData(TKey& key)
   , title(key.GetTitle())
 {
   // Assert that the data is a TTree (only supported type at the moment)
-  TObject& obj = key.ReadObj();
-  ASSERT_EQ(obj.ClassName(), "TTree", "Unsupported TKey type");
+  TObject& obj = *key.ReadObj();
+  ASSERT_EQ(strcmp(obj.ClassName(), "TTree"), 0, "Unsupported TKey type");
   TTree& tree = dynamic_cast<TTree&>(obj);
 
   // Load data from the tree
@@ -115,20 +118,21 @@ FileData::FileData(const std::string& fileName) {
         latestCycleData = KeyCycle{ keyCycle, key };
       }
     } else {
-      latestKeys.insert(std::move(keyName), KeyCycle{ keyCycle, key });
+      latestKeys.insert({ std::move(keyName), KeyCycle{ keyCycle, key } });
     }
   }
 
   // Load data from the latest cycle of each key
-  for (const auto [keyName, keyCycle] : std::move(latestKeys)) {
-    this->keys.emplace(keyName, *keyCycle->second);
+  for (auto&& [keyName, keyCycle] : std::move(latestKeys)) {
+    this->keys.insert({ std::move(keyName), KeyData{ *(keyCycle.second) } });
   }
 }
 
 
-std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
-                                        size_t numEntries,
-                                        TBranch& branch) {
+std::unique_ptr<BranchDataReader>
+BranchDataReader::setup(TTreeReader& treeReader,
+                        size_t numEntries,
+                        TBranch& branch) {
   BranchProperties branchProperties{ branch };
   const std::string& className = branchProperties.className;
   const char* const branchName = branch.GetName();
@@ -162,7 +166,7 @@ std::unique_ptr<BranchDataReader> setup(TTreeReader& treeReader,
 
         #define HANDLE_VECTOR(thisElementType) \
           if (elementType == #thisElementType) \
-            INSTANTIATE(std::vector<thisElementType>) \
+            INSTANTIATE(std::vector<thisElementType>); \
           else
 
         #define HANDLE_INTEGER_VECTOR(intElementType) \
