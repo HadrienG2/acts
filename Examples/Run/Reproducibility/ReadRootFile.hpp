@@ -39,12 +39,13 @@ struct BranchProperties {
 
 /// Type-erased interface to TypedBranchData
 struct BranchData : BranchProperties {
+  virtual ~BranchData() = default;
+
   /// Forward branch properties down the inheritance stack
   BranchData(BranchProperties&& properties)
     : BranchProperties{ std::move(properties) }
   {}
 
-  virtual ~BranchData() = default;
   // TODO: More abstract interface to higher-level functionality
 };
 
