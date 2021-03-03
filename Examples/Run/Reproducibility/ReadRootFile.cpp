@@ -160,6 +160,7 @@ BranchDataReader::setup(TTreeReader& treeReader,
     TYPE_CASE(kFloat_t, float)
     TYPE_CASE(kDouble_t, double)
     TYPE_CASE(kBool_t, bool)
+
     case kOther_t:
       if (className.substr(0, 6) == "vector") {
         std::string elementType = className.substr(7, className.size() - 8);
@@ -188,6 +189,7 @@ BranchDataReader::setup(TTreeReader& treeReader,
       } else {
         THROW("Unsupported ROOT branch class " << className);
       }
+
     default:
       THROW("Unsupported ROOT branch type " << branchProperties.dataType);
   }
