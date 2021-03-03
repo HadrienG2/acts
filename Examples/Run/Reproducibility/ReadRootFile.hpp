@@ -51,7 +51,7 @@ struct BranchData : BranchProperties {
 
 /// Concrete data from a ROOT TTree's branch
 template <typename T>
-struct TypedBranchData : BranchData {
+struct TypedBranchData final : BranchData {
   std::vector<T> data;
 
   /// Prepare to record a number of entries from a certain branch
@@ -130,7 +130,7 @@ public:
 
 /// Mechanism to read TypedBranchData using a TTreeReader
 template <typename T>
-class TypedBranchDataReader : public BranchDataReader {
+class TypedBranchDataReader final : public BranchDataReader {
 public:
   TypedBranchDataReader(TTreeReader& reader,
                         size_t numEntries,
@@ -141,11 +141,11 @@ public:
     , m_reader{ reader, branchName }
   {}
 
-  void collectValue() final override {
+  void collectValue() override {
     m_data->data.push_back(*m_reader);
   }
 
-  std::unique_ptr<BranchData> finish() final override {
+  std::unique_ptr<BranchData> finish() override {
     return std::move(m_data);
   }
 
