@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <vector>
+
 
 /// Key for type-erased data tuple comparisons
 ///
